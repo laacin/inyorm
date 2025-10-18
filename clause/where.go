@@ -5,40 +5,43 @@ import "strings"
 // ----- Builder -----
 
 type WhereBuilder struct {
-	expressions []*WhereStart
-	table       string
-	ph          *PlaceholderGen
+	Expressions []*WhereStart
+	Table       string
+	Ph          *PlaceholderGen
 }
 
-func (w *WhereBuilder) NewExpr(field string, from ...string) *WhereStart {
-	if len(from) > 0 {
-		w.table = from[0]
+func (w *WhereBuilder) NewExpr(field string, table ...string) *WhereStart {
+	tbl := w.Table
+	if len(table) > 0 {
+		tbl = table[0]
 	}
 
-	expr := &WhereStart{ph: w.ph}
-	w.expressions = append(w.expressions, expr)
-	return expr.start(field, w.table)
+	expr := &WhereStart{ph: w.Ph}
+	w.Expressions = append(w.Expressions, expr)
+	return expr.start(field, tbl)
 }
 
 func (w *WhereBuilder) Build(sb *strings.Builder) []any {
 	var values []any
 
-	for n, expr := range w.expressions {
+	for n, expr := range w.Expressions {
 		values = append(values, expr.values...)
 		if n > 0 {
 			sb.WriteString(" AND ")
 		}
 
 		sb.WriteByte('(')
-		for i := range w.expressions {
+		for i, col := range expr.column {
+
 			if i > 0 {
 				sb.WriteByte(' ')
 				sb.WriteString(expr.ended.connectors[i-1])
 				sb.WriteByte(' ')
 			}
-			sb.WriteString(string(expr.column[i].table))
+
+			sb.WriteString(col.table)
 			sb.WriteByte('.')
-			sb.WriteString(string(expr.column[i].field))
+			sb.WriteString(col.field)
 			sb.WriteByte(' ')
 			sb.WriteString(expr.operator[i])
 		}
