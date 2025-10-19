@@ -9,18 +9,18 @@ const (
 
 type PlaceholderGen struct {
 	Kind  int
-	Count int
+	count int
 }
 
 func (ph *PlaceholderGen) Next() string {
-	ph.Count++
+	ph.count++
 
 	switch ph.Kind {
 	case Simple:
 		return "?"
 
 	case Numbered:
-		return "$" + strconv.Itoa(ph.Count)
+		return "$" + strconv.Itoa(ph.count)
 
 	default:
 		return "?"
@@ -28,5 +28,5 @@ func (ph *PlaceholderGen) Next() string {
 }
 
 func (ph *PlaceholderGen) GetCount() int {
-	return ph.Count
+	return ph.count
 }
