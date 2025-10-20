@@ -24,6 +24,7 @@ func (w *WhereBuilder) NewExpr(field string, table ...string) *WhereStart {
 func (w *WhereBuilder) Build(sb *strings.Builder) []any {
 	var values []any
 
+	sb.WriteString("WHERE ")
 	for n, expr := range w.Expressions {
 		values = append(values, expr.values...)
 		if n > 0 {

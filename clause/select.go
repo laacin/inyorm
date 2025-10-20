@@ -28,6 +28,7 @@ func (s *SelectBuilder) Build(sb *strings.Builder) error {
 		s.Values = append(s.Values, &SelectSimple{value: s.Default})
 	}
 
+	sb.WriteString("SELECT ")
 	for i, sel := range s.Values {
 		if i > 0 {
 			sb.WriteString(", ")

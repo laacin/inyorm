@@ -29,10 +29,11 @@ func TestWhere(t *testing.T) {
 		var sb strings.Builder
 
 		values := wb.Build(&sb)
-		stmtExp := "(main_table.column1 = ? OR main_table.column1 != ?)"
+		expCls := "WHERE "
+		expCls += "(main_table.column1 = ? OR main_table.column1 != ?)"
 		valuesExp := []any{42, 50}
 
-		expect(t, stmtExp, sb.String())
+		expect(t, expCls, sb.String())
 		expectValues(t, valuesExp, values)
 	})
 
@@ -44,10 +45,11 @@ func TestWhere(t *testing.T) {
 		var sb strings.Builder
 
 		values := wb.Build(&sb)
-		stmtExp := "(main_table.name LIKE ? AND main_table.surname NOT LIKE ?)"
+		expCls := "WHERE "
+		expCls += "(main_table.name LIKE ? AND main_table.surname NOT LIKE ?)"
 		valuesExp := []any{"%abc%", "%xyz%"}
 
-		expect(t, stmtExp, sb.String())
+		expect(t, expCls, sb.String())
 		expectValues(t, valuesExp, values)
 	})
 
@@ -59,10 +61,11 @@ func TestWhere(t *testing.T) {
 		var sb strings.Builder
 
 		values := wb.Build(&sb)
-		stmtExp := "(main_table.age IN (?, ?, ?) OR main_table.age NOT IN (?, ?))"
+		expCls := "WHERE "
+		expCls += "(main_table.age IN (?, ?, ?) OR main_table.age NOT IN (?, ?))"
 		valuesExp := []any{20, 25, 30, 35, 40}
 
-		expect(t, stmtExp, sb.String())
+		expect(t, expCls, sb.String())
 		expectValues(t, valuesExp, values)
 	})
 
@@ -74,10 +77,11 @@ func TestWhere(t *testing.T) {
 		var sb strings.Builder
 
 		values := wb.Build(&sb)
-		stmtExp := "(main_table.score BETWEEN ? AND ? AND main_table.level NOT BETWEEN ? AND ?)"
+		expCls := "WHERE "
+		expCls += "(main_table.score BETWEEN ? AND ? AND main_table.level NOT BETWEEN ? AND ?)"
 		valuesExp := []any{50, 100, 10, 20}
 
-		expect(t, stmtExp, sb.String())
+		expect(t, expCls, sb.String())
 		expectValues(t, valuesExp, values)
 	})
 
@@ -89,10 +93,11 @@ func TestWhere(t *testing.T) {
 		var sb strings.Builder
 
 		values := wb.Build(&sb)
-		stmtExp := "(main_table.price > ? AND main_table.quantity < ?)"
+		expCls := "WHERE "
+		expCls += "(main_table.price > ? AND main_table.quantity < ?)"
 		valuesExp := []any{100, 50}
 
-		expect(t, stmtExp, sb.String())
+		expect(t, expCls, sb.String())
 		expectValues(t, valuesExp, values)
 	})
 
@@ -104,10 +109,11 @@ func TestWhere(t *testing.T) {
 		var sb strings.Builder
 
 		values := wb.Build(&sb)
-		stmtExp := "(main_table.weight > ? OR main_table.weight >= ?)"
+		expCls := "WHERE "
+		expCls += "(main_table.weight > ? OR main_table.weight >= ?)"
 		valuesExp := []any{10, 5}
 
-		expect(t, stmtExp, sb.String())
+		expect(t, expCls, sb.String())
 		expectValues(t, valuesExp, values)
 	})
 
@@ -119,10 +125,11 @@ func TestWhere(t *testing.T) {
 		var sb strings.Builder
 
 		values := wb.Build(&sb)
-		stmtExp := "(main_table.deleted_at IS NULL OR main_table.updated_at IS NOT NULL)"
+		expCls := "WHERE "
+		expCls += "(main_table.deleted_at IS NULL OR main_table.updated_at IS NOT NULL)"
 		var valuesExp []any
 
-		expect(t, stmtExp, sb.String())
+		expect(t, expCls, sb.String())
 		expectValues(t, valuesExp, values)
 	})
 
@@ -139,12 +146,13 @@ func TestWhere(t *testing.T) {
 		var sb strings.Builder
 
 		values := wb.Build(&sb)
-		stmtExp := "(main_table.column1 = ? OR main_table.column1 <= ?) AND " +
-			"(t2.column2 LIKE ? AND t2.column3 NOT LIKE ?) AND " +
-			"(main_table.column4 IN (?, ?, ?) AND t5.column5 NOT IN (?, ?)) AND " +
-			"(main_table.column6 BETWEEN ? AND ? AND main_table.column7 NOT BETWEEN ? AND ?) AND " +
-			"(t8.column8 > ? AND t8.column9 < ?) AND " +
-			"(main_table.column10 IS NULL OR t11.column11 IS NOT NULL)"
+		expCls := "WHERE "
+		expCls += "(main_table.column1 = ? OR main_table.column1 <= ?) AND "
+		expCls += "(t2.column2 LIKE ? AND t2.column3 NOT LIKE ?) AND "
+		expCls += "(main_table.column4 IN (?, ?, ?) AND t5.column5 NOT IN (?, ?)) AND "
+		expCls += "(main_table.column6 BETWEEN ? AND ? AND main_table.column7 NOT BETWEEN ? AND ?) AND "
+		expCls += "(t8.column8 > ? AND t8.column9 < ?) AND "
+		expCls += "(main_table.column10 IS NULL OR t11.column11 IS NOT NULL)"
 
 		valuesExp := []any{
 			1, 5,
@@ -154,7 +162,7 @@ func TestWhere(t *testing.T) {
 			100, 50,
 		}
 
-		expect(t, stmtExp, sb.String())
+		expect(t, expCls, sb.String())
 		expectValues(t, valuesExp, values)
 	})
 
@@ -171,12 +179,13 @@ func TestWhere(t *testing.T) {
 		var sb strings.Builder
 
 		values := wb.Build(&sb)
-		stmtExp := "(main_table.column1 = $1 OR main_table.column1 <= $2) AND " +
-			"(t2.column2 LIKE $3 AND t2.column3 NOT LIKE $4) AND " +
-			"(main_table.column4 IN ($5, $6, $7) AND t5.column5 NOT IN ($8, $9)) AND " +
-			"(main_table.column6 BETWEEN $10 AND $11 AND main_table.column7 NOT BETWEEN $12 AND $13) AND " +
-			"(t8.column8 > $14 AND t8.column9 < $15) AND " +
-			"(main_table.column10 IS NULL OR t11.column11 IS NOT NULL)"
+		expCls := "WHERE "
+		expCls += "(main_table.column1 = $1 OR main_table.column1 <= $2) AND "
+		expCls += "(t2.column2 LIKE $3 AND t2.column3 NOT LIKE $4) AND "
+		expCls += "(main_table.column4 IN ($5, $6, $7) AND t5.column5 NOT IN ($8, $9)) AND "
+		expCls += "(main_table.column6 BETWEEN $10 AND $11 AND main_table.column7 NOT BETWEEN $12 AND $13) AND "
+		expCls += "(t8.column8 > $14 AND t8.column9 < $15) AND "
+		expCls += "(main_table.column10 IS NULL OR t11.column11 IS NOT NULL)"
 
 		valuesExp := []any{
 			1, 5,
@@ -186,7 +195,7 @@ func TestWhere(t *testing.T) {
 			100, 50,
 		}
 
-		expect(t, stmtExp, sb.String())
+		expect(t, expCls, sb.String())
 		expectValues(t, valuesExp, values)
 	})
 }

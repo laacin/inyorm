@@ -22,8 +22,9 @@ func TestSelect(t *testing.T) {
 		sel.New("lastname")
 		sel.Build(&sb)
 
-		expClause := "firstname, lastname"
-		expect(t, expClause, sb.String())
+		expCls := "SELECT "
+		expCls += "firstname, lastname"
+		expect(t, expCls, sb.String())
 	})
 
 	t.Run("select_with_alias", func(t *testing.T) {
@@ -34,8 +35,9 @@ func TestSelect(t *testing.T) {
 		sel.New("lastname", "ln")
 		sel.Build(&sb)
 
-		expClause := "firstname AS fn, lastname AS ln"
-		expect(t, expClause, sb.String())
+		expCls := "SELECT "
+		expCls += "firstname AS fn, lastname AS ln"
+		expect(t, expCls, sb.String())
 	})
 
 	t.Run("select_with_alias", func(t *testing.T) {
@@ -48,7 +50,8 @@ func TestSelect(t *testing.T) {
 		sel.New("email", "mail")
 		sel.Build(&sb)
 
-		expClause := "firstname AS fn, lastname AS ln, age, email AS mail"
-		expect(t, expClause, sb.String())
+		expCls := "SELECT "
+		expCls += "firstname AS fn, lastname AS ln, age, email AS mail"
+		expect(t, expCls, sb.String())
 	})
 }
