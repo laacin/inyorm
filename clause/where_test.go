@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/laacin/inyorm/clause"
-	"github.com/laacin/inyorm/internal"
+	"github.com/laacin/inyorm/internal/stmt"
 )
 
 func TestWhere(t *testing.T) {
@@ -23,7 +23,7 @@ func TestWhere(t *testing.T) {
 	}
 
 	t.Run("Equal_and_Not", func(t *testing.T) {
-		ph := &internal.PlaceholderGen{Kind: clause.Simple}
+		ph := &stmt.PlaceholderGen{Kind: stmt.Simple}
 		wb := &clause.WhereBuilder{Ph: ph, Table: "main_table"}
 
 		wb.NewExpr("column1").Equal(42).Or().Not().Equal(50)
@@ -39,7 +39,7 @@ func TestWhere(t *testing.T) {
 	})
 
 	t.Run("Like_and_NotLike", func(t *testing.T) {
-		ph := &internal.PlaceholderGen{Kind: clause.Simple}
+		ph := &stmt.PlaceholderGen{Kind: stmt.Simple}
 		wb := &clause.WhereBuilder{Ph: ph, Table: "main_table"}
 
 		wb.NewExpr("name").Like("%abc%").And("surname").Not().Like("%xyz%")
@@ -55,7 +55,7 @@ func TestWhere(t *testing.T) {
 	})
 
 	t.Run("In_and_NotIn", func(t *testing.T) {
-		ph := &internal.PlaceholderGen{Kind: clause.Simple}
+		ph := &stmt.PlaceholderGen{Kind: stmt.Simple}
 		wb := &clause.WhereBuilder{Ph: ph, Table: "main_table"}
 
 		wb.NewExpr("age").In(20, 25, 30).Or().Not().In(35, 40)
@@ -71,7 +71,7 @@ func TestWhere(t *testing.T) {
 	})
 
 	t.Run("Between_and_NotBetween", func(t *testing.T) {
-		ph := &internal.PlaceholderGen{Kind: clause.Simple}
+		ph := &stmt.PlaceholderGen{Kind: stmt.Simple}
 		wb := &clause.WhereBuilder{Ph: ph, Table: "main_table"}
 
 		wb.NewExpr("score").Between(50, 100).And("level").Not().Between(10, 20)
@@ -87,7 +87,7 @@ func TestWhere(t *testing.T) {
 	})
 
 	t.Run("Greater_and_Less", func(t *testing.T) {
-		ph := &internal.PlaceholderGen{Kind: clause.Simple}
+		ph := &stmt.PlaceholderGen{Kind: stmt.Simple}
 		wb := &clause.WhereBuilder{Ph: ph, Table: "main_table"}
 
 		wb.NewExpr("price").Greater(100).And("quantity").Less(50)
@@ -103,7 +103,7 @@ func TestWhere(t *testing.T) {
 	})
 
 	t.Run("Greater_and_NotLess", func(t *testing.T) {
-		ph := &internal.PlaceholderGen{Kind: clause.Simple}
+		ph := &stmt.PlaceholderGen{Kind: stmt.Simple}
 		wb := &clause.WhereBuilder{Ph: ph, Table: "main_table"}
 
 		wb.NewExpr("weight").Greater(10).Or().Not().Less(5)
@@ -119,7 +119,7 @@ func TestWhere(t *testing.T) {
 	})
 
 	t.Run("IsNull_and_NotIsNull", func(t *testing.T) {
-		ph := &internal.PlaceholderGen{Kind: clause.Simple}
+		ph := &stmt.PlaceholderGen{Kind: stmt.Simple}
 		wb := &clause.WhereBuilder{Ph: ph, Table: "main_table"}
 
 		wb.NewExpr("deleted_at").IsNull().Or("updated_at").Not().IsNull()
@@ -135,7 +135,7 @@ func TestWhere(t *testing.T) {
 	})
 
 	t.Run("Mix_all_methods_some_aliases", func(t *testing.T) {
-		ph := &internal.PlaceholderGen{Kind: clause.Simple}
+		ph := &stmt.PlaceholderGen{Kind: stmt.Simple}
 		wb := &clause.WhereBuilder{Ph: ph, Table: "main_table"}
 
 		wb.NewExpr("column1").Equal(1).Or().Not().Greater(5)
@@ -167,8 +167,8 @@ func TestWhere(t *testing.T) {
 		expectValues(t, valuesExp, values)
 	})
 
-	t.Run("Mix_all_methods_some_aliases_numeric_placeholders", func(t *testing.T) {
-		ph := &internal.PlaceholderGen{Kind: clause.Numbered}
+	t.Run("Mix_all_methods_some_aliases_numeric_stmt.", func(t *testing.T) {
+		ph := &stmt.PlaceholderGen{Kind: stmt.Numbered}
 		wb := &clause.WhereBuilder{Ph: ph, Table: "main_table"}
 
 		wb.NewExpr("column1").Equal(1).Or().Not().Greater(5)

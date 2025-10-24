@@ -1,10 +1,10 @@
-package internal
+package stmt
 
 type Operator string
 
 const (
 	Equal      Operator = "="
-	NotEqual   Operator = "!="
+	NotEqual   Operator = "<>"
 	Greater    Operator = ">"
 	NotGreater Operator = "<="
 	Less       Operator = "<"

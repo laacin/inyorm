@@ -3,25 +3,20 @@ package clause
 import (
 	"strings"
 
-	"github.com/laacin/inyorm/expression"
-	"github.com/laacin/inyorm/internal"
+	"github.com/laacin/inyorm/iface"
+	"github.com/laacin/inyorm/internal/stmt"
 )
 
 type WhereBuilder struct {
 	Table       string
-	Expressions []*expression.ExprStart
-	Ph          *internal.PlaceholderGen
+	Expressions []*stmt.Expression
+	Ph          *stmt.PlaceholderGen
 }
 
-func (w *WhereBuilder) NewExpr(field string, table ...string) expression.ExpressionStart {
-	tbl := w.Table
-	if len(table) > 0 {
-		tbl = table[0]
-	}
-
-	expr := &expression.ExprStart{Ph: w.Ph}
+func (w *WhereBuilder) Where(identifier string) iface.Expression {
+	expr := &stmt.Expression{Ph: w.Ph}
 	w.Expressions = append(w.Expressions, expr)
-	return expr.Start(field, tbl)
+	return expr.Start(identifier)
 }
 
 func (w *WhereBuilder) Build(sb *strings.Builder) []any {
@@ -29,7 +24,7 @@ func (w *WhereBuilder) Build(sb *strings.Builder) []any {
 	for n, expr := range w.Expressions {
 		if n > 0 {
 			sb.WriteByte(' ')
-			sb.WriteString(string(internal.And))
+			sb.WriteString(string(stmt.And))
 			sb.WriteByte(' ')
 		}
 
@@ -41,9 +36,7 @@ func (w *WhereBuilder) Build(sb *strings.Builder) []any {
 				sb.WriteByte(' ')
 			}
 
-			sb.WriteString(seg.Reference)
-			sb.WriteByte('.')
-			sb.WriteString(seg.Identifier)
+			sb.WriteString(stmt.SetColumn(seg.Identifier))
 			sb.WriteByte(' ')
 			sb.WriteString(seg.Argument)
 		}

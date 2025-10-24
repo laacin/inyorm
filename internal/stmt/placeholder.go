@@ -1,4 +1,4 @@
-package internal
+package stmt
 
 import (
 	"strconv"
@@ -11,13 +11,16 @@ const (
 )
 
 type PlaceholderGen struct {
-	Kind   int
-	count  int
-	values []any
+	Stringify bool
+	Kind      int
+	count     int
+	values    []any
 }
 
 func (ph *PlaceholderGen) Write(sb *strings.Builder, values ...any) {
-	ph.values = append(ph.values, values...)
+	if !ph.Stringify {
+		ph.values = append(ph.values, values...)
+	}
 	num := len(values)
 
 	if num > 1 {
@@ -27,7 +30,12 @@ func (ph *PlaceholderGen) Write(sb *strings.Builder, values ...any) {
 		if i > 0 {
 			sb.WriteString(", ")
 		}
-		sb.WriteString(ph.write())
+		if !ph.Stringify {
+			sb.WriteString(ph.write())
+		} else {
+			str := Stringify(values[i])
+			sb.WriteString(str)
+		}
 	}
 	if num > 1 {
 		sb.WriteByte(')')
