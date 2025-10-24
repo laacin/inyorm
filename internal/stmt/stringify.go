@@ -2,127 +2,115 @@ package stmt
 
 import "strconv"
 
+const (
+	falseValue = "0"
+	trueValue  = "1"
+	nullValue  = "NULL"
+)
+
+func handlePtr[T any](v *T, fn func(T) string) string {
+	if v == nil {
+		return nullValue
+	}
+	return fn(*v)
+}
+
+type number interface {
+	~int | ~int8 | ~int16 |
+		~int32 | ~int64 | ~uint |
+		~uint8 | ~uint16 | ~uint32 |
+		~uint64
+}
+
+func handleInt[T number](v T) string {
+	return strconv.Itoa(int(v))
+}
+
+func handleFloat[T ~float32 | ~float64](v T) string {
+	return strconv.FormatFloat(float64(v), 'f', -1, 32)
+}
+
+func handleBool(v bool) string {
+	if !v {
+		return falseValue
+	}
+	return trueValue
+}
+
 // Stringify returns a string representation of basic comparable types without using reflection.
 func Stringify(value any) string {
 	switch t := value.(type) {
+
 	case string:
 		return FilterColumn(t)
 	case *string:
-		if t == nil {
-			return "NULL"
-		}
-		return FilterColumn(*t)
+		return handlePtr(t, FilterColumn)
 
 	case int:
-		return strconv.Itoa(t)
+		return handleInt(t)
 	case *int:
-		if t == nil {
-			return "NULL"
-		}
-		return strconv.Itoa(*t)
+		return handlePtr(t, handleInt)
 
 	case int8:
-		return strconv.Itoa(int(t))
+		return handleInt(t)
 	case *int8:
-		if t == nil {
-			return "NULL"
-		}
-		return strconv.Itoa(int(*t))
+		return handlePtr(t, handleInt)
 
 	case int16:
-		return strconv.Itoa(int(t))
+		return handleInt(t)
 	case *int16:
-		if t == nil {
-			return "NULL"
-		}
-		return strconv.Itoa(int(*t))
+		return handlePtr(t, handleInt)
 
 	case int32:
-		return strconv.Itoa(int(t))
+		return handleInt(t)
 	case *int32:
-		if t == nil {
-			return "NULL"
-		}
-		return strconv.Itoa(int(*t))
+		return handlePtr(t, handleInt)
 
 	case int64:
-		return strconv.FormatInt(t, 10)
+		return handleInt(t)
 	case *int64:
-		if t == nil {
-			return "NULL"
-		}
-		return strconv.FormatInt(*t, 10)
+		return handlePtr(t, handleInt)
 
 	case uint:
-		return strconv.FormatUint(uint64(t), 10)
+		return handleInt(t)
 	case *uint:
-		if t == nil {
-			return "NULL"
-		}
-		return strconv.FormatUint(uint64(*t), 10)
+		return handlePtr(t, handleInt)
 
 	case uint8:
-		return strconv.FormatUint(uint64(t), 10)
+		return handleInt(t)
 	case *uint8:
-		if t == nil {
-			return "NULL"
-		}
-		return strconv.FormatUint(uint64(*t), 10)
+		return handlePtr(t, handleInt)
 
 	case uint16:
-		return strconv.FormatUint(uint64(t), 10)
+		return handleInt(t)
 	case *uint16:
-		if t == nil {
-			return "NULL"
-		}
-		return strconv.FormatUint(uint64(*t), 10)
+		return handlePtr(t, handleInt)
 
 	case uint32:
-		return strconv.FormatUint(uint64(t), 10)
+		return handleInt(t)
 	case *uint32:
-		if t == nil {
-			return "NULL"
-		}
-		return strconv.FormatUint(uint64(*t), 10)
+		return handlePtr(t, handleInt)
 
 	case uint64:
-		return strconv.FormatUint(t, 10)
+		return handleInt(t)
 	case *uint64:
-		if t == nil {
-			return "NULL"
-		}
-		return strconv.FormatUint(*t, 10)
+		return handlePtr(t, handleInt)
 
 	case float32:
-		return strconv.FormatFloat(float64(t), 'f', -1, 32)
+		return handleFloat(t)
 	case *float32:
-		if t == nil {
-			return "NULL"
-		}
-		return strconv.FormatFloat(float64(*t), 'f', -1, 32)
+		return handlePtr(t, handleFloat)
 
 	case float64:
-		return strconv.FormatFloat(t, 'f', -1, 64)
+		return handleFloat(t)
 	case *float64:
-		if t == nil {
-			return "NULL"
-		}
-		return strconv.FormatFloat(*t, 'f', -1, 64)
+		return handlePtr(t, handleFloat)
 
 	case bool:
-		if t {
-			return "1"
-		}
-		return "0"
+		return handleBool(t)
 	case *bool:
-		if t == nil {
-			return "NULL"
-		}
-		if *t {
-			return "1"
-		}
-		return "0"
+		return handlePtr(t, handleBool)
 	}
 
-	return "NULL"
+	return nullValue
 }
