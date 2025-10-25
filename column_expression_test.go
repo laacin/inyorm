@@ -41,7 +41,7 @@ func TestFieldBuilder(t *testing.T) {
 			return fb.Simple(prod.Use()).Mul(price.Use())
 		})
 
-		exp := "(product) * price"
+		exp := "product * price"
 		expect(t, fld, exp)
 	})
 
@@ -85,8 +85,8 @@ func TestFieldBuilder(t *testing.T) {
 			})
 		})
 
-		exp := "CASE WHEN (age < 18) OR (banned = 1) THEN 'invalid user' "
-		exp += "ELSE CONCAT('User: ', firstname, ' ', lastname, ' had a total of ', quantity, ' of ', product, ' worth ', (quantity) * price)"
+		exp := "CASE WHEN (age < 18) OR (banned = 1) THEN 'invalid user' " // FIX: invalid expression wrapper
+		exp += "ELSE CONCAT('User: ', firstname, ' ', lastname, ' had a total of ', quantity, ' of ', product, ' worth ', quantity * price)"
 		exp += " END"
 		expect(t, fld, exp)
 	})
@@ -96,7 +96,7 @@ func TestFieldBuilder(t *testing.T) {
 			return fb.Simple(finalVal.Use()).Sub(initVal.Use()).Wrap().Div(initVal.Use()).Mul(100)
 		})
 
-		exp := "((final_value) - initial_value) / initial_value * 100"
+		exp := "(final_value - initial_value) / initial_value * 100"
 		expect(t, fld, exp)
 	})
 }

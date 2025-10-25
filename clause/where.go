@@ -3,7 +3,6 @@ package clause
 import (
 	"strings"
 
-	"github.com/laacin/inyorm/iface"
 	"github.com/laacin/inyorm/internal/stmt"
 )
 
@@ -13,11 +12,11 @@ type WhereBuilder struct {
 	Ph          *stmt.PlaceholderGen
 }
 
-func (w *WhereBuilder) Where(identifier string) iface.Expression {
-	expr := &stmt.Expression{Ph: w.Ph}
-	w.Expressions = append(w.Expressions, expr)
-	return expr.Start(identifier)
-}
+// func (w *WhereBuilder) Where(identifier string) iface.Expression {
+// 	expr := &stmt.Expression{Ph: w.Ph}
+// 	w.Expressions = append(w.Expressions, expr)
+// 	return expr.Start(identifier)
+// }
 
 func (w *WhereBuilder) Build(sb *strings.Builder) []any {
 	sb.WriteString("WHERE ")

@@ -23,11 +23,8 @@ func (ce *ColumnExpr) New(alias string, fn func(fb *FB) *NdF) *CustomField {
 	fb := &FB{}
 	node := fn(fb)
 
-	var sb strings.Builder
-	node.build(&sb)
-
 	return &CustomField{
-		sel:   sb.String(),
+		sel:   node.build(),
 		alias: alias,
 	}
 }
@@ -39,10 +36,10 @@ type CustomField struct {
 }
 
 // Returns the SQL expression for this field, ready to be used in a SELECT clause.
-func (cf *CustomField) Select() string { return cf.sel }
+func (n *CustomField) Select() string { return n.sel }
 
 // Returns the alias of the column, properly formatted for use in a query.
-func (cf *CustomField) Alias() string { return stmt.SetColumn(cf.alias) }
+func (n *CustomField) Alias() string { return stmt.SetColumn(n.alias) }
 
 // ----- FIELD BUILDER -----
 
@@ -80,7 +77,7 @@ func (fb *FB) Concat(vals ...Value) *NdF {
 
 // Creates a new expression builder.
 func (fb *FB) Expr(when Value) *Expr {
-	expr := &Expr{ph: &stmt.PlaceholderGen{Stringify: true}}
+	expr := &Expr{ph: &stmt.PlaceholderGen{StringMode: true}}
 	return expr.start(when)
 }
 
@@ -148,7 +145,7 @@ func (fb *FB) Switch(cond Value, fn func(cs *CaseField[Value])) *NdF {
 }
 
 // Creates a node from a searched CASE statement.
-// Each WHEN clause inside the callback is an expression (created with fb.Expr()).
+// Each WHEN clause is a full logical expression (built with fb.Expr()).
 // SQL: CASE WHEN expr THEN ... ELSE ... END
 func (fb *FB) Search(fn func(cs *CaseField[*ExprEnd])) *NdF {
 	fb.mu.Lock()
@@ -159,7 +156,7 @@ func (fb *FB) Search(fn func(cs *CaseField[*ExprEnd])) *NdF {
 	cs := &CaseField[*ExprEnd]{}
 	fn(cs)
 	for _, arg := range cs.args {
-		arg.when.ctx.build(&fb.sb) // TODO: add support for Node
+		arg.when.ctx.build(&fb.sb)
 		fb.sb.WriteString(" THEN ")
 		writeValue(&fb.sb, arg.do)
 	}
@@ -173,107 +170,231 @@ func (fb *FB) Search(fn func(cs *CaseField[*ExprEnd])) *NdF {
 
 // ----- NODE FIELD -----
 
-// Internal types
-const (
-	addOp  byte = '+'
-	subOp  byte = '-'
-	mulOp  byte = '*'
-	divOp  byte = '/'
-	modOp  byte = '%'
-	wrapOp byte = 'W'
-)
-
-type operation struct {
-	op    byte
-	value any
-}
-
 // NdF (Node field) is an internal type used to generate custom fields.
 type NdF struct {
-	target string
-	ops    []operation
-	wraps  int
+	target   string
+	segments []nodeSegment
+	aggr     string
 }
+
+type nodeSegment struct {
+	typ   int
+	arg   any
+	value Value
+}
+
+// ----- AGGREGATION METHODS -----
+const (
+	countAggr = "COUNT"
+	sumAggr   = "SUM"
+	minAggr   = "MIN"
+	maxAggr   = "MAX"
+	avgAggr   = "AVG"
+)
+
+// Applies the COUNT aggregation to the current node.
+// SQL: COUNT(<expr>)
+func (n *NdF) Count() *NdF {
+	n.aggr = countAggr
+	return n
+}
+
+// Applies the SUM aggregation to the current node.
+// SQL: SUM(<expr>)
+func (n *NdF) Sum() *NdF {
+	n.aggr = sumAggr
+	return n
+}
+
+// Applies the MIN aggregation to the current node.
+// SQL: MIN(<expr>)
+func (n *NdF) Min() *NdF {
+	n.aggr = minAggr
+	return n
+}
+
+// Applies the MAX aggregation to the current node.
+// SQL: MAX(<expr>)
+func (n *NdF) Max() *NdF {
+	n.aggr = maxAggr
+	return n
+}
+
+// Applies the AVG aggregation to the current node.
+// SQL: AVG(<expr>)
+func (n *NdF) Avg() *NdF {
+	n.aggr = avgAggr
+	return n
+}
+
+const (
+	scalarFn = iota
+	arithOp
+	wrap
+)
+
+// ----- ARITHMETICAL OPERATION METHODS -----
+const (
+	addOp byte = '+'
+	subOp byte = '-'
+	mulOp byte = '*'
+	divOp byte = '/'
+	modOp byte = '%'
+)
 
 // Adds a value to the current node using the addition operator (+).
 // SQL: <expr> + v
-func (cf *NdF) Add(v Value) *NdF {
-	cf.ops = append(cf.ops, operation{op: addOp, value: v})
-	return cf
+func (n *NdF) Add(v Value) *NdF {
+	n.segments = append(n.segments, nodeSegment{
+		typ: arithOp, arg: addOp, value: v,
+	})
+	return n
 }
 
 // Subtracts a value from the current node using the subtraction operator (-).
 // SQL: <expr> - v
-func (cf *NdF) Sub(v Value) *NdF {
-	cf.ops = append(cf.ops, operation{op: subOp, value: v})
-	return cf
+func (n *NdF) Sub(v Value) *NdF {
+	n.segments = append(n.segments, nodeSegment{
+		typ: arithOp, arg: subOp, value: v,
+	})
+	return n
 }
 
 // Multiplies the current node by a given value using the multiplication operator (*).
 // SQL: <expr> * v
-func (cf *NdF) Mul(v Value) *NdF {
-	cf.ops = append(cf.ops, operation{op: mulOp, value: v})
-	return cf
+func (n *NdF) Mul(v Value) *NdF {
+	n.segments = append(n.segments, nodeSegment{
+		typ: arithOp, arg: mulOp, value: v,
+	})
+	return n
 }
 
 // Divides the current node by a given value using the division operator (/).
 // SQL: <expr> / v
-func (cf *NdF) Div(v Value) *NdF {
-	cf.ops = append(cf.ops, operation{op: divOp, value: v})
-	return cf
+func (n *NdF) Div(v Value) *NdF {
+	n.segments = append(n.segments, nodeSegment{
+		typ: arithOp, arg: divOp, value: v,
+	})
+	return n
 }
 
 // Applies the modulo operator (%) to the current node with the given value.
 // SQL: <expr> % v
-func (cf *NdF) Mod(v Value) *NdF {
-	cf.ops = append(cf.ops, operation{op: modOp, value: v})
-	return cf
+func (n *NdF) Mod(v Value) *NdF {
+	n.segments = append(n.segments, nodeSegment{
+		typ: arithOp, arg: modOp, value: v,
+	})
+	return n
 }
 
 // Wraps the current node in parentheses to control expression precedence.
 // SQL: (<expr>)
-func (cf *NdF) Wrap() *NdF {
-	cf.wraps++
-	cf.ops = append(cf.ops, operation{op: wrapOp})
-	return cf
+func (n *NdF) Wrap() *NdF {
+	n.segments = append(n.segments, nodeSegment{
+		typ: wrap,
+	})
+	return n
 }
 
-// ---- Internal builders/helpers -----
+// ----- SCALAR METHODS -----
+const (
+	lowerFunc = "LOWER"
+	upperFunc = "UPPER"
+	trimFunc  = "TRIM"
+	roundFunc = "ROUND"
+	absFunc   = "ABS"
+)
 
-func (cf *NdF) build(sb *strings.Builder) {
-	cf.buildOperation(sb)
+// Converts the current expression to lowercase.
+// SQL: LOWER(<expr>)
+func (n *NdF) Lower() *NdF {
+	n.segments = append(n.segments, nodeSegment{
+		typ: scalarFn, arg: lowerFunc,
+	})
+	return n
 }
 
-func (cf *NdF) buildOperation(sb *strings.Builder) {
-	if cf.ops == nil {
-		sb.WriteString(cf.target)
-		return
-	}
+// Converts the current expression to uppercase.
+// SQL: UPPER(<expr>)
+func (n *NdF) Upper() *NdF {
+	n.segments = append(n.segments, nodeSegment{
+		typ: scalarFn, arg: upperFunc,
+	})
+	return n
+}
 
-	for range cf.wraps {
-		sb.WriteByte('(')
-	}
+// Removes leading and trailing spaces from the current expression.
+// SQL: TRIM(<expr>)
+func (n *NdF) Trim() *NdF {
+	n.segments = append(n.segments, nodeSegment{
+		typ: scalarFn, arg: trimFunc,
+	})
+	return n
+}
 
-	sb.WriteByte('(')
-	sb.WriteString(cf.target)
-	sb.WriteByte(')')
+// Rounds a numeric expression to the nearest integer.
+// SQL: ROUND(<expr>)
+func (n *NdF) Round() *NdF {
+	n.segments = append(n.segments, nodeSegment{
+		typ: scalarFn, arg: roundFunc,
+	})
+	return n
+}
 
-	for _, v := range cf.ops {
-		if v.op == wrapOp {
+// Returns the absolute value of a numeric expression.
+// SQL: ABS(<expr>)
+func (n *NdF) Abs() *NdF {
+	n.segments = append(n.segments, nodeSegment{
+		typ: scalarFn, arg: absFunc,
+	})
+	return n
+}
+
+// ----- Internal builders/helpers -----
+func (n *NdF) build() string {
+	var sb strings.Builder
+
+	tgt := n.target
+	for _, seg := range n.segments {
+		sb.Reset()
+
+		switch seg.typ {
+		case scalarFn:
+			sb.WriteString(seg.arg.(string))
+			sb.WriteByte('(')
+			sb.WriteString(tgt)
 			sb.WriteByte(')')
-			continue
-		}
 
-		sb.WriteByte(' ')
-		sb.WriteByte(v.op)
-		sb.WriteByte(' ')
-		sb.WriteString(stmt.Stringify(v.value))
+		case arithOp:
+			sb.WriteString(tgt)
+			sb.WriteByte(' ')
+			sb.WriteByte(seg.arg.(byte))
+			sb.WriteByte(' ')
+			writeValue(&sb, seg.value)
+
+		case wrap:
+			sb.WriteByte('(')
+			sb.WriteString(tgt)
+			sb.WriteByte(')')
+		}
+		tgt = sb.String()
 	}
+
+	if n.aggr != "" {
+		sb.Reset()
+		sb.WriteString(n.aggr)
+		sb.WriteByte('(')
+		sb.WriteString(tgt)
+		sb.WriteByte(')')
+		tgt = sb.String()
+	}
+
+	return tgt
 }
 
 func writeValue(sb *strings.Builder, v Value) {
-	if cf, ok := v.(*NdF); ok {
-		cf.build(sb)
+	if n, ok := v.(*NdF); ok {
+		sb.WriteString(n.build())
 		return
 	}
 	sb.WriteString(stmt.Stringify(v))

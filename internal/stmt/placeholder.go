@@ -6,39 +6,39 @@ import (
 )
 
 const (
-	Simple = iota
-	Numbered
+	SimplePh = iota
+	NumberedPh
 )
 
 type PlaceholderGen struct {
-	Stringify bool
-	Kind      int
-	count     int
-	values    []any
+	StringMode bool
+	Kind       int
+	count      int
+	values     []any
 }
 
 func (ph *PlaceholderGen) Write(sb *strings.Builder, values ...any) {
-	if !ph.Stringify {
+	if !ph.StringMode {
 		ph.values = append(ph.values, values...)
 	}
 	num := len(values)
 
 	if num > 1 {
 		sb.WriteByte('(')
+		defer sb.WriteByte(')')
 	}
+
 	for i := range num {
 		if i > 0 {
 			sb.WriteString(", ")
 		}
-		if !ph.Stringify {
+
+		if !ph.StringMode {
 			sb.WriteString(ph.write())
 		} else {
 			str := Stringify(values[i])
 			sb.WriteString(str)
 		}
-	}
-	if num > 1 {
-		sb.WriteByte(')')
 	}
 }
 
@@ -48,10 +48,10 @@ func (ph *PlaceholderGen) write() string {
 	ph.count++
 
 	switch ph.Kind {
-	case Simple:
+	case SimplePh:
 		return "?"
 
-	case Numbered:
+	case NumberedPh:
 		return "$" + strconv.Itoa(ph.count)
 
 	default:

@@ -1,32 +1,35 @@
 package stmt
 
-type Operator string
+type SqlOp string
 
 const (
-	Equal      Operator = "="
-	NotEqual   Operator = "<>"
-	Greater    Operator = ">"
-	NotGreater Operator = "<="
-	Less       Operator = "<"
-	NotLess    Operator = ">="
+	Equal    SqlOp = "="
+	NotEqual SqlOp = "<>"
 
-	And Operator = "AND"
-	Or  Operator = "OR"
-	Not Operator = "NOT"
+	Greater    SqlOp = ">"
+	NotGreater SqlOp = "<="
 
-	In         Operator = "IN"
-	NotIn      Operator = "NOT IN"
-	Between    Operator = "BETWEEN"
-	NotBetween Operator = "NOT BETWEEN"
+	Less    SqlOp = "<"
+	NotLess SqlOp = ">="
 
-	IsNull    Operator = "IS NULL"
-	IsNotNull Operator = "IS NOT NULL"
+	And SqlOp = "AND"
+	Or  SqlOp = "OR"
+	Not SqlOp = "NOT"
 
-	Like    Operator = "LIKE"
-	NotLike Operator = "NOT LIKE"
+	In    SqlOp = "IN"
+	NotIn SqlOp = "NOT IN"
+
+	Between    SqlOp = "BETWEEN"
+	NotBetween SqlOp = "NOT BETWEEN"
+
+	IsNull    SqlOp = "IS NULL"
+	IsNotNull SqlOp = "IS NOT NULL"
+
+	Like    SqlOp = "LIKE"
+	NotLike SqlOp = "NOT LIKE"
 )
 
-var negations = map[Operator]Operator{
+var negations = map[SqlOp]SqlOp{
 	Equal:      NotEqual,
 	NotEqual:   Equal,
 	Greater:    NotGreater,
@@ -43,7 +46,7 @@ var negations = map[Operator]Operator{
 	NotLike:    Like,
 }
 
-func GetOp(kind Operator, negated bool) string {
+func GetSqlOp(kind SqlOp, negated bool) string {
 	if negated {
 		if op, ok := negations[kind]; ok {
 			return string(op)

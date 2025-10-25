@@ -10,7 +10,7 @@ import (
 func TestPlaceholderGen_Write(t *testing.T) {
 	t.Run("Simple stmt.", func(t *testing.T) {
 		var sb strings.Builder
-		ph := &stmt.PlaceholderGen{Kind: stmt.Simple}
+		ph := &stmt.PlaceholderGen{Kind: stmt.SimplePh}
 
 		ph.Write(&sb, 1, "a", true)
 
@@ -24,7 +24,7 @@ func TestPlaceholderGen_Write(t *testing.T) {
 
 	t.Run("Numbered stmt.", func(t *testing.T) {
 		var sb strings.Builder
-		ph := &stmt.PlaceholderGen{Kind: stmt.Numbered}
+		ph := &stmt.PlaceholderGen{Kind: stmt.NumberedPh}
 
 		ph.Write(&sb, 10, 20)
 
@@ -35,7 +35,7 @@ func TestPlaceholderGen_Write(t *testing.T) {
 
 	t.Run("Stringify mode", func(t *testing.T) {
 		var sb strings.Builder
-		ph := &stmt.PlaceholderGen{Stringify: true}
+		ph := &stmt.PlaceholderGen{StringMode: true}
 
 		ph.Write(&sb, "x", 5, true, 3.14)
 
@@ -46,7 +46,7 @@ func TestPlaceholderGen_Write(t *testing.T) {
 
 	t.Run("Stringify stress", func(t *testing.T) {
 		var sb strings.Builder
-		ph := &stmt.PlaceholderGen{Stringify: true}
+		ph := &stmt.PlaceholderGen{StringMode: true}
 
 		vals := []any{
 			42,
