@@ -1,46 +1,25 @@
 package clause
 
-import (
-	"strings"
+import "strings"
 
-	"github.com/laacin/inyorm/internal/stmt"
-)
-
-type WhereBuilder struct {
-	Table       string
-	Expressions []*stmt.Expression
-	Ph          *stmt.PlaceholderGen
+type WhereClause struct {
+	exprs []*Expr
 }
 
-// func (w *WhereBuilder) Where(identifier string) iface.Expression {
-// 	expr := &stmt.Expression{Ph: w.Ph}
-// 	w.Expressions = append(w.Expressions, expr)
-// 	return expr.Start(identifier)
-// }
+func (w *WhereClause) Where(indetifier any) *Expr {
+	expr := &Expr{}
+	w.exprs = append(w.exprs, expr)
+	return expr.Start(indetifier)
+}
 
-func (w *WhereBuilder) Build(sb *strings.Builder) []any {
+func (wc *WhereClause) Build(sb *strings.Builder, ph *Placeholder) {
 	sb.WriteString("WHERE ")
-	for n, expr := range w.Expressions {
-		if n > 0 {
+	for i, expr := range wc.exprs {
+		if i > 0 {
 			sb.WriteByte(' ')
-			sb.WriteString(string(stmt.And))
+			sb.WriteString(string(and))
 			sb.WriteByte(' ')
 		}
-
-		sb.WriteByte('(')
-		for i, seg := range expr.Segments {
-			if i > 0 {
-				sb.WriteByte(' ')
-				sb.WriteString(expr.End.Connectors[i-1])
-				sb.WriteByte(' ')
-			}
-
-			sb.WriteString(stmt.SetColumn(seg.Identifier))
-			sb.WriteByte(' ')
-			sb.WriteString(seg.Argument)
-		}
-		sb.WriteByte(')')
+		expr.build(sb, ph)
 	}
-
-	return w.Ph.Values()
 }

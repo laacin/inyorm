@@ -5,9 +5,6 @@ import (
 	"strings"
 )
 
-// TODO: better use for aliases
-
-// -- JOIN TYPES
 type JoinTyp string
 
 const (
@@ -27,42 +24,70 @@ func (typ JoinTyp) IsValid() bool {
 	}
 }
 
-// ----- BUILDER ------
-
 type JoinBuilder struct {
-	Table        string
-	PrimaryKey   string
-	joins        []*Join
-	intermediate []*JoinIntermediate
+	table      string
+	alias      string
+	key        string
+	joins      []*Joined
+	interJoins []*InterJoin
 }
 
-func (j *JoinBuilder) Simple(typ JoinTyp, table, foreignKey string) {
-	join := &Join{typ, table, foreignKey}
-	j.joins = append(j.joins, join)
+func NewJoinBuilder(table, alias, key string) *JoinBuilder {
+	return &JoinBuilder{table: table, alias: alias, key: key}
 }
 
-// keys is a map which contains table reference (key) and his foreign key
-func (j *JoinBuilder) ManyToMany(typ JoinTyp, relTable string, keys map[string]string) *JoinIntermediate {
-	inter := &JoinIntermediate{typ: typ, table: relTable, keys: keys}
-	j.intermediate = append(j.intermediate, inter)
+type InterJoin struct {
+	typ   JoinTyp
+	table string
+	alias string
+	keys  map[string]string
+	joins []*Joined
+}
+
+type Joined struct {
+	typ        JoinTyp
+	table      string
+	alias      string
+	foreignKey string
+}
+
+func (j *JoinBuilder) Join(typ JoinTyp, table, alias, foreignKey string) {
+	j.joins = append(j.joins, newJoin(typ, table, alias, foreignKey))
+}
+
+func (j *JoinBuilder) Many(typ JoinTyp, table, alias string, keys map[string]string) *InterJoin {
+	inter := &InterJoin{
+		typ:   typ,
+		table: table,
+		alias: alias,
+		keys:  keys,
+	}
+	j.interJoins = append(j.interJoins, inter)
 	return inter
 }
 
-// write: type JOIN joinedTable joinAlias
-// ON joinedAlias.joinedFk = mainAlias.mainPk ...
+func (j *InterJoin) Join(typ JoinTyp, table, alias, foreignKey string) {
+	j.joins = append(j.joins, newJoin(typ, table, alias, foreignKey))
+}
+
+// --- Helper
+func newJoin(typ JoinTyp, table, alias, fk string) *Joined {
+	return &Joined{
+		typ:        typ,
+		table:      table,
+		alias:      alias,
+		foreignKey: fk,
+	}
+}
+
 func (j *JoinBuilder) Build(sb *strings.Builder) []error {
 	var errs []error
-	hasRelation := false
+	manyToMany := false
 
-	for i, rel := range j.intermediate {
-		if !rel.typ.IsValid() {
-			errs = append(errs, fmt.Errorf("'%s' Join type is not valid", rel.typ))
-			continue
-		}
-
-		fk, exists := rel.keys[j.Table]
-		if !exists {
-			errs = append(errs, fmt.Errorf("intermediate '%s' table has no relation with the main table", rel.table))
+	for i, inter := range j.interJoins {
+		fk, err := validateJoin(inter.typ, j.table, inter.table, inter.keys)
+		if err != nil {
+			errs = append(errs, err)
 			continue
 		}
 
@@ -70,74 +95,72 @@ func (j *JoinBuilder) Build(sb *strings.Builder) []error {
 			sb.WriteByte(' ')
 		}
 
-		hasRelation = true
-		writeJoin(sb, rel.typ, j.Table, j.PrimaryKey, rel.table, fk)
+		manyToMany = true
+		writeJoin(sb, j.alias, j.key, &Joined{
+			typ:        inter.typ,
+			table:      inter.table,
+			alias:      inter.alias,
+			foreignKey: fk,
+		})
 
-		for _, join := range rel.joins {
-			if !join.typ.IsValid() {
-				errs = append(errs, fmt.Errorf("'%s' Join type is not valid", join.typ))
-				continue
-			}
-
-			joinedFk, exists := rel.keys[join.table]
-			if !exists {
-				errs = append(errs, fmt.Errorf("intermediate '%s' table has no relation with '%s' table", rel.table, join.table))
+		for _, join := range inter.joins {
+			joinedFk, err := validateJoin(join.typ, join.table, inter.table, inter.keys)
+			if err != nil {
+				errs = append(errs, err)
 				continue
 			}
 
 			sb.WriteByte(' ')
-			writeJoin(sb, join.typ, rel.table, joinedFk, join.table, join.key)
+			writeJoin(sb, inter.alias, joinedFk, join)
 		}
 
 	}
 
 	for i, join := range j.joins {
-		if !join.typ.IsValid() {
-			errs = append(errs, fmt.Errorf("'%s' Join type is not valid", join.typ))
+		if _, err := validateJoin(join.typ, "", "", nil); err != nil {
+			errs = append(errs, err)
 			continue
 		}
 
-		if i > 0 || hasRelation {
+		if i > 0 || manyToMany {
 			sb.WriteByte(' ')
 		}
-		writeJoin(sb, join.typ, j.Table, j.PrimaryKey, join.table, join.key)
+		writeJoin(sb, j.alias, j.key, join)
 	}
 	return errs
 }
 
-type JoinIntermediate struct {
-	typ   JoinTyp
-	table string
-	keys  map[string]string
-	joins []*Join
-}
-
-func (j *JoinIntermediate) Join(typ JoinTyp, table, key string) *JoinIntermediate {
-	j.joins = append(j.joins, &Join{typ, table, key})
-	return j
-}
-
-type Join struct {
-	typ   JoinTyp
-	table string
-	key   string
-}
-
-func writeJoin(sb *strings.Builder, typ JoinTyp, srcTable, srcKey, joinTable, joinKey string) {
-	sb.WriteString(string(typ))
+func writeJoin(sb *strings.Builder, alias, key string, joined *Joined) {
+	sb.WriteString(string(joined.typ))
 	sb.WriteString(" JOIN ")
-	sb.WriteString(joinTable)
+	sb.WriteString(joined.table)
 
-	if typ != CrossJoin {
+	if joined.typ != CrossJoin {
 		sb.WriteByte(' ')
-		sb.WriteString(joinTable)
+		sb.WriteString(joined.alias)
 		sb.WriteString(" ON ")
-		sb.WriteString(joinTable)
+		sb.WriteString(joined.alias)
 		sb.WriteByte('.')
-		sb.WriteString(joinKey)
+		sb.WriteString(joined.foreignKey)
 		sb.WriteString(" = ")
-		sb.WriteString(srcTable)
+		sb.WriteString(alias)
 		sb.WriteByte('.')
-		sb.WriteString(srcKey)
+		sb.WriteString(key)
 	}
+}
+
+func validateJoin(typ JoinTyp, join, on string, keys map[string]string) (string, error) {
+	if !typ.IsValid() {
+		return "", fmt.Errorf("'%s' Join type is not valid", typ)
+	}
+
+	if keys != nil {
+		fk, exists := keys[join]
+		if !exists {
+			return "", fmt.Errorf("'%s' table has no relation with '%s' table", join, on)
+		}
+		return fk, nil
+	}
+
+	return "", nil
 }
