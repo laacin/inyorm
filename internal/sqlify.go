@@ -1,4 +1,4 @@
-package stmt
+package internal
 
 import "strconv"
 
@@ -37,14 +37,18 @@ func handleBool(v bool) string {
 	return trueValue
 }
 
-// Stringify returns a string representation of basic comparable types without using reflection.
-func Stringify(value any) string {
+func handleString(v string) string {
+	return "'" + v + "'"
+}
+
+// SQLify returns the SQL-safe string representation of common comparable types without using reflection.
+func Sqlify(value any) string {
 	switch t := value.(type) {
 
 	case string:
-		return FilterColumn(t)
+		return handleString(t)
 	case *string:
-		return handlePtr(t, FilterColumn)
+		return handlePtr(t, handleString)
 
 	case int:
 		return handleInt(t)
