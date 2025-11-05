@@ -1,8 +1,16 @@
 package internal
 
+type ColumnType int
+
+const (
+	NormalCol ColumnType = iota
+	CustomCol
+	KeywordCol
+)
+
 type Column struct {
-	Custom bool
-	Value  string
-	Alias  string
-	Table  string
+	Typ   ColumnType
+	Value string
+	Alias string
+	Table string
 }

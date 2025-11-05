@@ -1,50 +1,18 @@
 package internal
 
-import (
-	"strconv"
-	"strings"
-)
-
-const (
-	psql = "postgres"
-)
+import "strconv"
 
 type Placeholder struct {
-	Dialect string
+	dialect string
 	count   int
 	values  []any
 }
 
-func (ph *Placeholder) Write(sb *strings.Builder, values ...any) {
-	initialized := ph != nil
-	if initialized {
-		ph.values = append(ph.values, values...)
-	}
-
-	if len(values) > 1 {
-		sb.WriteByte('(')
-		defer sb.WriteByte(')')
-	}
-
-	for i := range len(values) {
-		if i > 0 {
-			sb.WriteString(", ")
-		}
-
-		if initialized {
-			sb.WriteString(ph.write())
-		} else {
-			sb.WriteString(Sqlify(values[i]))
-		}
-	}
-}
-
-func (ph *Placeholder) Values() []any { return ph.values }
-
-func (ph *Placeholder) write() string {
+func (ph *Placeholder) next(value any) string {
 	ph.count++
+	ph.values = append(ph.values, value)
 
-	switch ph.Dialect {
+	switch ph.dialect {
 	case psql:
 		return "$" + strconv.Itoa(ph.count)
 	default:
