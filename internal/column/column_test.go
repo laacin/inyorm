@@ -124,8 +124,8 @@ func TestColumn(t *testing.T) {
 			banned  = c.Col("banned")
 			fname   = c.Col("firstname")
 			lname   = c.Col("lastname")
-			role    = c.Col("name", "roles")
 			postNum = c.Col("id", "posts").Count()
+			role    = c.Col("name", "roles")
 			lastLog = c.Col("last_login")
 		)
 
@@ -145,7 +145,7 @@ func TestColumn(t *testing.T) {
 
 		exp := "CONCAT('User: ', a.firstname, ' ', a.lastname, ' ', "
 		exp += "CASE WHEN (a.banned IS NULL) THEN "
-		exp += "CONCAT('with role: ', b.name, ' has ', COUNT(c.id), ' posts and', ' his last login was: ', a.last_login)"
+		exp += "CONCAT('with role: ', c.name, ' has ', COUNT(b.id), ' posts and', ' his last login was: ', a.last_login)"
 		exp += " ELSE CONCAT('was banned at: ', a.banned) END) AS user_info"
 		run(t, result, "user_info", exp)
 	})

@@ -56,7 +56,7 @@ type ClauseGroupBy interface {
 
 // Order by clause
 type ClauseOrderBy interface {
-	OrderBy(values ...any)
+	OrderBy(value any) ClauseOrder
 }
 
 // Limit clause
@@ -81,4 +81,8 @@ type ClauseOn interface {
 
 type ClauseHaving interface {
 	Having(identifier any) Cond
+}
+
+type ClauseOrder interface {
+	Desc()
 }

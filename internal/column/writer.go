@@ -2,6 +2,42 @@ package column
 
 import "github.com/laacin/inyorm/internal/core"
 
+func wDefinition(w core.Writer, col *Column) {
+	switch col.Type {
+	case normalCol:
+		if col.Alias != "" {
+			w.ColRef(col.Alias)
+			w.Char('.')
+		}
+		w.Write(col.Value)
+
+	case customCol:
+		w.Write(col.Value)
+		if col.Alias != "" {
+			w.Write(" AS ")
+			w.Write(col.Alias)
+		}
+	}
+}
+
+func wReference(w core.Writer, col *Column) {
+	switch col.Type {
+	case normalCol:
+		if col.Alias != "" {
+			w.ColRef(col.Alias)
+			w.Char('.')
+		}
+		w.Write(col.Value)
+
+	case customCol:
+		if col.Alias == "" {
+			w.Write(col.Value)
+			return
+		}
+		w.Write(col.Alias)
+	}
+}
+
 func wPrev(w core.Writer, col *Column) {
 	if col.Type == normalCol {
 		if col.Alias != "" {
@@ -52,19 +88,17 @@ func wWrap(col *Column) {
 
 func wAggr(col *Column, distinct bool, aggr string) {
 	w := col.Writer
-	col.Aggregation = func() {
-		w.Reset()
+	w.Reset()
 
-		w.Write(aggr)
-		w.Char('(')
-		if distinct {
-			w.Write("DISTINCT ")
-		}
-		wPrev(w, col)
-		w.Char(')')
-
-		col.Value = w.ToString()
+	w.Write(aggr)
+	w.Char('(')
+	if distinct {
+		w.Write("DISTINCT ")
 	}
+	wPrev(w, col)
+	w.Char(')')
+
+	col.Value = w.ToString()
 }
 
 func wAs(col *Column, value string) {

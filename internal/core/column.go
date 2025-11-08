@@ -1,8 +1,8 @@
 package core
 
 type Column interface {
-	Def() func(Writer)
-	Ref() func(Writer)
+	Def() Builder
+	Ref() Builder
 
 	Count(distinct ...bool) Column
 	Sum(distinct ...bool) Column

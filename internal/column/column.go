@@ -3,54 +3,23 @@ package column
 import "github.com/laacin/inyorm/internal/core"
 
 type Column struct {
-	Writer      core.Writer
-	Type        ColumnType
-	Value       string
-	Alias       string
-	Aggregation func()
+	Writer core.Writer
+	Type   ColumnType
+	Value  string
+	Alias  string
 }
 
-func (c *Column) Def() func(w core.Writer) {
+// FIX: reference persistence
+
+func (c *Column) Def() core.Builder {
 	return func(w core.Writer) {
-		if c.Aggregation != nil {
-			c.Aggregation()
-		}
-
-		switch c.Type {
-		case normalCol:
-			if c.Alias != "" {
-				w.ColRef(c.Alias)
-				w.Char('.')
-			}
-			w.Write(c.Value)
-
-		case customCol:
-			w.Write(c.Value)
-			if c.Alias != "" {
-				w.Write(" AS ")
-				w.Write(c.Alias)
-			}
-		}
+		wDefinition(w, c)
 	}
 }
 
-func (c *Column) Ref() func(w core.Writer) {
+func (c *Column) Ref() core.Builder {
 	return func(w core.Writer) {
-		switch c.Type {
-		case normalCol:
-			if c.Alias != "" {
-				w.ColRef(c.Alias)
-				w.Char('.')
-			}
-			w.Write(c.Value)
-
-		case customCol:
-			if c.Alias == "" {
-				w.Write(c.Value)
-				return
-			}
-			w.Write(c.Alias)
-		}
+		wReference(w, c)
 	}
 }
 

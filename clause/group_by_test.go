@@ -9,7 +9,7 @@ import (
 	"github.com/laacin/inyorm/internal/writer"
 )
 
-func NewGroupBy() (*clause.GroupByClause, core.ColExpr, func(t *testing.T, cls string)) {
+func NewGroupBy() (core.ClauseGroupBy, core.ColExpr, func(t *testing.T, cls string)) {
 	stmt := writer.NewStatement("")
 	stmt.SetFrom("default")
 	var c core.ColExpr = &column.ColExpr{Statement: stmt}
