@@ -4,7 +4,7 @@ type Writer interface {
 	Write(v string)
 	Char(v byte)
 
-	Value(v any, opts ValueOpts)
+	Value(v any, opts *ValueOpts)
 	ColRef(table string)
 	Table(v string)
 

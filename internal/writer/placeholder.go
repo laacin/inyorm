@@ -17,7 +17,7 @@ func (ph *Placeholder) next(value any) string {
 	ph.values = append(ph.values, value)
 
 	switch ph.dialect {
-	case core.DialectPostgres:
+	case core.Postgres:
 		return "$" + strconv.Itoa(ph.count)
 	default:
 		return "?"

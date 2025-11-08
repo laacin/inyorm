@@ -45,6 +45,10 @@ func (c *Column) Ref() func(w core.Writer) {
 			w.Write(c.Value)
 
 		case customCol:
+			if c.Alias == "" {
+				w.Write(c.Value)
+				return
+			}
 			w.Write(c.Alias)
 		}
 	}

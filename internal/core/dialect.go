@@ -1,5 +1,9 @@
 package core
 
 const (
-	DialectPostgres = "postgres"
+	Postgres  = "postgresql"
+	MySQL     = "mysql"
+	SQLite    = "sqlite"
+	Oracle    = "oracle"
+	SQLServer = "sqlserver"
 )

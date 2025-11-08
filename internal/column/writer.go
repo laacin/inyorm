@@ -22,7 +22,7 @@ func wOp(col *Column, arg byte, value any) {
 	w.Char(' ')
 	w.Char(arg)
 	w.Char(' ')
-	w.Value(value, core.ValueOpts{Definition: true})
+	w.Value(value, &core.ValueOpts{Definition: true})
 
 	col.Value = w.ToString()
 }
