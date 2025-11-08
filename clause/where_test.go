@@ -1,84 +1,99 @@
 package clause_test
 
 import (
-	"reflect"
-	"strings"
-	"testing"
-
-	"github.com/laacin/inyorm"
 	"github.com/laacin/inyorm/clause"
+	"github.com/laacin/inyorm/internal/column"
+	"github.com/laacin/inyorm/internal/core"
+	"github.com/laacin/inyorm/internal/writer"
+	"reflect"
+	"testing"
 )
 
+func NewWhere(dialect ...string) (core.ClauseWhere, core.ColExpr, func(t *testing.T, cls string, vals []any)) {
+	d := ""
+	if len(dialect) > 0 {
+		d = dialect[0]
+	}
+
+	stmt := writer.NewStatement(d)
+	stmt.SetFrom("default")
+	var c core.ColExpr = &column.ColExpr{Statement: stmt}
+	cls := &clause.WhereClause{}
+
+	run := func(t *testing.T, clause string, vals []any) {
+		w := stmt.Writer()
+		cls.Build()(w)
+		if val := w.ToString(); val != clause {
+			t.Errorf("\nmismatch result:\nExpect:\n%s\nHave:\n%s\n", clause, val)
+		}
+
+		values := stmt.Values()
+		if !reflect.DeepEqual(vals, values) {
+			t.Errorf("\nmissmatch values:\nExpect:\n%#v\nHave:\n%#v\n", vals, values)
+		}
+	}
+
+	return cls, c, run
+}
+
 func TestWhere(t *testing.T) {
-	var (
-		sb    strings.Builder
-		fname inyorm.Field = "firstname"
-		lname inyorm.Field = "lastname"
-		age   inyorm.Field = "age"
-	)
-
-	expect := func(t *testing.T, expect string) {
-		if val := sb.String(); val != expect {
-			t.Errorf("\nmismatch result:\nExpect:\n%s\nHave:\n%s\n", expect, val)
-		}
-		sb.Reset()
-	}
-
-	expectVals := func(t *testing.T, have, expect any) {
-		if !reflect.DeepEqual(have, expect) {
-			t.Errorf("\nmissmatch values:\nExpect:\n%#v\nHave:\n%s\n", expect, have)
-		}
-	}
-
 	t.Run("basic", func(t *testing.T) {
-		cls := clause.WhereClause{}
-		cls.Where(fname.Use()).Not().Not().Equal("john").Or().Not().Equal("mary")
+		cls, c, run := NewWhere()
+		cls.Where(c.Col("firstname")).Not().Not().Equal("john").Or().Not().Equal("mary")
 
-		exp := "WHERE (firstname = 'john' OR firstname <> 'mary')"
-		cls.Build(&sb, nil)
-		expect(t, exp)
+		exp := "WHERE (a.firstname = ? OR a.firstname <> ?)"
+		run(t, exp, []any{"john", "mary"})
 	})
 
-	t.Run("with_placeholders", func(t *testing.T) {
-		ph := clause.Placeholder{}
-		cls := clause.WhereClause{}
-		cls.Where(lname.Use()).Like("%alv%").And().Not().In("calvin", "malvina", "salvatore")
+	t.Run("basic_2", func(t *testing.T) {
+		cls, c, run := NewWhere()
+		cls.Where(c.Col("lastname")).Like("%alv%").And().Not().In("calvin", "malvina", "salvatore")
 
-		exp := "WHERE (lastname LIKE ? AND lastname NOT IN (?, ?, ?))"
-		cls.Build(&sb, &ph)
-		expect(t, exp)
-		expectVals(t, ph.Values(), []any{"%alv%", "calvin", "malvina", "salvatore"})
+		exp := "WHERE (a.lastname LIKE ? AND a.lastname NOT IN (?, ?, ?))"
+		run(t, exp, []any{"%alv%", "calvin", "malvina", "salvatore"})
 	})
 
-	t.Run("postgres_placeholders", func(t *testing.T) {
-		ph := clause.Placeholder{Dialect: "postgres"}
-		cls := clause.WhereClause{}
-		cls.Where(age.Use()).Between(17, 70).And().Not().Equal(45)
+	t.Run("basic_3", func(t *testing.T) {
+		cls, c, run := NewWhere()
+		cls.Where(c.Col("age")).Between(17, 70).And().Not().Equal(45)
 
-		exp := "WHERE (age BETWEEN $1 AND $2 AND age <> $3)"
-		cls.Build(&sb, &ph)
-		expect(t, exp)
-		expectVals(t, ph.Values(), []any{17, 70, 45})
+		exp := "WHERE (a.age BETWEEN ? AND ? AND a.age <> ?)"
+		run(t, exp, []any{17, 70, 45})
 	})
 
 	t.Run("many_wheres", func(t *testing.T) {
-		ph := clause.Placeholder{}
-		cls := clause.WhereClause{}
-		cls.Where(age.Use()).Between(17, 70).And().Not().Equal(45)
-		cls.Where(lname.Use()).Like("%alv%").And().Not().In("calvin", "malvina", "salvatore")
-		cls.Where(fname.Use()).Not().Not().Equal("john").Or().Not().Equal("mary")
+		cls, c, run := NewWhere()
+		cls.Where(c.Col("age")).Between(17, 70).And().Not().Equal(45)
+		cls.Where(c.Col("firstname")).Like("%alv%").And().Not().In("calvin", "malvina", "salvatore")
+		cls.Where(c.Col("lastname")).Not().Not().Equal("john").Or().Not().Equal("mary")
 		cls.Where("literal").Not().IsNull()
 
-		exp := "WHERE (age BETWEEN ? AND ? AND age <> ?)"
+		exp := "WHERE (a.age BETWEEN ? AND ? AND a.age <> ?)"
 		exp += " AND "
-		exp += "(lastname LIKE ? AND lastname NOT IN (?, ?, ?))"
+		exp += "(a.firstname LIKE ? AND a.firstname NOT IN (?, ?, ?))"
 		exp += " AND "
-		exp += "(firstname = ? OR firstname <> ?)"
+		exp += "(a.lastname = ? OR a.lastname <> ?)"
 		exp += " AND "
 		exp += "('literal' IS NOT NULL)"
 
-		cls.Build(&sb, &ph)
-		expect(t, exp)
-		expectVals(t, ph.Values(), []any{17, 70, 45, "%alv%", "calvin", "malvina", "salvatore", "john", "mary"})
+		run(t, exp, []any{17, 70, 45, "%alv%", "calvin", "malvina", "salvatore", "john", "mary"})
+	})
+
+	t.Run("many_wheres_with_postgres_placeholder", func(t *testing.T) {
+		cls, c, run := NewWhere(core.Postgres)
+		cls.Where(c.Col("age")).Between(17, 70).And().Not().Equal(45)
+		cls.Where(c.Col("firstname")).Like("%alv%").And().Not().In("calvin", "malvina", "salvatore")
+		cls.Where(c.Col("lastname")).Not().Not().Equal("john").Or().Not().Equal("mary")
+		cls.Where("literal").Not().IsNull()
+
+		exp := "WHERE (a.age BETWEEN $1 AND $2 AND a.age <> $3)"
+		exp += " AND "
+		exp += "(a.firstname LIKE $4 AND a.firstname NOT IN ($5, $6, $7))"
+		exp += " AND "
+		exp += "(a.lastname = $8 OR a.lastname <> $9)"
+		exp += " AND "
+		exp += "('literal' IS NOT NULL)"
+
+		run(t, exp, []any{17, 70, 45, "%alv%", "calvin", "malvina", "salvatore", "john", "mary"})
 	})
 }
