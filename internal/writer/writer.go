@@ -20,22 +20,27 @@ func (w *Writer) Char(v byte) {
 	w.sb.WriteByte(v)
 }
 
-func (w *Writer) Value(v any, opts *core.ValueOpts) {
-	if opts != nil && opts.Placeholder {
+func (w *Writer) Value(v any, opts core.WriterOpts) {
+	if opts.Placeholder {
 		w.sb.WriteString(w.ph.next(v))
 		return
 	}
 
 	switch val := v.(type) {
-	case func(core.Writer):
+	case core.Builder:
 		val(w)
 
 	case core.Column:
-		if opts != nil && opts.Definition {
+		switch opts.ColType {
+		case core.ColTypBase:
+			val.Base()(w)
+		case core.ColTypExpr:
+			val.Expr()(w)
+		case core.ColTypAlias:
+			val.Alias()(w)
+		case core.ColTypDef:
 			val.Def()(w)
-			return
 		}
-		val.Ref()(w)
 
 	default:
 		w.sb.WriteString(core.Sqlify(v))

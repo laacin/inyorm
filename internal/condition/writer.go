@@ -2,12 +2,10 @@ package condition
 
 import "github.com/laacin/inyorm/internal/core"
 
-func (e *Condition) Build(w core.Writer, opts *core.ValueOpts) {
-	var identOpt, valOpt *core.ValueOpts
-	if opts != nil {
-		identOpt = &core.ValueOpts{Definition: opts.Definition}
-		valOpt = &core.ValueOpts{Placeholder: opts.Placeholder}
-	}
+func (e *Condition) Build(w core.Writer, opts core.WriterOpts) {
+	var identOpt, valOpt core.WriterOpts
+	identOpt = core.WriterOpts{ColType: opts.ColType}
+	valOpt = core.WriterOpts{Placeholder: opts.Placeholder}
 
 	w.Char('(')
 	for i, seg := range e.segments {
@@ -25,7 +23,7 @@ func (e *Condition) Build(w core.Writer, opts *core.ValueOpts) {
 			w.Char(' ')
 			w.Value(seg.Argument[0], valOpt)
 			w.Char(' ')
-			w.Write(string(And))
+			w.Write(and)
 			w.Char(' ')
 			w.Value(seg.Argument[1], valOpt)
 		case in:
@@ -47,6 +45,6 @@ func (e *Condition) Build(w core.Writer, opts *core.ValueOpts) {
 	w.Char(')')
 }
 
-func (e *ConditionNext) Build(w core.Writer, opts *core.ValueOpts) {
+func (e *ConditionNext) Build(w core.Writer, opts core.WriterOpts) {
 	e.ctx.Build(w, opts)
 }

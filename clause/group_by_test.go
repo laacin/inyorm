@@ -10,14 +10,14 @@ import (
 )
 
 func NewGroupBy() (core.ClauseGroupBy, core.ColExpr, func(t *testing.T, cls string)) {
-	stmt := writer.NewStatement("")
+	stmt := writer.NewStatement("", "default")
 	stmt.SetFrom("default")
 	var c core.ColExpr = &column.ColExpr{Statement: stmt}
 	cls := &clause.GroupByClause{}
 
 	run := func(t *testing.T, clause string) {
 		w := stmt.Writer()
-		cls.Build()(w)
+		cls.Build(w)
 		if val := w.ToString(); val != clause {
 			t.Errorf("\nmismatch result:\nExpect:\n%s\nHave:\n%s\n", clause, val)
 		}
@@ -29,17 +29,17 @@ func NewGroupBy() (core.ClauseGroupBy, core.ColExpr, func(t *testing.T, cls stri
 func TestGroupBy(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		cls, c, run := NewGroupBy()
-		name := c.Col("name", "posts")
-		cls.GroupBy(name).Having(name.Count(true)).Greater(10)
+		name := c.Col("name", "posts").Count(true)
+		cls.GroupBy(name.Base()).Having(name).Greater(10)
 
 		run(t, "GROUP BY b.name HAVING (COUNT(DISTINCT b.name) > 10)")
 	})
 
 	t.Run("multiple_columns_with_function", func(t *testing.T) {
 		cls, c, run := NewGroupBy()
-		name := c.Col("name")
-		role := c.Col("role", "roles")
-		cls.GroupBy(name.Lower(), role).Having(role.Count()).Greater(5)
+		name := c.Col("name").Lower()
+		role := c.Col("role", "roles").Count()
+		cls.GroupBy(name, role.Base()).Having(role).Greater(5)
 
 		run(t, "GROUP BY LOWER(a.name), b.role HAVING (COUNT(b.role) > 5)")
 	})

@@ -17,25 +17,25 @@ type JoinClause struct {
 	joins []*OnJoin
 }
 
-func (j *JoinClause) Name() string {
-	return core.ClsJoin
+func (j *JoinClause) Name() core.ClauseType {
+	return core.ClsTypJoin
 }
 
-func (j *JoinClause) Build() core.Builder {
-	return func(w core.Writer) {
-		for i, join := range j.joins {
-			if i > 0 {
-				w.Char(' ')
-			}
-			w.Write(join.Type)
+func (j *JoinClause) IsDeclared() bool { return j != nil }
+
+func (j *JoinClause) Build(w core.Writer) {
+	for i, join := range j.joins {
+		if i > 0 {
 			w.Char(' ')
-			w.Write("JOIN")
-			w.Char(' ')
-			w.Table(join.Table)
-			if join.Cond != nil {
-				w.Write(" ON ")
-				join.Cond.Build(w, nil)
-			}
+		}
+		w.Write(join.Type)
+		w.Char(' ')
+		w.Write("JOIN")
+		w.Char(' ')
+		w.Table(join.Table)
+		if join.Cond != nil {
+			w.Write(" ON ")
+			join.Cond.Build(w, core.WriterOpts{ColType: core.ColTypBase})
 		}
 	}
 }

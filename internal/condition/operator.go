@@ -21,11 +21,9 @@ const (
 
 	like    = "LIKE"
 	notLike = "NOT LIKE"
-)
 
-const (
-	And = "AND"
-	Or  = "OR"
+	and = "AND"
+	or  = "OR"
 )
 
 var negations = map[string]string{

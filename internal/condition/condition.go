@@ -56,12 +56,12 @@ type ConditionNext struct {
 }
 
 func (e *ConditionNext) And(identifier ...any) core.Cond {
-	e.Next(And, identifier)
+	e.Next(and, identifier)
 	return e.ctx
 }
 
 func (e *ConditionNext) Or(identifier ...any) core.Cond {
-	e.Next(Or, identifier)
+	e.Next(or, identifier)
 	return e.ctx
 }
 

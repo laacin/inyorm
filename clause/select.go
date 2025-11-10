@@ -7,24 +7,24 @@ type SelectClause struct {
 	targets  []any
 }
 
-func (s *SelectClause) Name() string {
-	return core.ClsSelect
+func (s *SelectClause) Name() core.ClauseType {
+	return core.ClsTypSelect
 }
 
-func (s *SelectClause) Build() core.Builder {
-	return func(w core.Writer) {
-		w.Write("SELECT ")
+func (s *SelectClause) IsDeclared() bool { return s != nil }
 
-		if s.distinct {
-			w.Write("DISTINCT ")
-		}
+func (s *SelectClause) Build(w core.Writer) {
+	w.Write("SELECT ")
 
-		for i, sel := range s.targets {
-			if i > 0 {
-				w.Write(", ")
-			}
-			w.Value(sel, &core.ValueOpts{Definition: true})
+	if s.distinct {
+		w.Write("DISTINCT ")
+	}
+
+	for i, sel := range s.targets {
+		if i > 0 {
+			w.Write(", ")
 		}
+		w.Value(sel, core.WriterOpts{ColType: core.ColTypDef})
 	}
 }
 

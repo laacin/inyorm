@@ -10,14 +10,14 @@ import (
 )
 
 func NewJoin() (core.ClauseJoin, core.ColExpr, func(t *testing.T, cls string)) {
-	stmt := writer.NewStatement("")
+	stmt := writer.NewStatement("", "default")
 	stmt.SetFrom("default")
 	var c core.ColExpr = &column.ColExpr{Statement: stmt}
 	cls := &clause.JoinClause{}
 
 	run := func(t *testing.T, clause string) {
 		w := stmt.Writer()
-		cls.Build()(w)
+		cls.Build(w)
 		if val := w.ToString(); val != clause {
 			t.Errorf("\nmismatch result:\nExpect:\n%s\nHave:\n%s\n", clause, val)
 		}

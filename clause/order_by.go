@@ -6,22 +6,22 @@ type OrderByClause struct {
 	orders []*Order
 }
 
-func (o *OrderByClause) Name() string {
-	return core.ClsOrderBy
+func (o *OrderByClause) Name() core.ClauseType {
+	return core.ClsTypOrderBy
 }
 
-func (o *OrderByClause) Build() core.Builder {
-	return func(w core.Writer) {
-		w.Write("ORDER BY ")
-		for i, ord := range o.orders {
-			if i > 0 {
-				w.Write(", ")
-			}
+func (o *OrderByClause) IsDeclared() bool { return o != nil }
 
-			w.Value(ord.order, nil)
-			if ord.descending {
-				w.Write(" DESC")
-			}
+func (o *OrderByClause) Build(w core.Writer) {
+	w.Write("ORDER BY ")
+	for i, ord := range o.orders {
+		if i > 0 {
+			w.Write(", ")
+		}
+
+		w.Value(ord.order, core.WriterOpts{ColType: core.ColTypAlias})
+		if ord.descending {
+			w.Write(" DESC")
 		}
 	}
 }

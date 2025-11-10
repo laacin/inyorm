@@ -9,19 +9,22 @@ type WhereClause struct {
 	exprs []*condition.Condition
 }
 
-func (w *WhereClause) Name() string {
-	return core.ClsWhere
+func (w *WhereClause) Name() core.ClauseType {
+	return core.ClsTypWhere
 }
 
-func (wc *WhereClause) Build() core.Builder {
-	return func(w core.Writer) {
-		w.Write("WHERE ")
-		for i, expr := range wc.exprs {
-			if i > 0 {
-				w.Write(" AND ")
-			}
-			expr.Build(w, &core.ValueOpts{Placeholder: true})
+func (w *WhereClause) IsDeclared() bool { return w != nil }
+
+func (wc *WhereClause) Build(w core.Writer) {
+	w.Write("WHERE ")
+	for i, expr := range wc.exprs {
+		if i > 0 {
+			w.Write(" AND ")
 		}
+		expr.Build(w, core.WriterOpts{
+			Placeholder: true,
+			ColType:     core.ColTypExpr,
+		})
 	}
 }
 

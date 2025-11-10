@@ -10,24 +10,24 @@ type GroupByClause struct {
 	having *HavingClause
 }
 
-func (g *GroupByClause) Name() string {
-	return core.ClsGroupBy
+func (g *GroupByClause) Name() core.ClauseType {
+	return core.ClsTypGroupBy
 }
 
-func (g *GroupByClause) Build() core.Builder {
-	return func(w core.Writer) {
-		w.Write("GROUP BY")
-		w.Char(' ')
-		for i, group := range g.groups {
-			if i > 0 {
-				w.Write(", ")
-			}
-			w.Value(group, nil)
+func (f *GroupByClause) IsDeclared() bool { return f != nil }
+
+func (g *GroupByClause) Build(w core.Writer) {
+	w.Write("GROUP BY")
+	w.Char(' ')
+	for i, group := range g.groups {
+		if i > 0 {
+			w.Write(", ")
 		}
-		if cond := g.having.cond; cond != nil {
-			w.Write(" HAVING ")
-			cond.Build(w, &core.ValueOpts{Definition: true})
-		}
+		w.Value(group, core.WriterOpts{ColType: core.ColTypExpr})
+	}
+	if cond := g.having.cond; cond != nil {
+		w.Write(" HAVING ")
+		cond.Build(w, core.WriterOpts{ColType: core.ColTypExpr})
 	}
 }
 

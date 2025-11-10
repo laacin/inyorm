@@ -19,10 +19,10 @@ func (c *ColExpr) Col(v any, table ...string) core.Column {
 	switch val := v.(type) {
 	case string:
 		return &Column{
-			Type:   normalCol,
-			Writer: c.Statement.Writer(),
-			Alias:  tbl,
-			Value:  val,
+			custom: false,
+			writer: c.Statement.Writer(),
+			table:  tbl,
+			base:   val,
 		}
 
 	case core.Column:
@@ -30,19 +30,19 @@ func (c *ColExpr) Col(v any, table ...string) core.Column {
 
 	default:
 		return &Column{
-			Type:   normalCol,
-			Writer: c.Statement.Writer(),
-			Alias:  tbl,
-			Value:  core.Sqlify(v),
+			custom: false,
+			writer: c.Statement.Writer(),
+			table:  tbl,
+			base:   core.Sqlify(v),
 		}
 	}
 }
 
 func (c *ColExpr) All() core.Column {
 	return &Column{
-		Writer: c.Statement.Writer(),
-		Type:   customCol,
-		Value:  "*",
+		writer: c.Statement.Writer(),
+		custom: false,
+		base:   "*",
 	}
 }
 
@@ -54,20 +54,20 @@ func (c *ColExpr) Concat(v ...any) core.Column {
 		if i > 0 {
 			w.Write(", ")
 		}
-		w.Value(val, &core.ValueOpts{Definition: true})
+		w.Value(val, core.WriterOpts{ColType: core.ColTypExpr})
 	}
 	w.Char(')')
 
 	return &Column{
-		Writer: w,
-		Type:   customCol,
-		Value:  w.ToString(),
+		writer: w,
+		custom: true,
+		expr:   w.ToString(),
 	}
 }
 
 func (c *ColExpr) Switch(cond any, fn func(cs core.CaseSwitch)) core.Column {
 	w := c.Statement.Writer()
-	opts := &core.ValueOpts{Definition: true}
+	opts := core.WriterOpts{ColType: core.ColTypExpr}
 
 	cs := &Case[any]{}
 	fn(cs)
@@ -86,9 +86,9 @@ func (c *ColExpr) Switch(cond any, fn func(cs core.CaseSwitch)) core.Column {
 	w.Write(" END")
 
 	return &Column{
-		Writer: w,
-		Type:   customCol,
-		Value:  w.ToString(),
+		writer: w,
+		custom: true,
+		expr:   w.ToString(),
 	}
 }
 
@@ -99,7 +99,7 @@ func (c *ColExpr) Condition(identifier any) core.Cond {
 
 func (c *ColExpr) Search(fn func(cs core.CaseSearch)) core.Column {
 	w := c.Statement.Writer()
-	opts := &core.ValueOpts{Definition: true}
+	opts := core.WriterOpts{ColType: core.ColTypExpr}
 
 	cs := &Case[core.CondNext]{}
 	fn(cs)
@@ -117,8 +117,8 @@ func (c *ColExpr) Search(fn func(cs core.CaseSearch)) core.Column {
 	w.Write(" END")
 
 	return &Column{
-		Writer: w,
-		Type:   customCol,
-		Value:  w.ToString(),
+		writer: w,
+		custom: true,
+		expr:   w.ToString(),
 	}
 }

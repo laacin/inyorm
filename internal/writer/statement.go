@@ -7,13 +7,37 @@ type Statement struct {
 	dialect string
 	ph      Placeholder
 	alias   Alias
+	clauses []core.Clause
 }
 
-func NewStatement(dialect string) *Statement {
-	return &Statement{
+func NewStatement(dialect string, defaultTable string) *Statement {
+	stmt := &Statement{
+		from:    defaultTable,
 		dialect: dialect,
 		ph:      Placeholder{dialect: dialect},
 	}
+	stmt.alias.Get(defaultTable)
+
+	return stmt
+}
+
+func (stmt *Statement) Build() (string, []any) {
+	w := stmt.Writer()
+	for i, cls := range stmt.clauses {
+		if !cls.IsDeclared() {
+			continue
+		}
+
+		if i > 0 {
+			w.Char(' ')
+		}
+		cls.Build(w)
+	}
+	return w.ToString(), stmt.Values()
+}
+
+func (stmt *Statement) SetClauses(clauses []core.Clause) {
+	stmt.clauses = clauses
 }
 
 func (stmt *Statement) Dialect() string { return stmt.dialect }

@@ -2,69 +2,67 @@ package column
 
 import "github.com/laacin/inyorm/internal/core"
 
-func wDefinition(w core.Writer, col *Column) {
-	switch col.Type {
-	case normalCol:
-		if col.Alias != "" {
-			w.ColRef(col.Alias)
-			w.Char('.')
-		}
-		w.Write(col.Value)
+func wBase(w core.Writer, col *Column) {
+	if col.table != "" {
+		w.ColRef(col.table)
+		w.Char('.')
+	}
+	w.Write(col.base)
+}
 
-	case customCol:
-		w.Write(col.Value)
-		if col.Alias != "" {
-			w.Write(" AS ")
-			w.Write(col.Alias)
-		}
+func wExpr(w core.Writer, col *Column) {
+	if !col.custom {
+		wBase(w, col)
+		return
+	}
+	w.Write(col.expr)
+}
+
+func wAlias(w core.Writer, col *Column) {
+	if !col.custom {
+		wBase(w, col)
+		return
+	}
+	wExpr(w, col)
+}
+
+func wDef(w core.Writer, col *Column) {
+	if !col.custom {
+		wBase(w, col)
+		return
+	}
+	w.Write(col.expr)
+	if col.alias != "" {
+		w.Write(" AS ")
+		w.Write(col.alias)
 	}
 }
 
-func wReference(w core.Writer, col *Column) {
-	switch col.Type {
-	case normalCol:
-		if col.Alias != "" {
-			w.ColRef(col.Alias)
-			w.Char('.')
-		}
-		w.Write(col.Value)
-
-	case customCol:
-		if col.Alias == "" {
-			w.Write(col.Value)
-			return
-		}
-		w.Write(col.Alias)
-	}
-}
+// -- internal writers
 
 func wPrev(w core.Writer, col *Column) {
-	if col.Type == normalCol {
-		if col.Alias != "" {
-			w.ColRef(col.Alias)
-			w.Char('.')
-			col.Alias = ""
-		}
-		col.Type = customCol
+	if !col.custom {
+		wBase(w, col)
+		col.custom = true
 	}
-	w.Write(col.Value)
+	w.Write(col.expr)
 }
 
 func wOp(col *Column, arg byte, value any) {
-	w := col.Writer
+	w := col.writer
 	w.Reset()
 
 	wPrev(w, col)
 	w.Char(' ')
 	w.Char(arg)
 	w.Char(' ')
-	w.Value(value, &core.ValueOpts{Definition: true})
+	w.Value(value, core.WriterOpts{ColType: core.ColTypExpr})
 
-	col.Value = w.ToString()
+	col.expr = w.ToString()
 }
 
 func wFunc(col *Column, arg string) {
-	w := col.Writer
+	w := col.writer
 	w.Reset()
 
 	w.Write(arg)
@@ -72,22 +70,22 @@ func wFunc(col *Column, arg string) {
 	wPrev(w, col)
 	w.Char(')')
 
-	col.Value = w.ToString()
+	col.expr = w.ToString()
 }
 
 func wWrap(col *Column) {
-	w := col.Writer
+	w := col.writer
 	w.Reset()
 
 	w.Char('(')
 	wPrev(w, col)
 	w.Char(')')
 
-	col.Value = w.ToString()
+	col.expr = w.ToString()
 }
 
 func wAggr(col *Column, distinct bool, aggr string) {
-	w := col.Writer
+	w := col.writer
 	w.Reset()
 
 	w.Write(aggr)
@@ -98,10 +96,10 @@ func wAggr(col *Column, distinct bool, aggr string) {
 	wPrev(w, col)
 	w.Char(')')
 
-	col.Value = w.ToString()
+	col.expr = w.ToString()
 }
 
 func wAs(col *Column, value string) {
-	col.Type = customCol
-	col.Alias = value
+	col.custom = true
+	col.alias = value
 }

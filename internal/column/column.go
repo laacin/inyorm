@@ -3,23 +3,35 @@ package column
 import "github.com/laacin/inyorm/internal/core"
 
 type Column struct {
-	Writer core.Writer
-	Type   ColumnType
-	Value  string
-	Alias  string
+	writer core.Writer
+	custom bool
+	base   string
+	table  string
+	alias  string
+	expr   string
 }
-
-// FIX: reference persistence
 
 func (c *Column) Def() core.Builder {
 	return func(w core.Writer) {
-		wDefinition(w, c)
+		wDef(w, c)
 	}
 }
 
-func (c *Column) Ref() core.Builder {
+func (c *Column) Expr() core.Builder {
 	return func(w core.Writer) {
-		wReference(w, c)
+		wExpr(w, c)
+	}
+}
+
+func (c *Column) Alias() core.Builder {
+	return func(w core.Writer) {
+		wAlias(w, c)
+	}
+}
+
+func (c *Column) Base() core.Builder {
+	return func(w core.Writer) {
+		wBase(w, c)
 	}
 }
 

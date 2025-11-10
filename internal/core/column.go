@@ -2,7 +2,9 @@ package core
 
 type Column interface {
 	Def() Builder
-	Ref() Builder
+	Expr() Builder
+	Alias() Builder
+	Base() Builder
 
 	Count(distinct ...bool) Column
 	Sum(distinct ...bool) Column

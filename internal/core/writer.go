@@ -1,10 +1,12 @@
 package core
 
+type Builder = func(Writer)
+
 type Writer interface {
 	Write(v string)
 	Char(v byte)
 
-	Value(v any, opts *ValueOpts)
+	Value(v any, opts WriterOpts)
 	ColRef(table string)
 	Table(v string)
 
@@ -12,7 +14,7 @@ type Writer interface {
 	Reset()
 }
 
-type ValueOpts struct {
+type WriterOpts struct {
 	Placeholder bool
-	Definition  bool
+	ColType     ColumnType
 }

@@ -1,23 +1,11 @@
 package core
 
-// Clauses name
-const (
-	ClsSelect  = "SELECT"
-	ClsFrom    = "FROM"
-	ClsJoin    = "JOIN"
-	ClsWhere   = "WHERE"
-	ClsGroupBy = "GROUP BY"
-	ClsOrderBy = "ORDER BY"
-	ClsLimit   = "LIMIT"
-	ClsOffset  = "OFFSET"
-)
-
+// internal
 type Clause interface {
-	Name() string
-	Build() func(w Writer)
+	Name() ClauseType
+	IsDeclared() bool
+	Build(w Writer)
 }
-
-// ---- Clauses
 
 // Insert clause
 type ClauseInsert interface {
