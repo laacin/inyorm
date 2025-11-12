@@ -6,49 +6,41 @@ type Column interface {
 	Alias() Builder
 	Base() Builder
 
-	Count(distinct ...bool) Column
-	Sum(distinct ...bool) Column
-	Min(distinct ...bool) Column
-	Max(distinct ...bool) Column
-	Avg(distinct ...bool) Column
+	Count(distinct bool)
+	Sum(distinct bool)
+	Min(distinct bool)
+	Max(distinct bool)
+	Avg(distinct bool)
 
-	Add(v any) Column
-	Sub(v any) Column
-	Mul(v any) Column
-	Div(v any) Column
-	Mod(v any) Column
-	Wrap() Column
+	Add(v any)
+	Sub(v any)
+	Mul(v any)
+	Div(v any)
+	Mod(v any)
+	Wrap()
 
-	Lower() Column
-	Upper() Column
-	Trim() Column
-	Round() Column
-	Abs() Column
+	Lower()
+	Upper()
+	Trim()
+	Round()
+	Abs()
 
-	As(v string) Column
+	As(v string)
 }
 
 type ColExpr interface {
-	Col(v any, table ...string) Column
+	Col(col, table string) Column
 	All() Column
-	Concat(v ...any) Column
-	Condition(identifier any) Cond
-	Switch(cond any, fn func(cs CaseSwitch)) Column
-	Search(fn func(cs CaseSearch)) Column
+	Concat(v []any) Column
+	Condition(identifier any) Condition
+	Switch(cond any, cs Case) Column
+	Search(cs Case) Column
 }
 
 // ---- Case condition
 
-type (
-	CaseSwitch = Case[any]
-	CaseSearch = Case[CondNext]
-)
-
-type Case[T any] interface {
-	When(v T) CaseNext[T]
+type Case interface {
+	When(v any)
+	Then(v any)
 	Else(v any)
-}
-
-type CaseNext[T any] interface {
-	Then(v any) Case[T]
 }

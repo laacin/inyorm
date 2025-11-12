@@ -1,24 +1,27 @@
 package condition
 
-type exprSegment struct {
-	Identifier any
-	Operator   string
-	Negated    bool
-	Argument   []any
+type expression struct {
+	identifier any
+	operator   string
+	negated    bool
+	values     []any
 }
 
-func (e *exprSegment) addArg(op string, arg any) {
-	e.Operator = op
-	e.Argument = []any{arg}
+func (e *expression) addZero(op string) {
+	e.operator = op
 }
 
-func (e *Condition) Start(identifier any) *Condition {
-	if e.Next == nil {
-		e.Next = &ConditionNext{ctx: e}
-	}
+func (e *expression) addOne(op string, value any) {
+	e.operator = op
+	e.values = []any{value}
+}
 
-	segment := &exprSegment{Identifier: identifier}
-	e.current = segment
-	e.segments = append(e.segments, segment)
-	return e
+func (e *expression) addTwo(op string, val1, val2 any) {
+	e.operator = op
+	e.values = []any{val1, val2}
+}
+
+func (e *expression) addMany(op string, vals []any) {
+	e.operator = op
+	e.values = vals
 }

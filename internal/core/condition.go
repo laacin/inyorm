@@ -1,20 +1,20 @@
 package core
 
-type Cond interface {
-	Not() Cond
+type Condition interface {
+	Start(ident any)
 
-	Equal(v any) CondNext
-	Like(v any) CondNext
-	In(v ...any) CondNext
-	Between(minV, maxV any) CondNext
+	Not()
 
-	Greater(v any) CondNext
-	Less(v any) CondNext
+	Equal(v any)
+	Like(v any)
+	In(v []any)
+	Between(val1, val2 any)
 
-	IsNull() CondNext
-}
+	Greater(v any)
+	Less(v any)
 
-type CondNext interface {
-	And(identifier ...any) Cond
-	Or(identifier ...any) Cond
+	IsNull()
+
+	And(ident any)
+	Or(ident any)
 }

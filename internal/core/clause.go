@@ -34,7 +34,7 @@ type ClauseJoin interface {
 
 // Where clause
 type ClauseWhere interface {
-	Where(identifier any) Cond
+	Where(identifier any) Condition
 }
 
 // Group by clause
@@ -64,11 +64,11 @@ type ClauseValues interface {
 }
 
 type ClauseOn interface {
-	On(identifier any) Cond
+	On(identifier any) Condition
 }
 
 type ClauseHaving interface {
-	Having(identifier any) Cond
+	Having(identifier any) Condition
 }
 
 type ClauseOrder interface {

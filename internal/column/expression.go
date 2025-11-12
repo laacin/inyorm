@@ -3,51 +3,31 @@ package column
 import (
 	"github.com/laacin/inyorm/internal/condition"
 	"github.com/laacin/inyorm/internal/core"
-	"github.com/laacin/inyorm/internal/writer"
 )
 
 type ColExpr struct {
-	Statement *writer.Statement
+	Writer func() core.Writer
 }
 
-func (c *ColExpr) Col(v any, table ...string) core.Column {
-	tbl := c.Statement.GetFrom()
-	if len(table) > 0 {
-		tbl = table[0]
-	}
-
-	switch val := v.(type) {
-	case string:
-		return &Column{
-			custom: false,
-			writer: c.Statement.Writer(),
-			table:  tbl,
-			base:   val,
-		}
-
-	case core.Column:
-		return val
-
-	default:
-		return &Column{
-			custom: false,
-			writer: c.Statement.Writer(),
-			table:  tbl,
-			base:   core.Sqlify(v),
-		}
+func (c *ColExpr) Col(col, table string) core.Column {
+	return &Column{
+		custom: false,
+		writer: c.Writer(),
+		table:  table,
+		base:   col,
 	}
 }
 
 func (c *ColExpr) All() core.Column {
 	return &Column{
-		writer: c.Statement.Writer(),
+		writer: c.Writer(),
 		custom: false,
 		base:   "*",
 	}
 }
 
-func (c *ColExpr) Concat(v ...any) core.Column {
-	w := c.Statement.Writer()
+func (c *ColExpr) Concat(v []any) core.Column {
+	w := c.Writer()
 
 	w.Write("CONCAT(")
 	for i, val := range v {
@@ -65,25 +45,27 @@ func (c *ColExpr) Concat(v ...any) core.Column {
 	}
 }
 
-func (c *ColExpr) Switch(cond any, fn func(cs core.CaseSwitch)) core.Column {
-	w := c.Statement.Writer()
+func (c *ColExpr) Switch(cond any, cs core.Case) core.Column {
+	w := c.Writer()
 	opts := core.WriterOpts{ColType: core.ColTypExpr}
 
-	cs := &Case[any]{}
-	fn(cs)
+	val := cs.(*Case)
 
 	w.Write("CASE ")
 	w.Value(cond, opts)
-	for _, arg := range cs.args {
+	for _, arg := range val.exprs {
 		w.Write(" WHEN ")
 		w.Value(arg.when, opts)
 		w.Write(" THEN ")
 		w.Value(arg.do, opts)
 		w.Char(' ')
 	}
-	w.Write("ELSE ")
-	w.Value(cs.els, opts)
-	w.Write(" END")
+	if val.els != nil {
+		w.Write("ELSE ")
+		w.Value(val.els, opts)
+		w.Char(' ')
+	}
+	w.Write("END")
 
 	return &Column{
 		writer: w,
@@ -92,28 +74,28 @@ func (c *ColExpr) Switch(cond any, fn func(cs core.CaseSwitch)) core.Column {
 	}
 }
 
-func (c *ColExpr) Condition(identifier any) core.Cond {
+func (c *ColExpr) Condition(identifier any) core.Condition {
 	cond := &condition.Condition{}
-	return cond.Start(identifier)
+	cond.Start(identifier)
+	return cond
 }
 
-func (c *ColExpr) Search(fn func(cs core.CaseSearch)) core.Column {
-	w := c.Statement.Writer()
+func (c *ColExpr) Search(cs core.Case) core.Column {
+	w := c.Writer()
 	opts := core.WriterOpts{ColType: core.ColTypExpr}
 
-	cs := &Case[core.CondNext]{}
-	fn(cs)
+	val := cs.(*Case)
 
 	w.Write("CASE WHEN")
-	for _, arg := range cs.args {
+	for _, arg := range val.exprs {
 		w.Char(' ')
-		arg.when.(*condition.ConditionNext).Build(w, opts)
+		arg.when.(*condition.Condition).Build(w, opts)
 		w.Write(" THEN ")
 		w.Value(arg.do, opts)
 		w.Char(' ')
 	}
 	w.Write("ELSE ")
-	w.Value(cs.els, opts)
+	w.Value(val.els, opts)
 	w.Write(" END")
 
 	return &Column{

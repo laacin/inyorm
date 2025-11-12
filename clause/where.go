@@ -5,22 +5,20 @@ import (
 	"github.com/laacin/inyorm/internal/core"
 )
 
-type WhereClause struct {
+type Where struct {
 	exprs []*condition.Condition
 }
 
-func (w *WhereClause) Name() core.ClauseType {
-	return core.ClsTypWhere
-}
-
-func (w *WhereClause) IsDeclared() bool { return w != nil }
-
-func (wc *WhereClause) Build(w core.Writer) {
-	w.Write("WHERE ")
-	for i, expr := range wc.exprs {
+func (whr *Where) Name() core.ClauseType { return core.ClsTypWhere }
+func (whr *Where) IsDeclared() bool      { return whr != nil }
+func (whr *Where) Build(w core.Writer) {
+	w.Write("WHERE")
+	w.Char(' ')
+	for i, expr := range whr.exprs {
 		if i > 0 {
 			w.Write(" AND ")
 		}
+
 		expr.Build(w, core.WriterOpts{
 			Placeholder: true,
 			ColType:     core.ColTypExpr,
@@ -30,8 +28,9 @@ func (wc *WhereClause) Build(w core.Writer) {
 
 // -- Methods
 
-func (w *WhereClause) Where(identifier any) core.Cond {
+func (w *Where) Where(identifier any) core.Condition {
 	cond := &condition.Condition{}
 	w.exprs = append(w.exprs, cond)
-	return cond.Start(identifier)
+	cond.Start(identifier)
+	return cond
 }

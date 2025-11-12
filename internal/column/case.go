@@ -1,29 +1,20 @@
 package column
 
-import "github.com/laacin/inyorm/internal/core"
-
-type Case[T any] struct {
-	args []*CaseNext[T]
-	els  any
+type Case struct {
+	exprs   []*expression
+	current *expression
+	els     any
 }
 
-func (c *Case[T]) When(v T) core.CaseNext[T] {
-	arg := &CaseNext[T]{ctx: c, when: v}
-	c.args = append(c.args, arg)
-	return arg
+func (c *Case) When(v any) {
+	expr := &expression{when: v}
+	c.exprs = append(c.exprs, expr)
+	c.current = expr
 }
+func (c *Case) Then(v any) { c.current.do = v }
+func (c *Case) Else(v any) { c.els = v }
 
-func (c *Case[T]) Else(v any) {
-	c.els = v
-}
-
-type CaseNext[T any] struct {
-	ctx  *Case[T]
-	when T
+type expression struct {
+	when any
 	do   any
-}
-
-func (c *CaseNext[T]) Then(v any) core.Case[T] {
-	c.do = v
-	return c.ctx
 }

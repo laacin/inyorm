@@ -30,6 +30,7 @@ const (
 	ClsTypJoin
 	ClsTypWhere
 	ClsTypGroupBy
+	ClsTypHaving
 	ClsTypOrderBy
 	ClsTypLimit
 	ClsTypOffset

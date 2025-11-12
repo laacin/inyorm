@@ -23,6 +23,12 @@ func wAlias(w core.Writer, col *Column) {
 		wBase(w, col)
 		return
 	}
+
+	if col.alias != "" {
+		w.Write(col.alias)
+		return
+	}
+
 	wExpr(w, col)
 }
 

@@ -17,7 +17,7 @@ type Dummy struct {
 
 func New(defaultTable string) (core.ColExpr, func(t *testing.T, col core.Column, d Dummy)) {
 	stmt := writer.NewStatement("", defaultTable)
-	var c core.ColExpr = &column.ColExpr{Statement: stmt}
+	var c core.ColExpr = &column.ColExpr{Writer: stmt.Writer}
 
 	run := func(t *testing.T, col core.Column, dummy Dummy) {
 		d := stmt.Writer()
@@ -48,7 +48,7 @@ func TestColumn(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		c, run := New("users")
 
-		name := c.Col("name")
+		name := c.Col("name", "users")
 		run(t, name, Dummy{
 			Base:  "a.name",
 			Alias: "a.name",
@@ -61,11 +61,13 @@ func TestColumn(t *testing.T) {
 		c, run := New("products")
 
 		var (
-			stock = c.Col("stock")
-			price = c.Col("price")
+			stock = c.Col("stock", "products")
+			price = c.Col("price", "products")
 		)
 
-		total := stock.Mul(price).As("total")
+		total := stock
+		total.Mul(price)
+		total.As("total")
 		run(t, total, Dummy{
 			Base:  "a.stock",
 			Def:   "a.stock * a.price AS total",
@@ -81,7 +83,12 @@ func TestColumn(t *testing.T) {
 			initPrice  = c.Col("initial_price", "products")
 			finalPrice = c.Col("final_price", "products")
 		)
-		result := finalPrice.Sub(initPrice).Wrap().Div(initPrice).Mul(100).As("variation")
+		result := finalPrice
+		result.Sub(initPrice)
+		result.Wrap()
+		result.Div(initPrice)
+		result.Mul(100)
+		result.As("variation")
 		run(t, result, Dummy{
 			Base:  "b.final_price",
 			Alias: "variation",
@@ -93,8 +100,9 @@ func TestColumn(t *testing.T) {
 	t.Run("scalar", func(t *testing.T) {
 		c, run := New("users")
 
-		firstname := c.Col("firstname")
-		firstname.Lower().As("fname")
+		firstname := c.Col("firstname", "users")
+		firstname.Lower()
+		firstname.As("fname")
 		run(t, firstname, Dummy{
 			Base:  "a.firstname",
 			Expr:  "LOWER(a.firstname)",
@@ -106,11 +114,13 @@ func TestColumn(t *testing.T) {
 	t.Run("aggregation", func(t *testing.T) {
 		c, run := New("users")
 
-		all := c.All().Count()
+		all := c.All()
+		all.Count(false)
 		run(t, all, Dummy{
-			Base: "*",
-			Expr: "COUNT(*)",
-			Def:  "COUNT(*)",
+			Base:  "*",
+			Expr:  "COUNT(*)",
+			Alias: "COUNT(*)",
+			Def:   "COUNT(*)",
 		})
 	})
 
@@ -118,10 +128,11 @@ func TestColumn(t *testing.T) {
 		c, run := New("users")
 
 		var (
-			fname = c.Col("firstname")
-			lname = c.Col("lastname")
+			fname = c.Col("firstname", "users")
+			lname = c.Col("lastname", "users")
 		)
-		fullname := c.Concat(fname, " ", lname).As("fullname")
+		fullname := c.Concat([]any{fname, " ", lname})
+		fullname.As("fullname")
 		run(t, fullname, Dummy{
 			Def:   "CONCAT(a.firstname, ' ', a.lastname) AS fullname",
 			Expr:  "CONCAT(a.firstname, ' ', a.lastname)",
@@ -132,12 +143,17 @@ func TestColumn(t *testing.T) {
 	t.Run("switch", func(t *testing.T) {
 		c, run := New("users")
 
-		banned := c.Col("banned")
-		cs := c.Switch(banned, func(cs core.CaseSwitch) {
-			cs.When(true).Then("invalid")
-			cs.Else("valid")
-		}).As("is_valid")
-		run(t, cs, Dummy{
+		banned := c.Col("banned", "users")
+
+		cs := &column.Case{}
+		cs.When(true)
+		cs.Then("invalid")
+		cs.Else("valid")
+
+		info := c.Switch(banned, cs)
+		info.As("is_valid")
+
+		run(t, info, Dummy{
 			Def:   "CASE a.banned WHEN 1 THEN 'invalid' ELSE 'valid' END AS is_valid",
 			Expr:  "CASE a.banned WHEN 1 THEN 'invalid' ELSE 'valid' END",
 			Alias: "is_valid",
@@ -147,11 +163,15 @@ func TestColumn(t *testing.T) {
 	t.Run("search", func(t *testing.T) {
 		c, run := New("users")
 
-		age := c.Col("age")
-		cond := c.Condition(age).Less(18)
-		valid := c.Search(func(cs core.CaseSearch) {
-			cs.When(cond).Then(false).Else(true)
-		}).As("valid")
+		age := c.Col("age", "users")
+		cond := c.Condition(age)
+		cond.Less(18)
+		cs := &column.Case{}
+		cs.When(cond)
+		cs.Then(false)
+		cs.Else(true)
+		valid := c.Search(cs)
+		valid.As("valid")
 		run(t, valid, Dummy{
 			Def:   "CASE WHEN (a.age < 18) THEN 0 ELSE 1 END AS valid",
 			Expr:  "CASE WHEN (a.age < 18) THEN 0 ELSE 1 END",
@@ -163,27 +183,31 @@ func TestColumn(t *testing.T) {
 		c, run := New("users")
 
 		var (
-			banned  = c.Col("banned")
-			fname   = c.Col("firstname")
-			lname   = c.Col("lastname")
-			postNum = c.Col("id", "posts").Count()
+			banned  = c.Col("banned", "users")
+			fname   = c.Col("firstname", "users")
+			lname   = c.Col("lastname", "users")
+			postNum = c.Col("id", "posts")
 			role    = c.Col("name", "roles")
-			lastLog = c.Col("last_login")
+			lastLog = c.Col("last_login", "users")
 		)
+		postNum.Count(false)
 
-		success := c.Concat(
+		success := c.Concat([]any{
 			"with role: ", role,
 			" has ", postNum, " posts and",
 			" his last login was: ", lastLog,
-		)
-
-		cond := c.Condition(banned).IsNull()
-		info := c.Search(func(cs core.CaseSearch) {
-			cs.When(cond).Then(success)
-			cs.Else(c.Concat("was banned at: ", banned))
 		})
 
-		result := c.Concat("User: ", fname, " ", lname, " ", info).As("user_info")
+		cond := c.Condition(banned)
+		cond.IsNull()
+		cs := &column.Case{}
+		cs.When(cond)
+		cs.Then(success)
+		cs.Else(c.Concat([]any{"was banned at: ", banned}))
+		info := c.Search(cs)
+
+		result := c.Concat([]any{"User: ", fname, " ", lname, " ", info})
+		result.As("user_info")
 
 		exp := "CONCAT('User: ', a.firstname, ' ', a.lastname, ' ', "
 		exp += "CASE WHEN (a.banned IS NULL) THEN "

@@ -2,19 +2,16 @@ package clause
 
 import "github.com/laacin/inyorm/internal/core"
 
-type SelectClause struct {
+type Select struct {
 	distinct bool
 	targets  []any
 }
 
-func (s *SelectClause) Name() core.ClauseType {
-	return core.ClsTypSelect
-}
-
-func (s *SelectClause) IsDeclared() bool { return s != nil }
-
-func (s *SelectClause) Build(w core.Writer) {
-	w.Write("SELECT ")
+func (s *Select) Name() core.ClauseType { return core.ClsTypSelect }
+func (s *Select) IsDeclared() bool      { return s != nil }
+func (s *Select) Build(w core.Writer) {
+	w.Write("SELECT")
+	w.Char(' ')
 
 	if s.distinct {
 		w.Write("DISTINCT ")
@@ -30,11 +27,10 @@ func (s *SelectClause) Build(w core.Writer) {
 
 // -- Methods
 
-func (s *SelectClause) Distinct() core.ClauseSelect {
+func (s *Select) Distinct() {
 	s.distinct = true
-	return s
 }
 
-func (s *SelectClause) Select(targets ...any) {
+func (s *Select) Select(targets []any) {
 	s.targets = append(s.targets, targets...)
 }

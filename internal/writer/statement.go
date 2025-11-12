@@ -33,6 +33,7 @@ func (stmt *Statement) Build() (string, []any) {
 		}
 		cls.Build(w)
 	}
+
 	return w.ToString(), stmt.Values()
 }
 

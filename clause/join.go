@@ -6,64 +6,56 @@ import (
 )
 
 const (
-	innerJoin = "INNER"
-	leftJoin  = "LEFT"
-	rightJoin = "RIGHT"
-	fullJoin  = "FULL"
-	crossJoin = "CROSS"
+	InnerJoin = "INNER"
+	LeftJoin  = "LEFT"
+	RightJoin = "RIGHT"
+	FullJoin  = "FULL"
+	CrossJoin = "CROSS"
 )
 
-type JoinClause struct {
-	joins []*OnJoin
+type Join struct {
+	joins   []*join
+	current *join
 }
 
-func (j *JoinClause) Name() core.ClauseType {
-	return core.ClsTypJoin
-}
-
-func (j *JoinClause) IsDeclared() bool { return j != nil }
-
-func (j *JoinClause) Build(w core.Writer) {
+func (j *Join) Name() core.ClauseType { return core.ClsTypJoin }
+func (j *Join) IsDeclared() bool      { return j != nil }
+func (j *Join) Build(w core.Writer) {
 	for i, join := range j.joins {
 		if i > 0 {
 			w.Char(' ')
 		}
-		w.Write(join.Type)
+		w.Write(join.typ)
 		w.Char(' ')
 		w.Write("JOIN")
 		w.Char(' ')
-		w.Table(join.Table)
-		if join.Cond != nil {
+		w.Table(join.table)
+		if join.cond != nil {
 			w.Write(" ON ")
-			join.Cond.Build(w, core.WriterOpts{ColType: core.ColTypBase})
+			join.cond.Build(w, core.WriterOpts{ColType: core.ColTypBase})
 		}
 	}
 }
 
 // -- Methods
 
-func (j *JoinClause) Join(table string) core.ClauseOn      { return j.join(innerJoin, table) }
-func (j *JoinClause) JoinLeft(table string) core.ClauseOn  { return j.join(leftJoin, table) }
-func (j *JoinClause) JoinRight(table string) core.ClauseOn { return j.join(rightJoin, table) }
-func (j *JoinClause) JoinFull(table string) core.ClauseOn  { return j.join(fullJoin, table) }
-func (j *JoinClause) JoinCross(table string)               { j.join(crossJoin, table) }
-
-func (j *JoinClause) join(typ, table string) *OnJoin {
-	join := &OnJoin{Type: typ, Table: table}
+func (j *Join) Join(typ, table string) {
+	join := &join{typ: typ, table: table}
+	j.current = join
 	j.joins = append(j.joins, join)
-	return join
 }
 
-// -- Depending Clause
-
-type OnJoin struct {
-	Type  string
-	Table string
-	Cond  *condition.Condition
-}
-
-func (on *OnJoin) On(identifier any) core.Cond {
+func (j *Join) On(ident any) core.Condition {
 	cond := &condition.Condition{}
-	on.Cond = cond
-	return cond.Start(identifier)
+	j.current.cond = cond
+	cond.Start(ident)
+	return cond
+}
+
+// -- internal
+
+type join struct {
+	typ   string
+	table string
+	cond  *condition.Condition
 }

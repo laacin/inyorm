@@ -9,11 +9,10 @@ import (
 	"github.com/laacin/inyorm/internal/writer"
 )
 
-func NewSelect() (core.ClauseSelect, core.ColExpr, func(t *testing.T, cls string)) {
-	stmt := writer.NewStatement("", "default")
-	stmt.SetFrom("default")
-	var c core.ColExpr = &column.ColExpr{Statement: stmt}
-	cls := &clause.SelectClause{}
+func NewSelect() (*clause.Select, core.ColExpr, func(t *testing.T, cls string)) {
+	stmt := writer.NewStatement("", "users")
+	var c core.ColExpr = &column.ColExpr{Writer: stmt.Writer}
+	cls := &clause.Select{}
 
 	run := func(t *testing.T, clause string) {
 		w := stmt.Writer()
@@ -29,14 +28,15 @@ func NewSelect() (core.ClauseSelect, core.ColExpr, func(t *testing.T, cls string
 func TestSelect(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		cls, c, run := NewSelect()
-		cls.Select("active", c.Col("name"))
+		cls.Select([]any{"active", c.Col("name", "users")})
 
 		run(t, "SELECT 'active', a.name")
 	})
 
 	t.Run("distinct", func(t *testing.T) {
 		cls, c, run := NewSelect()
-		cls.Distinct().Select(c.Col("age"))
+		cls.Distinct()
+		cls.Select([]any{c.Col("age", "users")})
 
 		run(t, "SELECT DISTINCT a.age")
 	})

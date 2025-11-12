@@ -37,98 +37,29 @@ func (c *Column) Base() core.Builder {
 
 // -- Aggregation
 
-func (c *Column) Count(distinct ...bool) core.Column {
-	dist := len(distinct) > 0 && distinct[0]
-	wAggr(c, dist, countAggr)
-	return c
-}
-
-func (c *Column) Sum(distinct ...bool) core.Column {
-	dist := len(distinct) > 0 && distinct[0]
-	wAggr(c, dist, sumAggr)
-	return c
-}
-
-func (c *Column) Min(distinct ...bool) core.Column {
-	dist := len(distinct) > 0 && distinct[0]
-	wAggr(c, dist, minAggr)
-	return c
-}
-
-func (c *Column) Max(distinct ...bool) core.Column {
-	dist := len(distinct) > 0 && distinct[0]
-	wAggr(c, dist, maxAggr)
-	return c
-}
-
-func (c *Column) Avg(distinct ...bool) core.Column {
-	dist := len(distinct) > 0 && distinct[0]
-	wAggr(c, dist, avgAggr)
-	return c
-}
+func (c *Column) Count(distinct bool) { wAggr(c, distinct, countAggr) }
+func (c *Column) Sum(distinct bool)   { wAggr(c, distinct, sumAggr) }
+func (c *Column) Min(distinct bool)   { wAggr(c, distinct, minAggr) }
+func (c *Column) Max(distinct bool)   { wAggr(c, distinct, maxAggr) }
+func (c *Column) Avg(distinct bool)   { wAggr(c, distinct, avgAggr) }
 
 // -- Operation
 
-func (c *Column) Add(v any) core.Column {
-	wOp(c, addOp, v)
-	return c
-}
-
-func (c *Column) Sub(v any) core.Column {
-	wOp(c, subOp, v)
-	return c
-}
-
-func (c *Column) Mul(v any) core.Column {
-	wOp(c, mulOp, v)
-	return c
-}
-
-func (c *Column) Div(v any) core.Column {
-	wOp(c, divOp, v)
-	return c
-}
-
-func (c *Column) Mod(v any) core.Column {
-	wOp(c, modOp, v)
-	return c
-}
-
-func (c *Column) Wrap() core.Column {
-	wWrap(c)
-	return c
-}
+func (c *Column) Add(v any) { wOp(c, addOp, v) }
+func (c *Column) Sub(v any) { wOp(c, subOp, v) }
+func (c *Column) Mul(v any) { wOp(c, mulOp, v) }
+func (c *Column) Div(v any) { wOp(c, divOp, v) }
+func (c *Column) Mod(v any) { wOp(c, modOp, v) }
+func (c *Column) Wrap()     { wWrap(c) }
 
 // -- Scalar
 
-func (c *Column) Lower() core.Column {
-	wFunc(c, lowerFunc)
-	return c
-}
-
-func (c *Column) Upper() core.Column {
-	wFunc(c, upperFunc)
-	return c
-}
-
-func (c *Column) Trim() core.Column {
-	wFunc(c, trimFunc)
-	return c
-}
-
-func (c *Column) Round() core.Column {
-	wFunc(c, roundFunc)
-	return c
-}
-
-func (c *Column) Abs() core.Column {
-	wFunc(c, absFunc)
-	return c
-}
+func (c *Column) Lower() { wFunc(c, lowerFunc) }
+func (c *Column) Upper() { wFunc(c, upperFunc) }
+func (c *Column) Trim()  { wFunc(c, trimFunc) }
+func (c *Column) Round() { wFunc(c, roundFunc) }
+func (c *Column) Abs()   { wFunc(c, absFunc) }
 
 // -- Alias
 
-func (c *Column) As(value string) core.Column {
-	wAs(c, value)
-	return c
-}
+func (c *Column) As(value string) { wAs(c, value) }

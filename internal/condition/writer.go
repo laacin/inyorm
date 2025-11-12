@@ -2,34 +2,34 @@ package condition
 
 import "github.com/laacin/inyorm/internal/core"
 
-func (e *Condition) Build(w core.Writer, opts core.WriterOpts) {
+func (c *Condition) Build(w core.Writer, opts core.WriterOpts) {
 	var identOpt, valOpt core.WriterOpts
 	identOpt = core.WriterOpts{ColType: opts.ColType}
 	valOpt = core.WriterOpts{Placeholder: opts.Placeholder}
 
 	w.Char('(')
-	for i, seg := range e.segments {
+	for i, expr := range c.Exprs {
 		if i > 0 {
 			w.Char(' ')
-			w.Write(e.Next.connectors[i-1])
+			w.Write(c.Connectors[i-1])
 			w.Char(' ')
 		}
-		w.Value(seg.Identifier, identOpt)
+		w.Value(expr.identifier, identOpt)
 		w.Char(' ')
-		w.Write(getOp(seg.Operator, seg.Negated))
-		switch seg.Operator {
+		w.Write(getOp(expr.operator, expr.negated))
+		switch expr.operator {
 		case isNull:
 		case between:
 			w.Char(' ')
-			w.Value(seg.Argument[0], valOpt)
+			w.Value(expr.values[0], valOpt)
 			w.Char(' ')
 			w.Write(and)
 			w.Char(' ')
-			w.Value(seg.Argument[1], valOpt)
+			w.Value(expr.values[1], valOpt)
 		case in:
 			w.Char(' ')
 			w.Char('(')
-			for i, v := range seg.Argument {
+			for i, v := range expr.values {
 				if i > 0 {
 					w.Write(", ")
 				}
@@ -39,12 +39,8 @@ func (e *Condition) Build(w core.Writer, opts core.WriterOpts) {
 
 		default:
 			w.Char(' ')
-			w.Value(seg.Argument[0], valOpt)
+			w.Value(expr.values[0], valOpt)
 		}
 	}
 	w.Char(')')
-}
-
-func (e *ConditionNext) Build(w core.Writer, opts core.WriterOpts) {
-	e.ctx.Build(w, opts)
 }

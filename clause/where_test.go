@@ -9,16 +9,15 @@ import (
 	"testing"
 )
 
-func NewWhere(dialect ...string) (core.ClauseWhere, core.ColExpr, func(t *testing.T, cls string, vals []any)) {
+func NewWhere(dialect ...string) (*clause.Where, core.ColExpr, func(t *testing.T, cls string, vals []any)) {
 	d := ""
 	if len(dialect) > 0 {
 		d = dialect[0]
 	}
 
-	stmt := writer.NewStatement(d, "default")
-	stmt.SetFrom("default")
-	var c core.ColExpr = &column.ColExpr{Statement: stmt}
-	cls := &clause.WhereClause{}
+	stmt := writer.NewStatement(d, "users")
+	var c core.ColExpr = &column.ColExpr{Writer: stmt.Writer}
+	cls := &clause.Where{}
 
 	run := func(t *testing.T, clause string, vals []any) {
 		w := stmt.Writer()
@@ -39,7 +38,15 @@ func NewWhere(dialect ...string) (core.ClauseWhere, core.ColExpr, func(t *testin
 func TestWhere(t *testing.T) {
 	t.Run("basic", func(t *testing.T) {
 		cls, c, run := NewWhere()
-		cls.Where(c.Col("firstname")).Not().Not().Equal("john").Or().Not().Equal("mary")
+		name := c.Col("firstname", "users")
+
+		cond := cls.Where(name)
+		cond.Not()
+		cond.Not()
+		cond.Equal("john")
+		cond.Or(name)
+		cond.Not()
+		cond.Equal("mary")
 
 		exp := "WHERE (a.firstname = ? OR a.firstname <> ?)"
 		run(t, exp, []any{"john", "mary"})
@@ -47,7 +54,12 @@ func TestWhere(t *testing.T) {
 
 	t.Run("basic_2", func(t *testing.T) {
 		cls, c, run := NewWhere()
-		cls.Where(c.Col("lastname")).Like("%alv%").And().Not().In("calvin", "malvina", "salvatore")
+		lname := c.Col("lastname", "users")
+		cond := cls.Where(lname)
+		cond.Like("%alv%")
+		cond.And(lname)
+		cond.Not()
+		cond.In([]any{"calvin", "malvina", "salvatore"})
 
 		exp := "WHERE (a.lastname LIKE ? AND a.lastname NOT IN (?, ?, ?))"
 		run(t, exp, []any{"%alv%", "calvin", "malvina", "salvatore"})
@@ -55,7 +67,12 @@ func TestWhere(t *testing.T) {
 
 	t.Run("basic_3", func(t *testing.T) {
 		cls, c, run := NewWhere()
-		cls.Where(c.Col("age")).Between(17, 70).And().Not().Equal(45)
+		age := c.Col("age", "users")
+		cond := cls.Where(age)
+		cond.Between(17, 70)
+		cond.And(age)
+		cond.Not()
+		cond.Equal(45)
 
 		exp := "WHERE (a.age BETWEEN ? AND ? AND a.age <> ?)"
 		run(t, exp, []any{17, 70, 45})
@@ -63,10 +80,34 @@ func TestWhere(t *testing.T) {
 
 	t.Run("many_wheres", func(t *testing.T) {
 		cls, c, run := NewWhere()
-		cls.Where(c.Col("age")).Between(17, 70).And().Not().Equal(45)
-		cls.Where(c.Col("firstname")).Like("%alv%").And().Not().In("calvin", "malvina", "salvatore")
-		cls.Where(c.Col("lastname")).Not().Not().Equal("john").Or().Not().Equal("mary")
-		cls.Where("literal").Not().IsNull()
+		var (
+			age   = c.Col("age", "users")
+			fname = c.Col("firstname", "users")
+			lname = c.Col("lastname", "users")
+		)
+		cond1 := cls.Where(age)
+		cond1.Between(17, 70)
+		cond1.And(age)
+		cond1.Not()
+		cond1.Equal(45)
+
+		cond2 := cls.Where(fname)
+		cond2.Like("%alv%")
+		cond2.And(fname)
+		cond2.Not()
+		cond2.In([]any{"calvin", "malvina", "salvatore"})
+
+		cond3 := cls.Where(lname)
+		cond3.Not()
+		cond3.Not()
+		cond3.Equal("john")
+		cond3.Or(lname)
+		cond3.Not()
+		cond3.Equal("mary")
+
+		cond4 := cls.Where("literal")
+		cond4.Not()
+		cond4.IsNull()
 
 		exp := "WHERE (a.age BETWEEN ? AND ? AND a.age <> ?)"
 		exp += " AND "
@@ -81,10 +122,35 @@ func TestWhere(t *testing.T) {
 
 	t.Run("many_wheres_with_postgres_placeholder", func(t *testing.T) {
 		cls, c, run := NewWhere(core.Postgres)
-		cls.Where(c.Col("age")).Between(17, 70).And().Not().Equal(45)
-		cls.Where(c.Col("firstname")).Like("%alv%").And().Not().In("calvin", "malvina", "salvatore")
-		cls.Where(c.Col("lastname")).Not().Not().Equal("john").Or().Not().Equal("mary")
-		cls.Where("literal").Not().IsNull()
+
+		var (
+			age   = c.Col("age", "users")
+			fname = c.Col("firstname", "users")
+			lname = c.Col("lastname", "users")
+		)
+		cond1 := cls.Where(age)
+		cond1.Between(17, 70)
+		cond1.And(age)
+		cond1.Not()
+		cond1.Equal(45)
+
+		cond2 := cls.Where(fname)
+		cond2.Like("%alv%")
+		cond2.And(fname)
+		cond2.Not()
+		cond2.In([]any{"calvin", "malvina", "salvatore"})
+
+		cond3 := cls.Where(lname)
+		cond3.Not()
+		cond3.Not()
+		cond3.Equal("john")
+		cond3.Or(lname)
+		cond3.Not()
+		cond3.Equal("mary")
+
+		cond4 := cls.Where("literal")
+		cond4.Not()
+		cond4.IsNull()
 
 		exp := "WHERE (a.age BETWEEN $1 AND $2 AND a.age <> $3)"
 		exp += " AND "
