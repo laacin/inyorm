@@ -25,5 +25,3 @@ func (a *Alias) Get(table string) byte {
 	a.num++
 	return val
 }
-
-func (a *Alias) Reset() { a = nil }

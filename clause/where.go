@@ -19,10 +19,11 @@ func (whr *Where) Build(w core.Writer) {
 			w.Write(" AND ")
 		}
 
-		expr.Build(w, core.WriterOpts{
-			Placeholder: true,
-			ColType:     core.ColTypExpr,
-		})
+		expr.Build(
+			w,
+			core.WhereIdentWriteOpt,
+			core.WhereValueWriteOpt,
+		)
 	}
 }
 

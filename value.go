@@ -1,12 +1,12 @@
 package inyorm
 
-// Value is a versatile type representing any element that can be used in a SQL expression
+// Value is a versatile type representing any element that can be used in an SQL expression
 // within the ORM. It is essentially an alias for `any`, but semantically it signals
-// that the value is intended to be interpreted in a SQL context.
+// that the value is intended to be interpreted in an SQL context.
 //
 // Value can be:
 //   - SQL literals: strings, numbers, booleans, or nil. These will be rendered as
-//     valid SQL constants, e.g., "example" → 'example', 0 → 0, true → 1, nil → NULL.
+//     valid SQL constants (e.g., "example" → 'example', 0 → 0, true → 1, nil → NULL).
 //   - ORM fields or columns, via (*ColumnExpr) methods. This ensures the value is treated
 //     as a column reference rather than a literal.
 type Value = any

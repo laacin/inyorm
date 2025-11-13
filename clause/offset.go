@@ -12,7 +12,7 @@ func (o *Offset) Build(w core.Writer) {
 	if o.offset > 0 {
 		w.Write("OFFSET")
 		w.Char(' ')
-		w.Value(o.offset, core.WriterOpts{})
+		w.Value(o.offset, core.OffsetWriteOpt)
 	}
 }
 

@@ -12,7 +12,7 @@ func (l *Limit) Build(w core.Writer) {
 	if l.limit > 0 {
 		w.Write("LIMIT")
 		w.Char(' ')
-		w.Value(l.limit, core.WriterOpts{})
+		w.Value(l.limit, core.LimitWriteOpt)
 	}
 }
 

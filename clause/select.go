@@ -21,7 +21,7 @@ func (s *Select) Build(w core.Writer) {
 		if i > 0 {
 			w.Write(", ")
 		}
-		w.Value(sel, core.WriterOpts{ColType: core.ColTypDef})
+		w.Value(sel, core.SelectWriteOpt)
 	}
 }
 

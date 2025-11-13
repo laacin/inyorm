@@ -2,11 +2,7 @@ package condition
 
 import "github.com/laacin/inyorm/internal/core"
 
-func (c *Condition) Build(w core.Writer, opts core.WriterOpts) {
-	var identOpt, valOpt core.WriterOpts
-	identOpt = core.WriterOpts{ColType: opts.ColType}
-	valOpt = core.WriterOpts{Placeholder: opts.Placeholder}
-
+func (c *Condition) Build(w core.Writer, identOpt, valueOpt *core.WriterOpts) {
 	w.Char('(')
 	for i, expr := range c.Exprs {
 		if i > 0 {
@@ -21,11 +17,11 @@ func (c *Condition) Build(w core.Writer, opts core.WriterOpts) {
 		case isNull:
 		case between:
 			w.Char(' ')
-			w.Value(expr.values[0], valOpt)
+			w.Value(expr.values[0], valueOpt)
 			w.Char(' ')
 			w.Write(and)
 			w.Char(' ')
-			w.Value(expr.values[1], valOpt)
+			w.Value(expr.values[1], valueOpt)
 		case in:
 			w.Char(' ')
 			w.Char('(')
@@ -33,13 +29,13 @@ func (c *Condition) Build(w core.Writer, opts core.WriterOpts) {
 				if i > 0 {
 					w.Write(", ")
 				}
-				w.Value(v, valOpt)
+				w.Value(v, valueOpt)
 			}
 			w.Char(')')
 
 		default:
 			w.Char(' ')
-			w.Value(expr.values[0], valOpt)
+			w.Value(expr.values[0], valueOpt)
 		}
 	}
 	w.Char(')')

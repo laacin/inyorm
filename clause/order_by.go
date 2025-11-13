@@ -18,7 +18,7 @@ func (o *OrderBy) Build(w core.Writer) {
 			w.Write(", ")
 		}
 
-		w.Value(ord.order, core.WriterOpts{ColType: core.ColTypAlias})
+		w.Value(ord.order, core.OrderByWriteOpt)
 		if ord.descending {
 			w.Write(" DESC")
 		}

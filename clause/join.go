@@ -32,7 +32,11 @@ func (j *Join) Build(w core.Writer) {
 		w.Table(join.table)
 		if join.cond != nil {
 			w.Write(" ON ")
-			join.cond.Build(w, core.WriterOpts{ColType: core.ColTypBase})
+			join.cond.Build(
+				w,
+				core.JoinIdentWriteOpt,
+				core.JoinValueWriteOpt,
+			)
 		}
 	}
 }

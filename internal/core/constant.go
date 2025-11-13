@@ -34,4 +34,5 @@ const (
 	ClsTypOrderBy
 	ClsTypLimit
 	ClsTypOffset
+	ClsTypInsertInto
 )

@@ -20,7 +20,7 @@ func (w *Writer) Char(v byte) {
 	w.sb.WriteByte(v)
 }
 
-func (w *Writer) Value(v any, opts core.WriterOpts) {
+func (w *Writer) Value(v any, opts *core.WriterOpts) {
 	if opts.Placeholder {
 		w.sb.WriteString(w.ph.next(v))
 		return

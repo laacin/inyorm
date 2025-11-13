@@ -14,7 +14,11 @@ func (h *Having) IsDeclared() bool      { return h != nil }
 func (h *Having) Build(w core.Writer) {
 	w.Write("HAVING")
 	w.Char(' ')
-	h.cond.Build(w, core.WriterOpts{ColType: core.ColTypExpr})
+	h.cond.Build(
+		w,
+		core.HavingIdentWriteOpt,
+		core.HavingValueWriteOpt,
+	)
 }
 
 // -- Methods

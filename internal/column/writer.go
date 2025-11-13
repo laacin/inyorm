@@ -62,7 +62,7 @@ func wOp(col *Column, arg byte, value any) {
 	w.Char(' ')
 	w.Char(arg)
 	w.Char(' ')
-	w.Value(value, core.WriterOpts{ColType: core.ColTypExpr})
+	w.Value(value, core.ColumnIdentWriteOpt)
 
 	col.expr = w.ToString()
 }

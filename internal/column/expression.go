@@ -34,7 +34,7 @@ func (c *ColExpr) Concat(v []any) core.Column {
 		if i > 0 {
 			w.Write(", ")
 		}
-		w.Value(val, core.WriterOpts{ColType: core.ColTypExpr})
+		w.Value(val, core.ColumnIdentWriteOpt)
 	}
 	w.Char(')')
 
@@ -47,22 +47,20 @@ func (c *ColExpr) Concat(v []any) core.Column {
 
 func (c *ColExpr) Switch(cond any, cs core.Case) core.Column {
 	w := c.Writer()
-	opts := core.WriterOpts{ColType: core.ColTypExpr}
-
 	val := cs.(*Case)
 
 	w.Write("CASE ")
-	w.Value(cond, opts)
+	w.Value(cond, core.ColumnIdentWriteOpt)
 	for _, arg := range val.exprs {
 		w.Write(" WHEN ")
-		w.Value(arg.when, opts)
+		w.Value(arg.when, core.ColumnIdentWriteOpt)
 		w.Write(" THEN ")
-		w.Value(arg.do, opts)
+		w.Value(arg.do, core.ColumnIdentWriteOpt)
 		w.Char(' ')
 	}
 	if val.els != nil {
 		w.Write("ELSE ")
-		w.Value(val.els, opts)
+		w.Value(val.els, core.ColumnIdentWriteOpt)
 		w.Char(' ')
 	}
 	w.Write("END")
@@ -82,20 +80,22 @@ func (c *ColExpr) Condition(identifier any) core.Condition {
 
 func (c *ColExpr) Search(cs core.Case) core.Column {
 	w := c.Writer()
-	opts := core.WriterOpts{ColType: core.ColTypExpr}
-
 	val := cs.(*Case)
 
 	w.Write("CASE WHEN")
 	for _, arg := range val.exprs {
 		w.Char(' ')
-		arg.when.(*condition.Condition).Build(w, opts)
+		arg.when.(*condition.Condition).Build(
+			w,
+			core.ColumnIdentWriteOpt,
+			core.ColumnValueWriteOpt,
+		)
 		w.Write(" THEN ")
-		w.Value(arg.do, opts)
+		w.Value(arg.do, core.ColumnIdentWriteOpt)
 		w.Char(' ')
 	}
 	w.Write("ELSE ")
-	w.Value(val.els, opts)
+	w.Value(val.els, core.ColumnIdentWriteOpt)
 	w.Write(" END")
 
 	return &Column{

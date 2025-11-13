@@ -7,7 +7,9 @@ import (
 	"github.com/laacin/inyorm"
 )
 
-func run(t *testing.T, q *inyorm.SelectStatement, exp string, vals []any) {
+type Stmt interface{ Build() (string, []any) }
+
+func run(t *testing.T, q Stmt, exp string, vals []any) {
 	stmt, values := q.Build()
 	if stmt != exp {
 		t.Errorf("mismatch statement:\nExpect:\n%s\nHave:\n%s", exp, stmt)
@@ -95,6 +97,7 @@ func TestSelectStmt(t *testing.T) {
 		q.Where(age).Greater(17).And(age).Less(30)
 		q.GroupBy(postNum.Base())
 		q.Having(postNum).Greater(10)
+		q.OrderBy(age).Desc()
 		q.Limit(100)
 		q.Offset(20)
 
@@ -110,6 +113,7 @@ func TestSelectStmt(t *testing.T) {
 		exp += "WHERE (a.age > ? AND a.age < ?) "
 		exp += "GROUP BY b.id "
 		exp += "HAVING (COUNT(b.id) > 10) "
+		exp += "ORDER BY a.age DESC "
 		exp += "LIMIT 100 OFFSET 20"
 
 		vals := []any{17, 30}

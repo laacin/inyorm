@@ -15,7 +15,7 @@ func (g *GroupBy) Build(w core.Writer) {
 		if i > 0 {
 			w.Write(", ")
 		}
-		w.Value(group, core.WriterOpts{ColType: core.ColTypExpr})
+		w.Value(group, core.GroupByWriteOpt)
 	}
 }
 
