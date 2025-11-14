@@ -16,19 +16,15 @@ type Dummy struct {
 }
 
 func New(defaultTable string) (core.ColExpr, func(t *testing.T, col core.Column, d Dummy)) {
-	stmt := writer.NewStatement("", defaultTable)
 	var c core.ColExpr = &column.ColExpr{}
 
 	run := func(t *testing.T, col core.Column, dummy Dummy) {
-		d := stmt.Writer()
-		b := stmt.Writer()
-		e := stmt.Writer()
-		a := stmt.Writer()
+		var d, a, e, b writer.Writer
 
-		col.Def(d)
-		col.Alias(a)
-		col.Expr(e)
-		col.Base(b)
+		col.Def(&d)
+		col.Alias(&a)
+		col.Expr(&e)
+		col.Base(&b)
 
 		compare := func(name string, have, expect string) {
 			if have != expect {
@@ -50,10 +46,10 @@ func TestColumn(t *testing.T) {
 
 		name := c.Col("name", "users")
 		run(t, name, Dummy{
-			Base:  "a.name",
-			Alias: "a.name",
-			Expr:  "a.name",
-			Def:   "a.name",
+			Base:  "name",
+			Alias: "name",
+			Expr:  "name",
+			Def:   "name",
 		})
 	})
 
@@ -69,9 +65,9 @@ func TestColumn(t *testing.T) {
 		total.Mul(price)
 		total.As("total")
 		run(t, total, Dummy{
-			Base:  "a.stock",
-			Def:   "a.stock * a.price AS total",
-			Expr:  "a.stock * a.price",
+			Base:  "stock",
+			Def:   "stock * price AS total",
+			Expr:  "stock * price",
 			Alias: "total",
 		})
 	})
@@ -90,10 +86,10 @@ func TestColumn(t *testing.T) {
 		result.Mul(100)
 		result.As("variation")
 		run(t, result, Dummy{
-			Base:  "b.final_price",
+			Base:  "final_price",
 			Alias: "variation",
-			Def:   "(b.final_price - b.initial_price) / b.initial_price * 100 AS variation",
-			Expr:  "(b.final_price - b.initial_price) / b.initial_price * 100",
+			Def:   "(final_price - initial_price) / initial_price * 100 AS variation",
+			Expr:  "(final_price - initial_price) / initial_price * 100",
 		})
 	})
 
@@ -104,9 +100,9 @@ func TestColumn(t *testing.T) {
 		firstname.Lower()
 		firstname.As("fname")
 		run(t, firstname, Dummy{
-			Base:  "a.firstname",
-			Expr:  "LOWER(a.firstname)",
-			Def:   "LOWER(a.firstname) AS fname",
+			Base:  "firstname",
+			Expr:  "LOWER(firstname)",
+			Def:   "LOWER(firstname) AS fname",
 			Alias: "fname",
 		})
 	})
@@ -136,8 +132,8 @@ func TestColumn(t *testing.T) {
 		fullname.As("fullname")
 
 		run(t, fullname, Dummy{
-			Def:   "CONCAT(a.firstname, ' ', a.lastname) AS fullname",
-			Expr:  "CONCAT(a.firstname, ' ', a.lastname)",
+			Def:   "CONCAT(firstname, ' ', lastname) AS fullname",
+			Expr:  "CONCAT(firstname, ' ', lastname)",
 			Alias: "fullname",
 		})
 	})
@@ -156,8 +152,8 @@ func TestColumn(t *testing.T) {
 		info.As("is_valid")
 
 		run(t, info, Dummy{
-			Def:   "CASE a.banned WHEN 1 THEN 'invalid' ELSE 'valid' END AS is_valid",
-			Expr:  "CASE a.banned WHEN 1 THEN 'invalid' ELSE 'valid' END",
+			Def:   "CASE banned WHEN 1 THEN 'invalid' ELSE 'valid' END AS is_valid",
+			Expr:  "CASE banned WHEN 1 THEN 'invalid' ELSE 'valid' END",
 			Alias: "is_valid",
 		})
 	})
@@ -175,8 +171,8 @@ func TestColumn(t *testing.T) {
 		valid := c.Search(cs)
 		valid.As("valid")
 		run(t, valid, Dummy{
-			Def:   "CASE WHEN (a.age < 18) THEN 0 ELSE 1 END AS valid",
-			Expr:  "CASE WHEN (a.age < 18) THEN 0 ELSE 1 END",
+			Def:   "CASE WHEN (age < 18) THEN 0 ELSE 1 END AS valid",
+			Expr:  "CASE WHEN (age < 18) THEN 0 ELSE 1 END",
 			Alias: "valid",
 		})
 	})
@@ -211,10 +207,10 @@ func TestColumn(t *testing.T) {
 		result := c.Concat([]any{"User: ", fname, " ", lname, " ", info})
 		result.As("user_info")
 
-		exp := "CONCAT('User: ', a.firstname, ' ', a.lastname, ' ', "
-		exp += "CASE WHEN (a.banned IS NULL) THEN "
-		exp += "CONCAT('with role: ', b.name, ' has ', COUNT(c.id), ' posts and', ' his last login was: ', a.last_login)"
-		exp += " ELSE CONCAT('was banned at: ', a.banned) END)"
+		exp := "CONCAT('User: ', firstname, ' ', lastname, ' ', "
+		exp += "CASE WHEN (banned IS NULL) THEN "
+		exp += "CONCAT('with role: ', name, ' has ', COUNT(id), ' posts and', ' his last login was: ', last_login)"
+		exp += " ELSE CONCAT('was banned at: ', banned) END)"
 		run(t, result, Dummy{
 			Expr:  exp,
 			Def:   exp + " AS user_info",

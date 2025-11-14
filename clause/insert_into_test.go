@@ -39,6 +39,7 @@ func NewInsert(dialect ...string) (*clause.InsertInto, core.ColExpr, func(t *tes
 func TestInserInto(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		cls, c, run := NewInsert("")
+
 		var (
 			fname = c.Col("firstname", "users")
 			lname = c.Col("lastname", "users")

@@ -3,6 +3,8 @@ package inyorm
 import "github.com/laacin/inyorm/clause"
 
 type (
+	insertIntoCls struct{ insertIntoWrap *clause.InsertInto }
+
 	selectCls struct{ selectWrap *clause.Select }
 	fromCls   struct{ fromWrap *clause.From }
 
@@ -70,6 +72,13 @@ func lazyInit[T any](target **T) *T {
 }
 
 // ------ Methods ------
+
+func (cls *insertIntoCls) Insert(values any) {
+	// wrp := lazyInit(&cls.insertIntoWrap)
+	// _, colNames, vals, _ := mapper.ReadValues("inyorm", values)
+	// wrp.Insert("table", cols)
+	// wrp.Values(vals)
+}
 
 // Distinct writes DISTINCT in the SELECT clause
 //
