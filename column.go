@@ -3,7 +3,6 @@ package inyorm
 import (
 	"github.com/laacin/inyorm/internal/column"
 	"github.com/laacin/inyorm/internal/core"
-	"github.com/laacin/inyorm/internal/writer"
 )
 
 type (
@@ -11,8 +10,8 @@ type (
 		wrap core.Column
 	}
 	ColumnExpr struct {
-		wrap core.ColExpr
-		stmt *writer.Statement
+		defaultTable string
+		wrap         core.ColExpr
 	}
 	Builder = core.Builder
 )
@@ -21,17 +20,17 @@ type (
 
 func wrapColumn(wrap core.Column) *Column { return &Column{wrap} }
 
-func newColExpr(stmt *writer.Statement) *ColumnExpr {
-	c := &column.ColExpr{Writer: stmt.Writer}
-	return &ColumnExpr{stmt: stmt, wrap: c}
+func newColExpr(defaultTable string) *ColumnExpr {
+	c := &column.ColExpr{}
+	return &ColumnExpr{defaultTable: defaultTable, wrap: c}
 }
 
 // ----- Column -----
 
-func (c *Column) Def() Builder   { return c.wrap.Def() }
-func (c *Column) Expr() Builder  { return c.wrap.Expr() }
-func (c *Column) Alias() Builder { return c.wrap.Alias() }
-func (c *Column) Base() Builder  { return c.wrap.Base() }
+func (c *Column) Def() Builder   { return c.wrap.Def }
+func (c *Column) Expr() Builder  { return c.wrap.Expr }
+func (c *Column) Alias() Builder { return c.wrap.Alias }
+func (c *Column) Base() Builder  { return c.wrap.Base }
 
 func (c *Column) Count(distinct ...bool) *Column {
 	dist := len(distinct) > 0 && distinct[0]
@@ -77,7 +76,7 @@ func (c *Column) As(alias string) *Column { c.wrap.As(alias); return c }
 // ----- Column expression -----
 
 func (c *ColumnExpr) Col(name string, table ...string) *Column {
-	tbl := c.stmt.GetFrom()
+	tbl := c.defaultTable
 	if len(table) > 0 {
 		tbl = table[0]
 	}

@@ -11,14 +11,15 @@ import (
 
 func NewOrderBy() (*clause.OrderBy, core.ColExpr, func(t *testing.T, cls string)) {
 	stmt := writer.NewStatement("", "users")
-	var c core.ColExpr = &column.ColExpr{Writer: stmt.Writer}
+	var c core.ColExpr = &column.ColExpr{}
 	cls := &clause.OrderBy{}
 
 	run := func(t *testing.T, clause string) {
-		w := stmt.Writer()
-		cls.Build(w)
-		if val := w.ToString(); val != clause {
-			t.Errorf("\nmismatch result:\nExpect:\n%s\nHave:\n%s\n", clause, val)
+		stmt.SetClauses([]core.Clause{cls})
+		statement, _ := stmt.Build(writer.SelectOrder)
+
+		if statement != clause {
+			t.Errorf("\nmismatch result:\nExpect:\n%s\nHave:\n%s\n", clause, statement)
 		}
 	}
 
@@ -32,7 +33,7 @@ func TestOrderBy(t *testing.T) {
 		cls.OrderBy(c.Col("firstname", "users"))
 		cls.OrderBy(c.Col("age", "users"))
 
-		run(t, "ORDER BY a.firstname, a.age")
+		run(t, "ORDER BY firstname, age")
 	})
 
 	t.Run("descending", func(t *testing.T) {
@@ -44,7 +45,7 @@ func TestOrderBy(t *testing.T) {
 		cls.OrderBy(c.Col("lastname", "users"))
 		cls.Desc()
 
-		run(t, "ORDER BY a.age DESC, a.lastname DESC")
+		run(t, "ORDER BY age DESC, lastname DESC")
 	})
 
 	t.Run("mix", func(t *testing.T) {
@@ -62,6 +63,6 @@ func TestOrderBy(t *testing.T) {
 
 		cls.OrderBy(age)
 
-		run(t, "ORDER BY COUNT(b.id) DESC, a.age")
+		run(t, "ORDER BY COUNT(id) DESC, age")
 	})
 }

@@ -11,17 +11,16 @@ import (
 
 func NewGroupBy() (*clause.GroupBy, *clause.Having, core.ColExpr, func(t *testing.T, cls string)) {
 	stmt := writer.NewStatement("", "users")
-	var c core.ColExpr = &column.ColExpr{Writer: stmt.Writer}
+	var c core.ColExpr = &column.ColExpr{}
 	gb := &clause.GroupBy{}
 	h := &clause.Having{}
 
 	run := func(t *testing.T, clause string) {
-		w := stmt.Writer()
-		gb.Build(w)
-		w.Char(' ')
-		h.Build(w)
-		if val := w.ToString(); val != clause {
-			t.Errorf("\nmismatch result:\nExpect:\n%s\nHave:\n%s\n", clause, val)
+		stmt.SetClauses([]core.Clause{gb, h})
+		statement, _ := stmt.Build(writer.SelectOrder)
+
+		if statement != clause {
+			t.Errorf("\nmismatch result:\nExpect:\n%s\nHave:\n%s\n", clause, statement)
 		}
 	}
 
@@ -35,10 +34,10 @@ func TestGroupBy(t *testing.T) {
 		name := c.Col("name", "posts")
 		name.Count(true)
 
-		gb.GroupBy([]any{name.Base()})
+		gb.GroupBy([]any{name.Base})
 		h.Having(name).Greater(10)
 
-		run(t, "GROUP BY b.name HAVING (COUNT(DISTINCT b.name) > 10)")
+		run(t, "GROUP BY name HAVING (COUNT(DISTINCT name) > 10)")
 	})
 
 	t.Run("multiple_columns_with_function", func(t *testing.T) {
@@ -50,10 +49,10 @@ func TestGroupBy(t *testing.T) {
 		role := c.Col("role", "roles")
 		role.Count(false)
 
-		gb.GroupBy([]any{name, role.Base()})
+		gb.GroupBy([]any{name, role.Base})
 		h.Having(role).Greater(5)
 
-		run(t, "GROUP BY LOWER(a.name), b.role HAVING (COUNT(b.role) > 5)")
+		run(t, "GROUP BY LOWER(name), role HAVING (COUNT(role) > 5)")
 	})
 
 	t.Run("lower_and_count", func(t *testing.T) {
@@ -68,7 +67,7 @@ func TestGroupBy(t *testing.T) {
 		gb.GroupBy([]any{name})
 		h.Having(email).Greater(3)
 
-		run(t, "GROUP BY LOWER(a.name) HAVING (COUNT(DISTINCT a.email) > 3)")
+		run(t, "GROUP BY LOWER(name) HAVING (COUNT(DISTINCT email) > 3)")
 	})
 
 	t.Run("concat_and_max", func(t *testing.T) {
@@ -83,7 +82,7 @@ func TestGroupBy(t *testing.T) {
 		gb.GroupBy([]any{con})
 		h.Having(score).Less(80)
 
-		run(t, "GROUP BY CONCAT(a.firstname, ' ', a.lastname) HAVING (MAX(a.score) < 80)")
+		run(t, "GROUP BY CONCAT(firstname, ' ', lastname) HAVING (MAX(score) < 80)")
 	})
 
 	t.Run("trim_and_min", func(t *testing.T) {
@@ -98,7 +97,7 @@ func TestGroupBy(t *testing.T) {
 		gb.GroupBy([]any{role})
 		h.Having(points).Greater(10)
 
-		run(t, "GROUP BY TRIM(b.role) HAVING (MIN(a.points) > 10)")
+		run(t, "GROUP BY TRIM(role) HAVING (MIN(points) > 10)")
 	})
 
 	t.Run("round_and_avg", func(t *testing.T) {
@@ -113,7 +112,7 @@ func TestGroupBy(t *testing.T) {
 		gb.GroupBy([]any{price})
 		h.Having(discount).Less(0.3)
 
-		run(t, "GROUP BY ROUND(b.price) HAVING (AVG(b.discount) < 0.3)")
+		run(t, "GROUP BY ROUND(price) HAVING (AVG(discount) < 0.3)")
 	})
 
 	t.Run("nested_conditions", func(t *testing.T) {
@@ -132,7 +131,7 @@ func TestGroupBy(t *testing.T) {
 		cond.Or(points2)
 		cond.Greater(50)
 
-		run(t, "GROUP BY b.role HAVING (SUM(a.points) BETWEEN 100 AND 1000 OR COUNT(a.points) > 50)")
+		run(t, "GROUP BY role HAVING (SUM(points) BETWEEN 100 AND 1000 OR COUNT(points) > 50)")
 	})
 
 	t.Run("group_by_expression_and_alias", func(t *testing.T) {
@@ -150,6 +149,6 @@ func TestGroupBy(t *testing.T) {
 		gb.GroupBy([]any{con})
 		h.Having(score2).Less(90)
 
-		run(t, "GROUP BY CONCAT(b.level, '_', ROUND(b.score)) HAVING (MAX(b.score) < 90)")
+		run(t, "GROUP BY CONCAT(level, '_', ROUND(score)) HAVING (MAX(score) < 90)")
 	})
 }

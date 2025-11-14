@@ -16,17 +16,17 @@ func NewWhere(dialect ...string) (*clause.Where, core.ColExpr, func(t *testing.T
 	}
 
 	stmt := writer.NewStatement(d, "users")
-	var c core.ColExpr = &column.ColExpr{Writer: stmt.Writer}
+	var c core.ColExpr = &column.ColExpr{}
 	cls := &clause.Where{}
 
 	run := func(t *testing.T, clause string, vals []any) {
-		w := stmt.Writer()
-		cls.Build(w)
-		if val := w.ToString(); val != clause {
-			t.Errorf("\nmismatch result:\nExpect:\n%s\nHave:\n%s\n", clause, val)
+		stmt.SetClauses([]core.Clause{cls})
+		statement, values := stmt.Build(writer.SelectOrder)
+
+		if statement != clause {
+			t.Errorf("\nmismatch result:\nExpect:\n%s\nHave:\n%s\n", clause, statement)
 		}
 
-		values := stmt.Values()
 		if !reflect.DeepEqual(vals, values) {
 			t.Errorf("\nmissmatch values:\nExpect:\n%#v\nHave:\n%#v\n", vals, values)
 		}
@@ -48,7 +48,7 @@ func TestWhere(t *testing.T) {
 		cond.Not()
 		cond.Equal("mary")
 
-		exp := "WHERE (a.firstname = ? OR a.firstname <> ?)"
+		exp := "WHERE (firstname = ? OR firstname <> ?)"
 		run(t, exp, []any{"john", "mary"})
 	})
 
@@ -61,7 +61,7 @@ func TestWhere(t *testing.T) {
 		cond.Not()
 		cond.In([]any{"calvin", "malvina", "salvatore"})
 
-		exp := "WHERE (a.lastname LIKE ? AND a.lastname NOT IN (?, ?, ?))"
+		exp := "WHERE (lastname LIKE ? AND lastname NOT IN (?, ?, ?))"
 		run(t, exp, []any{"%alv%", "calvin", "malvina", "salvatore"})
 	})
 
@@ -74,7 +74,7 @@ func TestWhere(t *testing.T) {
 		cond.Not()
 		cond.Equal(45)
 
-		exp := "WHERE (a.age BETWEEN ? AND ? AND a.age <> ?)"
+		exp := "WHERE (age BETWEEN ? AND ? AND age <> ?)"
 		run(t, exp, []any{17, 70, 45})
 	})
 
@@ -109,11 +109,11 @@ func TestWhere(t *testing.T) {
 		cond4.Not()
 		cond4.IsNull()
 
-		exp := "WHERE (a.age BETWEEN ? AND ? AND a.age <> ?)"
+		exp := "WHERE (age BETWEEN ? AND ? AND age <> ?)"
 		exp += " AND "
-		exp += "(a.firstname LIKE ? AND a.firstname NOT IN (?, ?, ?))"
+		exp += "(firstname LIKE ? AND firstname NOT IN (?, ?, ?))"
 		exp += " AND "
-		exp += "(a.lastname = ? OR a.lastname <> ?)"
+		exp += "(lastname = ? OR lastname <> ?)"
 		exp += " AND "
 		exp += "('literal' IS NOT NULL)"
 
@@ -152,11 +152,11 @@ func TestWhere(t *testing.T) {
 		cond4.Not()
 		cond4.IsNull()
 
-		exp := "WHERE (a.age BETWEEN $1 AND $2 AND a.age <> $3)"
+		exp := "WHERE (age BETWEEN $1 AND $2 AND age <> $3)"
 		exp += " AND "
-		exp += "(a.firstname LIKE $4 AND a.firstname NOT IN ($5, $6, $7))"
+		exp += "(firstname LIKE $4 AND firstname NOT IN ($5, $6, $7))"
 		exp += " AND "
-		exp += "(a.lastname = $8 OR a.lastname <> $9)"
+		exp += "(lastname = $8 OR lastname <> $9)"
 		exp += " AND "
 		exp += "('literal' IS NOT NULL)"
 

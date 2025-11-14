@@ -6,8 +6,8 @@ type Statement struct {
 	from    string
 	dialect string
 	ph      Placeholder
-	alias   Alias
-	clauses []core.Clause
+	alias   *Alias
+	clauses map[core.ClauseType]core.Clause
 }
 
 func NewStatement(dialect string, defaultTable string) *Statement {
@@ -16,15 +16,21 @@ func NewStatement(dialect string, defaultTable string) *Statement {
 		dialect: dialect,
 		ph:      Placeholder{dialect: dialect},
 	}
-	stmt.alias.Get(defaultTable)
 
 	return stmt
 }
 
-func (stmt *Statement) Build() (string, []any) {
-	w := stmt.Writer()
-	for i, cls := range stmt.clauses {
-		if !cls.IsDeclared() {
+func (stmt *Statement) Build(order []core.ClauseType) (string, []any) {
+	if cls, exists := stmt.clauses[core.ClsTypJoin]; exists && cls.IsDeclared() {
+		stmt.alias = &Alias{}
+		stmt.alias.Get(stmt.from)
+	}
+
+	w := &Writer{ph: &stmt.ph, aliases: stmt.alias}
+	i := 0
+	for _, name := range order {
+		cls, exists := stmt.clauses[name]
+		if !exists || !cls.IsDeclared() {
 			continue
 		}
 
@@ -32,26 +38,15 @@ func (stmt *Statement) Build() (string, []any) {
 			w.Char(' ')
 		}
 		cls.Build(w)
+		i++
 	}
 
-	return w.ToString(), stmt.Values()
+	return w.ToString(), stmt.ph.values
 }
 
 func (stmt *Statement) SetClauses(clauses []core.Clause) {
-	stmt.clauses = clauses
+	stmt.clauses = make(map[core.ClauseType]core.Clause, len(clauses))
+	for _, cls := range clauses {
+		stmt.clauses[cls.Name()] = cls
+	}
 }
-
-func (stmt *Statement) Dialect() string { return stmt.dialect }
-
-func (stmt *Statement) SetFrom(ref string) {
-	stmt.from = ref
-	stmt.alias.Get(ref)
-}
-
-func (stmt *Statement) GetFrom() string { return stmt.from }
-
-func (stmt *Statement) Writer() core.Writer {
-	return &Writer{ph: &stmt.ph, aliases: &stmt.alias}
-}
-
-func (stmt *Statement) Values() []any { return stmt.ph.values }

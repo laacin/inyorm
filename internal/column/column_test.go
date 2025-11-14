@@ -17,7 +17,7 @@ type Dummy struct {
 
 func New(defaultTable string) (core.ColExpr, func(t *testing.T, col core.Column, d Dummy)) {
 	stmt := writer.NewStatement("", defaultTable)
-	var c core.ColExpr = &column.ColExpr{Writer: stmt.Writer}
+	var c core.ColExpr = &column.ColExpr{}
 
 	run := func(t *testing.T, col core.Column, dummy Dummy) {
 		d := stmt.Writer()
@@ -25,10 +25,10 @@ func New(defaultTable string) (core.ColExpr, func(t *testing.T, col core.Column,
 		e := stmt.Writer()
 		a := stmt.Writer()
 
-		col.Def()(d)
-		col.Alias()(a)
-		col.Expr()(e)
-		col.Base()(b)
+		col.Def(d)
+		col.Alias(a)
+		col.Expr(e)
+		col.Base(b)
 
 		compare := func(name string, have, expect string) {
 			if have != expect {
@@ -131,8 +131,10 @@ func TestColumn(t *testing.T) {
 			fname = c.Col("firstname", "users")
 			lname = c.Col("lastname", "users")
 		)
+
 		fullname := c.Concat([]any{fname, " ", lname})
 		fullname.As("fullname")
+
 		run(t, fullname, Dummy{
 			Def:   "CONCAT(a.firstname, ' ', a.lastname) AS fullname",
 			Expr:  "CONCAT(a.firstname, ' ', a.lastname)",
@@ -211,7 +213,7 @@ func TestColumn(t *testing.T) {
 
 		exp := "CONCAT('User: ', a.firstname, ' ', a.lastname, ' ', "
 		exp += "CASE WHEN (a.banned IS NULL) THEN "
-		exp += "CONCAT('with role: ', c.name, ' has ', COUNT(b.id), ' posts and', ' his last login was: ', a.last_login)"
+		exp += "CONCAT('with role: ', b.name, ' has ', COUNT(c.id), ' posts and', ' his last login was: ', a.last_login)"
 		exp += " ELSE CONCAT('was banned at: ', a.banned) END)"
 		run(t, result, Dummy{
 			Expr:  exp,

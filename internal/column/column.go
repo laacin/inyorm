@@ -3,63 +3,54 @@ package column
 import "github.com/laacin/inyorm/internal/core"
 
 type Column struct {
-	writer core.Writer
-	custom bool
-	base   string
-	table  string
-	alias  string
-	expr   string
+	table   string
+	base    string
+	value   string
+	alias   string
+	builder columnBuilder
 }
 
-func (c *Column) Def() core.Builder {
-	return func(w core.Writer) {
-		wDef(w, c)
-	}
+func (c *Column) Def(w core.Writer) {
+	wDef(w, c)
 }
 
-func (c *Column) Expr() core.Builder {
-	return func(w core.Writer) {
-		wExpr(w, c)
-	}
+func (c *Column) Expr(w core.Writer) {
+	wExpr(w, c)
 }
 
-func (c *Column) Alias() core.Builder {
-	return func(w core.Writer) {
-		wAlias(w, c)
-	}
+func (c *Column) Alias(w core.Writer) {
+	wAlias(w, c)
 }
 
-func (c *Column) Base() core.Builder {
-	return func(w core.Writer) {
-		wBase(w, c)
-	}
+func (c *Column) Base(w core.Writer) {
+	w.Column(c.table, c.base)
 }
 
 // -- Aggregation
 
-func (c *Column) Count(distinct bool) { wAggr(c, distinct, countAggr) }
-func (c *Column) Sum(distinct bool)   { wAggr(c, distinct, sumAggr) }
-func (c *Column) Min(distinct bool)   { wAggr(c, distinct, minAggr) }
-func (c *Column) Max(distinct bool)   { wAggr(c, distinct, maxAggr) }
-func (c *Column) Avg(distinct bool)   { wAggr(c, distinct, avgAggr) }
+func (c *Column) Count(distinct bool) { c.builder.wAggr(distinct, countAggr) }
+func (c *Column) Sum(distinct bool)   { c.builder.wAggr(distinct, sumAggr) }
+func (c *Column) Min(distinct bool)   { c.builder.wAggr(distinct, minAggr) }
+func (c *Column) Max(distinct bool)   { c.builder.wAggr(distinct, maxAggr) }
+func (c *Column) Avg(distinct bool)   { c.builder.wAggr(distinct, avgAggr) }
 
 // -- Operation
 
-func (c *Column) Add(v any) { wOp(c, addOp, v) }
-func (c *Column) Sub(v any) { wOp(c, subOp, v) }
-func (c *Column) Mul(v any) { wOp(c, mulOp, v) }
-func (c *Column) Div(v any) { wOp(c, divOp, v) }
-func (c *Column) Mod(v any) { wOp(c, modOp, v) }
-func (c *Column) Wrap()     { wWrap(c) }
+func (c *Column) Add(v any) { c.builder.wOp(addOp, v) }
+func (c *Column) Sub(v any) { c.builder.wOp(subOp, v) }
+func (c *Column) Mul(v any) { c.builder.wOp(mulOp, v) }
+func (c *Column) Div(v any) { c.builder.wOp(divOp, v) }
+func (c *Column) Mod(v any) { c.builder.wOp(modOp, v) }
+func (c *Column) Wrap()     { c.builder.wWrap() }
 
 // -- Scalar
 
-func (c *Column) Lower() { wFunc(c, lowerFunc) }
-func (c *Column) Upper() { wFunc(c, upperFunc) }
-func (c *Column) Trim()  { wFunc(c, trimFunc) }
-func (c *Column) Round() { wFunc(c, roundFunc) }
-func (c *Column) Abs()   { wFunc(c, absFunc) }
+func (c *Column) Lower() { c.builder.wFunc(lowerFunc) }
+func (c *Column) Upper() { c.builder.wFunc(upperFunc) }
+func (c *Column) Trim()  { c.builder.wFunc(trimFunc) }
+func (c *Column) Round() { c.builder.wFunc(roundFunc) }
+func (c *Column) Abs()   { c.builder.wFunc(absFunc) }
 
 // -- Alias
 
-func (c *Column) As(value string) { wAs(c, value) }
+func (c *Column) As(value string) { c.builder.wAs(value) }

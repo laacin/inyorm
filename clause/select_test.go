@@ -11,14 +11,15 @@ import (
 
 func NewSelect() (*clause.Select, core.ColExpr, func(t *testing.T, cls string)) {
 	stmt := writer.NewStatement("", "users")
-	var c core.ColExpr = &column.ColExpr{Writer: stmt.Writer}
+	var c core.ColExpr = &column.ColExpr{}
 	cls := &clause.Select{}
 
 	run := func(t *testing.T, clause string) {
-		w := stmt.Writer()
-		cls.Build(w)
-		if val := w.ToString(); val != clause {
-			t.Errorf("\nmismatch result:\nExpect:\n%s\nHave:\n%s\n", clause, val)
+		stmt.SetClauses([]core.Clause{cls})
+		statement, _ := stmt.Build(writer.SelectOrder)
+
+		if statement != clause {
+			t.Errorf("\nmismatch result:\nExpect:\n%s\nHave:\n%s\n", clause, statement)
 		}
 	}
 
@@ -30,7 +31,7 @@ func TestSelect(t *testing.T) {
 		cls, c, run := NewSelect()
 		cls.Select([]any{"active", c.Col("name", "users")})
 
-		run(t, "SELECT 'active', a.name")
+		run(t, "SELECT 'active', name")
 	})
 
 	t.Run("distinct", func(t *testing.T) {
@@ -38,6 +39,6 @@ func TestSelect(t *testing.T) {
 		cls.Distinct()
 		cls.Select([]any{c.Col("age", "users")})
 
-		run(t, "SELECT DISTINCT a.age")
+		run(t, "SELECT DISTINCT age")
 	})
 }

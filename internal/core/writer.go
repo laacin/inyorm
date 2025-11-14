@@ -7,9 +7,10 @@ type Writer interface {
 	Char(v byte)
 
 	Value(v any, opts *WriterOpts)
-	ColRef(table string)
+	Column(table, name string)
 	Table(v string)
 
+	Split() Writer
 	ToString() string
 	Reset()
 }

@@ -25,7 +25,7 @@ func (stmt *SelectStatement) Build() (string, []any) {
 		stmt.orderByWrap, stmt.limitWrap, stmt.offsetWrap,
 	}
 	stmt.stmt.SetClauses(clauses)
-	return stmt.stmt.Build()
+	return stmt.stmt.Build(writer.SelectOrder)
 }
 
 func NewSelect(table string) (*SelectStatement, *ColumnExpr) {
@@ -44,5 +44,5 @@ func NewSelect(table string) (*SelectStatement, *ColumnExpr) {
 	}
 	statement.From(table)
 
-	return statement, newColExpr(stmt)
+	return statement, newColExpr(table)
 }

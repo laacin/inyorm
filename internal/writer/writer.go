@@ -33,13 +33,13 @@ func (w *Writer) Value(v any, opts *core.WriterOpts) {
 	case core.Column:
 		switch opts.ColType {
 		case core.ColTypBase:
-			val.Base()(w)
+			val.Base(w)
 		case core.ColTypExpr:
-			val.Expr()(w)
+			val.Expr(w)
 		case core.ColTypAlias:
-			val.Alias()(w)
+			val.Alias(w)
 		case core.ColTypDef:
-			val.Def()(w)
+			val.Def(w)
 		}
 
 	default:
@@ -47,15 +47,26 @@ func (w *Writer) Value(v any, opts *core.WriterOpts) {
 	}
 }
 
-func (w *Writer) ColRef(table string) {
-	ref := w.aliases.Get(table)
-	w.sb.WriteByte(ref)
+func (w *Writer) Column(table, name string) {
+	if w.aliases != nil && table != "" {
+		w.sb.WriteByte(w.aliases.Get(table))
+		w.sb.WriteByte('.')
+	}
+	w.sb.WriteString(name)
 }
 
 func (w *Writer) Table(v string) {
 	w.sb.WriteString(v)
-	w.sb.WriteByte(' ')
-	w.sb.WriteByte(w.aliases.Get(v))
+	if w.aliases != nil {
+		w.sb.WriteByte(' ')
+		w.sb.WriteByte(w.aliases.Get(v))
+	}
+}
+
+func (w *Writer) Split() core.Writer {
+	split := *w
+	split.Reset()
+	return &split
 }
 
 func (w *Writer) ToString() string {

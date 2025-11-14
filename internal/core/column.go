@@ -1,10 +1,10 @@
 package core
 
 type Column interface {
-	Def() Builder
-	Expr() Builder
-	Alias() Builder
-	Base() Builder
+	Def(Writer)
+	Expr(Writer)
+	Alias(Writer)
+	Base(Writer)
 
 	Count(distinct bool)
 	Sum(distinct bool)

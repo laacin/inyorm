@@ -2,110 +2,150 @@ package column
 
 import "github.com/laacin/inyorm/internal/core"
 
-func wBase(w core.Writer, col *Column) {
-	if col.table != "" {
-		w.ColRef(col.table)
-		w.Char('.')
+func wExpr(w core.Writer, c *Column) {
+	c.builder.build(w.Split(), c)
+
+	if c.value == "" {
+		w.Column(c.table, c.base)
+		return
 	}
-	w.Write(col.base)
+	w.Write(c.value)
 }
 
-func wExpr(w core.Writer, col *Column) {
-	if !col.custom {
-		wBase(w, col)
+func wAlias(w core.Writer, c *Column) {
+	c.builder.build(w.Split(), c)
+
+	if c.alias != "" {
+		w.Write(c.alias)
 		return
 	}
-	w.Write(col.expr)
+
+	if c.value == "" {
+		w.Column(c.table, c.base)
+		return
+	}
+	w.Write(c.value)
 }
 
-func wAlias(w core.Writer, col *Column) {
-	if !col.custom {
-		wBase(w, col)
+func wDef(w core.Writer, c *Column) {
+	c.builder.build(w.Split(), c)
+
+	if c.value == "" {
+		w.Column(c.table, c.base)
 		return
 	}
 
-	if col.alias != "" {
-		w.Write(col.alias)
-		return
-	}
-
-	wExpr(w, col)
-}
-
-func wDef(w core.Writer, col *Column) {
-	if !col.custom {
-		wBase(w, col)
-		return
-	}
-	w.Write(col.expr)
-	if col.alias != "" {
+	w.Write(c.value)
+	if c.alias != "" {
 		w.Write(" AS ")
-		w.Write(col.alias)
+		w.Write(c.alias)
 	}
 }
 
 // -- internal writers
 
-func wPrev(w core.Writer, col *Column) {
-	if !col.custom {
-		wBase(w, col)
-		col.custom = true
+type columnBuilder struct {
+	exprs       []core.Builder
+	aggregation core.Builder
+	alias       string
+}
+
+func (ch *columnBuilder) first(w core.Writer, c *Column) {
+	if c.value == "" {
+		w.Column(c.table, c.base)
+		return
 	}
-	w.Write(col.expr)
+	w.Write(c.value)
 }
 
-func wOp(col *Column, arg byte, value any) {
-	w := col.writer
-	w.Reset()
-
-	wPrev(w, col)
-	w.Char(' ')
-	w.Char(arg)
-	w.Char(' ')
-	w.Value(value, core.ColumnIdentWriteOpt)
-
-	col.expr = w.ToString()
-}
-
-func wFunc(col *Column, arg string) {
-	w := col.writer
-	w.Reset()
-
-	w.Write(arg)
-	w.Char('(')
-	wPrev(w, col)
-	w.Char(')')
-
-	col.expr = w.ToString()
-}
-
-func wWrap(col *Column) {
-	w := col.writer
-	w.Reset()
-
-	w.Char('(')
-	wPrev(w, col)
-	w.Char(')')
-
-	col.expr = w.ToString()
-}
-
-func wAggr(col *Column, distinct bool, aggr string) {
-	w := col.writer
-	w.Reset()
-
-	w.Write(aggr)
-	w.Char('(')
-	if distinct {
-		w.Write("DISTINCT ")
+func (ch *columnBuilder) build(w core.Writer, c *Column) {
+	if ch.exprs == nil && ch.aggregation == nil && ch.alias == "" {
+		return
 	}
-	wPrev(w, col)
-	w.Char(')')
 
-	col.expr = w.ToString()
+	if ch.exprs != nil || ch.aggregation != nil {
+		ch.first(w, c)
+	}
+	if ch.exprs != nil {
+		for _, expr := range ch.exprs {
+			expr(w)
+		}
+		ch.exprs = nil
+	}
+
+	if ch.aggregation != nil {
+		ch.aggregation(w)
+		ch.aggregation = nil
+	}
+
+	if ch.alias != "" {
+		c.alias = ch.alias
+		ch.alias = ""
+	}
+
+	c.value = w.ToString()
+	w.Reset()
 }
 
-func wAs(col *Column, value string) {
-	col.custom = true
-	col.alias = value
+func (cb *columnBuilder) wExpr(expr core.Builder) {
+	cb.exprs = append(cb.exprs, expr)
+}
+
+func (cb *columnBuilder) wOp(arg byte, value any) {
+	expr := func(w core.Writer) {
+		prev := w.ToString()
+		w.Reset()
+
+		w.Write(prev)
+		w.Char(' ')
+		w.Char(arg)
+		w.Char(' ')
+		w.Value(value, core.ColumnIdentWriteOpt)
+	}
+	cb.exprs = append(cb.exprs, expr)
+}
+
+func (cb *columnBuilder) wFunc(arg string) {
+	expr := func(w core.Writer) {
+		prev := w.ToString()
+		w.Reset()
+
+		w.Write(arg)
+		w.Char('(')
+		w.Write(prev)
+		w.Char(')')
+	}
+	cb.exprs = append(cb.exprs, expr)
+}
+
+func (cb *columnBuilder) wWrap() {
+	expr := func(w core.Writer) {
+		prev := w.ToString()
+		w.Reset()
+
+		w.Char('(')
+		w.Write(prev)
+		w.Char(')')
+	}
+	cb.exprs = append(cb.exprs, expr)
+}
+
+func (cb *columnBuilder) wAggr(distinct bool, aggr string) {
+	expr := func(w core.Writer) {
+		prev := w.ToString()
+		w.Reset()
+
+		w.Write(aggr)
+		w.Char('(')
+		if distinct {
+			w.Write("DISTINCT ")
+		}
+		w.Write(prev)
+		w.Char(')')
+	}
+	cb.aggregation = expr
+}
+
+func (cb *columnBuilder) wAs(name string) {
+	cb.alias = name
 }

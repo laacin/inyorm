@@ -28,7 +28,7 @@ func TestSelectStmt(t *testing.T) {
 		q.Where(c.Col("id")).Equal("uuid")
 		q.Limit(1)
 
-		exp := "SELECT * FROM users a WHERE (a.id = ?) LIMIT 1"
+		exp := "SELECT * FROM users WHERE (id = ?) LIMIT 1"
 
 		run(t, q, exp, []any{"uuid"})
 	})
@@ -104,15 +104,15 @@ func TestSelectStmt(t *testing.T) {
 		exp := "SELECT "
 		exp += "CONCAT('User: ', a.firstname, ' ', a.lastname, ' ', "
 		exp += "CASE WHEN (a.banned IS NULL) THEN "
-		exp += "CONCAT('with role: ', c.name, ' has ', COUNT(b.id), ' posts and', ' his last login was: ', a.last_login) "
+		exp += "CONCAT('with role: ', b.name, ' has ', COUNT(c.id), ' posts and', ' his last login was: ', a.last_login) "
 		exp += "ELSE CONCAT('was banned at: ', a.banned) END) AS user_info "
 		exp += "FROM users a "
-		exp += "INNER JOIN posts b ON (b.user_id = a.id) "
+		exp += "INNER JOIN posts c ON (c.user_id = a.id) "
 		exp += "INNER JOIN user_roles d ON (d.user_id = a.id) "
-		exp += "INNER JOIN roles c ON (c.id = d.role_id) "
+		exp += "INNER JOIN roles b ON (b.id = d.role_id) "
 		exp += "WHERE (a.age > ? AND a.age < ?) "
-		exp += "GROUP BY b.id "
-		exp += "HAVING (COUNT(b.id) > 10) "
+		exp += "GROUP BY c.id "
+		exp += "HAVING (COUNT(c.id) > 10) "
 		exp += "ORDER BY a.age DESC "
 		exp += "LIMIT 100 OFFSET 20"
 
