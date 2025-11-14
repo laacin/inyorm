@@ -70,9 +70,7 @@ func resolveSlice(val reflect.Value) error {
 	switch stTyp.Kind() {
 	case reflect.Struct: // continue
 	case reflect.Pointer:
-		if stTyp.Elem().Kind() != reflect.Struct {
-			return ErrExpectedSlice
-		}
+		return ErrSlicePtr
 	default:
 		return ErrExpectedSlice
 	}

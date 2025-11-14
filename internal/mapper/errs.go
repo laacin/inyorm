@@ -8,6 +8,7 @@ var (
 	ErrInvalidType            = errors.New("invalid type")
 	ErrMixedSliceElementTypes = errors.New("slice elements must all be of the same struct type")
 	ErrEmptyValues            = errors.New("cannot call WithValues with an empty slice or nil value")
+	ErrSlicePtr               = errors.New("inyorm: slices of pointers not supported, use []T instead of []*T")
 
 	ErrExpectedStruct        = errors.New("expected struct")
 	ErrExpectedSlice         = errors.New("expected slice of structs")

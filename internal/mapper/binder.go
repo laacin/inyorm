@@ -5,7 +5,13 @@ import (
 	"reflect"
 )
 
-func BindRows(rows *sql.Rows, columnTag string, values any) error {
+type RowScanner interface {
+	Columns() ([]string, error)
+	Next() bool
+	Scan(...any) error
+}
+
+func BindRows(rows RowScanner, columnTag string, values any) error {
 	val, typ, err := resolveInput(false, values)
 	if err != nil {
 		return err
@@ -32,7 +38,7 @@ func indexFields(columnTag string, typ reflect.Type) map[string][]int {
 	return indexField
 }
 
-func bindStruct(rows *sql.Rows, columnTag string, strct reflect.Value) error {
+func bindStruct(rows RowScanner, columnTag string, strct reflect.Value) error {
 	indexMap := indexFields(columnTag, strct.Type())
 
 	cols, err := rows.Columns()
@@ -60,7 +66,7 @@ func bindStruct(rows *sql.Rows, columnTag string, strct reflect.Value) error {
 	return nil
 }
 
-func bindSlice(rows *sql.Rows, columnTag string, slice reflect.Value) error {
+func bindSlice(rows RowScanner, columnTag string, slice reflect.Value) error {
 	typ := slice.Type().Elem()
 	if typ.Kind() == reflect.Pointer {
 		typ = typ.Elem()
