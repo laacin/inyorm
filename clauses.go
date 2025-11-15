@@ -5,8 +5,16 @@ import "github.com/laacin/inyorm/clause"
 type (
 	insertIntoCls struct{ insertIntoWrap *clause.InsertInto }
 
-	selectCls struct{ selectWrap *clause.Select }
-	fromCls   struct{ fromWrap *clause.From }
+	selectCls struct {
+		selectWrap *clause.Select
+		selectNext *selectNext
+	}
+	selectNext struct {
+		wrap **clause.Select
+		ctx  *selectCls
+	}
+
+	fromCls struct{ fromWrap *clause.From }
 
 	joinCls struct {
 		joinWrap *clause.Join
@@ -36,13 +44,22 @@ type (
 
 // ----- Constructors -----
 
-func wrapSelect() *selectCls   { return &selectCls{} }
 func wrapFrom() *fromCls       { return &fromCls{} }
 func wrapWhere() *whereCls     { return &whereCls{} }
 func wrapGroupBy() *groupByCls { return &groupByCls{} }
 func wrapHaving() *havingCls   { return &havingCls{} }
 func wrapLimit() *limitCls     { return &limitCls{} }
 func wrapOffset() *offsetCls   { return &offsetCls{} }
+
+func wrapSelect() *selectCls {
+	wrapper := &selectCls{}
+	next := &selectNext{
+		ctx:  wrapper,
+		wrap: &wrapper.selectWrap,
+	}
+	wrapper.selectNext = next
+	return wrapper
+}
 
 func wrapJoin() *joinCls {
 	wrapper := &joinCls{}
@@ -80,21 +97,21 @@ func (cls *insertIntoCls) Insert(values any) {
 	// wrp.Values(vals)
 }
 
-// Distinct writes DISTINCT in the SELECT clause
-//
-// @SQL: SELECT DISTINCT ...
-func (cls *selectCls) Distinct() *selectCls {
-	wrp := lazyInit(&cls.selectWrap)
-	wrp.Distinct()
-	return cls
-}
-
 // Select writes the SELECT clause values
 //
-// @SQL: SELECT `DISTINCT?` `val1`, `val2`, `val3` ...
-func (cls *selectCls) Select(values ...Value) {
+// @SQL: SELECT `DISTINCT?` `val1`, `val2`, `val3` ... [SelectNext]
+func (cls *selectCls) Select(values ...Value) *selectNext {
 	wrp := lazyInit(&cls.selectWrap)
 	wrp.Select(vMany(values))
+	return cls.selectNext
+}
+
+// Distinct writes DISTINCT in the SELECT clause
+//
+// @SQL: SELECT `DISTINCT` ...
+func (cls *selectNext) Distinct() {
+	ptr := *cls.wrap
+	ptr.Distinct()
 }
 
 // From writes the FROM clause
