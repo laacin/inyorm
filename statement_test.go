@@ -21,8 +21,10 @@ func run(t *testing.T, q Stmt, exp string, vals []any) {
 }
 
 func TestSelectStmt(t *testing.T) {
+	qe := inyorm.New("", nil)
+
 	t.Run("simple", func(t *testing.T) {
-		q, c := inyorm.NewSelect("users")
+		q, c := qe.NewSelect("users")
 
 		q.Select(c.All())
 		q.Where(c.Col("id")).Equal("uuid")
@@ -34,7 +36,7 @@ func TestSelectStmt(t *testing.T) {
 	})
 
 	t.Run("pagination", func(t *testing.T) {
-		q, c := inyorm.NewSelect("users")
+		q, c := qe.NewSelect("users")
 		var (
 			id      = c.Col("id")
 			age     = c.Col("age")
@@ -60,7 +62,7 @@ func TestSelectStmt(t *testing.T) {
 	})
 
 	t.Run("complex", func(t *testing.T) {
-		q, c := inyorm.NewSelect("users")
+		q, c := qe.NewSelect("users")
 		var (
 			banned  = c.Col("banned")
 			fname   = c.Col("firstname")

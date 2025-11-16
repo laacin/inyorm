@@ -27,22 +27,3 @@ func (stmt *SelectStatement) Build() (string, []any) {
 	stmt.stmt.SetClauses(clauses)
 	return stmt.stmt.Build(writer.SelectOrder)
 }
-
-func NewSelect(table string) (*SelectStatement, *ColumnExpr) {
-	stmt := writer.NewStatement("", table)
-	statement := &SelectStatement{
-		stmt:       stmt,
-		selectCls:  wrapSelect(),
-		fromCls:    wrapFrom(),
-		joinCls:    wrapJoin(),
-		whereCls:   wrapWhere(),
-		groupByCls: wrapGroupBy(),
-		havingCls:  wrapHaving(),
-		orderByCls: wrapOrderBy(),
-		limitCls:   wrapLimit(),
-		offsetCls:  wrapOffset(),
-	}
-	statement.From(table)
-
-	return statement, newColExpr(table)
-}
