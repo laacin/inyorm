@@ -15,8 +15,8 @@ func NewOrderBy() (*clause.OrderBy, core.ColExpr, func(t *testing.T, cls string)
 	cls := &clause.OrderBy{}
 
 	run := func(t *testing.T, clause string) {
-		stmt.SetClauses([]core.Clause{cls})
-		statement, _ := stmt.Build(writer.SelectOrder)
+		stmt.SetClauses([]core.Clause{cls}, writer.SelectOrder)
+		statement, _ := stmt.Build()
 
 		if statement != clause {
 			t.Errorf("\nmismatch result:\nExpect:\n%s\nHave:\n%s\n", clause, statement)

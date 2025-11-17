@@ -6,7 +6,7 @@ import (
 )
 
 type SelectStatement struct {
-	stmt *writer.Statement
+	builder *writer.StatementBuilder
 	*selectCls
 	*fromCls
 	*joinCls
@@ -24,6 +24,6 @@ func (stmt *SelectStatement) Build() (string, []any) {
 		stmt.whereWrap, stmt.groupByWrap, stmt.havingWrap,
 		stmt.orderByWrap, stmt.limitWrap, stmt.offsetWrap,
 	}
-	stmt.stmt.SetClauses(clauses)
-	return stmt.stmt.Build(writer.SelectOrder)
+	stmt.builder.SetClauses(clauses, writer.SelectOrder)
+	return stmt.builder.Build()
 }

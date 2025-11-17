@@ -16,8 +16,8 @@ func NewGroupBy() (*clause.GroupBy, *clause.Having, core.ColExpr, func(t *testin
 	h := &clause.Having{}
 
 	run := func(t *testing.T, clause string) {
-		stmt.SetClauses([]core.Clause{gb, h})
-		statement, _ := stmt.Build(writer.SelectOrder)
+		stmt.SetClauses([]core.Clause{gb, h}, writer.SelectOrder)
+		statement, _ := stmt.Build()
 
 		if statement != clause {
 			t.Errorf("\nmismatch result:\nExpect:\n%s\nHave:\n%s\n", clause, statement)

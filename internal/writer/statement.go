@@ -2,34 +2,39 @@ package writer
 
 import "github.com/laacin/inyorm/internal/core"
 
-type Statement struct {
-	from    string
-	dialect string
-	ph      Placeholder
-	alias   *Alias
-	clauses map[core.ClauseType]core.Clause
+type StatementBuilder struct {
+	Dialect      string
+	Table        string
+	Aliases      Alias
+	Placeholders Placeholder
+	Clauses      map[core.ClauseType]core.Clause
+	ClauseOrder  []core.ClauseType
 }
 
-func NewStatement(dialect string, defaultTable string) *Statement {
-	stmt := &Statement{
-		from:    defaultTable,
-		dialect: dialect,
-		ph:      Placeholder{dialect: dialect},
+func NewStatement(dialect string, defaultTable string) *StatementBuilder {
+	builder := &StatementBuilder{
+		Table:   defaultTable,
+		Dialect: dialect,
 	}
 
-	return stmt
+	builder.Placeholders.dialect = dialect
+	if defaultTable != "" {
+		builder.Aliases.Get(defaultTable)
+	}
+
+	return builder
 }
 
-func (stmt *Statement) Build(order []core.ClauseType) (string, []any) {
-	if cls, exists := stmt.clauses[core.ClsTypJoin]; exists && cls.IsDeclared() {
-		stmt.alias = &Alias{}
-		stmt.alias.Get(stmt.from)
+func (sb *StatementBuilder) Build() (string, []any) {
+	w := &Writer{ph: &sb.Placeholders}
+
+	if cls, exists := sb.Clauses[core.ClsTypJoin]; exists && cls.IsDeclared() {
+		w.aliases = &sb.Aliases
 	}
 
-	w := &Writer{ph: &stmt.ph, aliases: stmt.alias}
 	i := 0
-	for _, name := range order {
-		cls, exists := stmt.clauses[name]
+	for _, name := range sb.ClauseOrder {
+		cls, exists := sb.Clauses[name]
 		if !exists || !cls.IsDeclared() {
 			continue
 		}
@@ -37,16 +42,18 @@ func (stmt *Statement) Build(order []core.ClauseType) (string, []any) {
 		if i > 0 {
 			w.Char(' ')
 		}
+
 		cls.Build(w)
 		i++
 	}
 
-	return w.ToString(), stmt.ph.values
+	return w.ToString(), sb.Placeholders.values
 }
 
-func (stmt *Statement) SetClauses(clauses []core.Clause) {
-	stmt.clauses = make(map[core.ClauseType]core.Clause, len(clauses))
+func (sb *StatementBuilder) SetClauses(clauses []core.Clause, order []core.ClauseType) {
+	sb.ClauseOrder = order
+	sb.Clauses = make(map[core.ClauseType]core.Clause, len(clauses))
 	for _, cls := range clauses {
-		stmt.clauses[cls.Name()] = cls
+		sb.Clauses[cls.Name()] = cls
 	}
 }

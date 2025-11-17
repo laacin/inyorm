@@ -23,7 +23,7 @@ func New(dialect string, instance *sql.DB) *QueryEngine {
 func (qe *QueryEngine) NewSelect(table string) (*SelectStatement, *ColumnExpr) {
 	stmt := writer.NewStatement(qe.dialect, table)
 	statement := &SelectStatement{
-		stmt:       stmt,
+		builder:    stmt,
 		selectCls:  wrapSelect(),
 		fromCls:    wrapFrom(),
 		joinCls:    wrapJoin(),

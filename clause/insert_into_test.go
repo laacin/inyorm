@@ -21,8 +21,8 @@ func NewInsert(dialect ...string) (*clause.InsertInto, core.ColExpr, func(t *tes
 	cls := &clause.InsertInto{}
 
 	run := func(t *testing.T, clause string, vals []any) {
-		stmt.SetClauses([]core.Clause{cls})
-		statement, values := stmt.Build(writer.InsertOrder)
+		stmt.SetClauses([]core.Clause{cls}, writer.InsertOrder)
+		statement, values := stmt.Build()
 
 		if statement != clause {
 			t.Errorf("\nmismatch result:\nExpect:\n%s\nHave:\n%s\n", clause, statement)
