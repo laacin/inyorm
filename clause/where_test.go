@@ -15,13 +15,13 @@ func NewWhere(dialect ...string) (*clause.Where, core.ColExpr, func(t *testing.T
 		d = dialect[0]
 	}
 
-	stmt := writer.NewStatement(d, "users")
+	q := writer.NewQuery(d, "users")
 	var c core.ColExpr = &column.ColExpr{}
 	cls := &clause.Where{}
 
 	run := func(t *testing.T, clause string, vals []any) {
-		stmt.SetClauses([]core.Clause{cls}, writer.SelectOrder)
-		statement, values := stmt.Build()
+		q.SetClauses([]core.Clause{cls}, writer.SelectOrder)
+		statement, values := q.Build()
 
 		if statement != clause {
 			t.Errorf("\nmismatch result:\nExpect:\n%s\nHave:\n%s\n", clause, statement)

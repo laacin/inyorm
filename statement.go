@@ -1,12 +1,15 @@
 package inyorm
 
 import (
+	"context"
+
 	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/writer"
 )
 
 type SelectStatement struct {
-	builder *writer.StatementBuilder
+	ctx   context.Context
+	query *writer.Query
 	*selectCls
 	*fromCls
 	*joinCls
@@ -24,6 +27,7 @@ func (stmt *SelectStatement) Build() (string, []any) {
 		stmt.whereWrap, stmt.groupByWrap, stmt.havingWrap,
 		stmt.orderByWrap, stmt.limitWrap, stmt.offsetWrap,
 	}
-	stmt.builder.SetClauses(clauses, writer.SelectOrder)
-	return stmt.builder.Build()
+
+	stmt.query.SetClauses(clauses, writer.SelectOrder)
+	return stmt.query.Build()
 }

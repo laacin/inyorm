@@ -16,13 +16,13 @@ func NewInsert(dialect ...string) (*clause.InsertInto, core.ColExpr, func(t *tes
 		d = dialect[0]
 	}
 
-	stmt := writer.NewStatement(d, "users")
+	q := writer.NewQuery(d, "users")
 	var c core.ColExpr = &column.ColExpr{}
 	cls := &clause.InsertInto{}
 
 	run := func(t *testing.T, clause string, vals []any) {
-		stmt.SetClauses([]core.Clause{cls}, writer.InsertOrder)
-		statement, values := stmt.Build()
+		q.SetClauses([]core.Clause{cls}, writer.InsertOrder)
+		statement, values := q.Build()
 
 		if statement != clause {
 			t.Errorf("\nmismatch result:\nExpect:\n%s\nHave:\n%s\n", clause, statement)

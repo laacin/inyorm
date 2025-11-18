@@ -10,13 +10,13 @@ import (
 )
 
 func NewJoin() (*clause.Join, core.ColExpr, func(t *testing.T, cls string)) {
-	stmt := writer.NewStatement("", "users")
+	q := writer.NewQuery("", "users")
 	var c core.ColExpr = &column.ColExpr{}
 	cls := &clause.Join{}
 
 	run := func(t *testing.T, clause string) {
-		stmt.SetClauses([]core.Clause{cls}, writer.SelectOrder)
-		statement, _ := stmt.Build()
+		q.SetClauses([]core.Clause{cls}, writer.SelectOrder)
+		statement, _ := q.Build()
 
 		if statement != clause {
 			t.Errorf("\nmismatch result:\nExpect:\n%s\nHave:\n%s\n", clause, statement)

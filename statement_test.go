@@ -1,6 +1,7 @@
 package inyorm_test
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
@@ -24,7 +25,7 @@ func TestSelectStmt(t *testing.T) {
 	qe := inyorm.New("", nil)
 
 	t.Run("simple", func(t *testing.T) {
-		q, c := qe.NewSelect("users")
+		q, c := qe.NewSelect(context.Background(), "users")
 
 		q.Select(c.All())
 		q.Where(c.Col("id")).Equal("uuid")
@@ -36,7 +37,7 @@ func TestSelectStmt(t *testing.T) {
 	})
 
 	t.Run("pagination", func(t *testing.T) {
-		q, c := qe.NewSelect("users")
+		q, c := qe.NewSelect(context.Background(), "users")
 		var (
 			id      = c.Col("id")
 			age     = c.Col("age")
@@ -62,7 +63,7 @@ func TestSelectStmt(t *testing.T) {
 	})
 
 	t.Run("complex", func(t *testing.T) {
-		q, c := qe.NewSelect("users")
+		q, c := qe.NewSelect(context.Background(), "users")
 		var (
 			banned  = c.Col("banned")
 			fname   = c.Col("firstname")

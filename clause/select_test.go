@@ -10,7 +10,7 @@ import (
 )
 
 func NewSelect() (*clause.Select, core.ColExpr, func(t *testing.T, cls string)) {
-	stmt := writer.NewStatement("", "users")
+	stmt := writer.NewQuery("", "users")
 	var c core.ColExpr = &column.ColExpr{}
 	cls := &clause.Select{}
 
