@@ -12,9 +12,13 @@ type Placeholder struct {
 	values  []any
 }
 
-func (ph *Placeholder) next(value any) string {
-	ph.count++
+func (ph *Placeholder) withValue(value any) string {
 	ph.values = append(ph.values, value)
+	return ph.write()
+}
+
+func (ph *Placeholder) write() string {
+	ph.count++
 
 	switch ph.dialect {
 	case core.Postgres:

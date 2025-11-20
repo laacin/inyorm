@@ -1,33 +1,41 @@
 package inyorm
 
 import (
-	"context"
-
 	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/writer"
 )
 
 type SelectStatement struct {
-	ctx   context.Context
 	query *writer.Query
-	*selectCls
-	*fromCls
-	*joinCls
-	*whereCls
-	*groupByCls
-	*havingCls
-	*orderByCls
-	*limitCls
-	*offsetCls
+	clsSelect
+	clsFrom
+	clsJoin
+	clsWhere
+	clsGroupBy
+	clsHaving
+	clsOrderBy
+	clsLimit
+	clsOffset
 }
 
-func (stmt *SelectStatement) Build() (string, []any) {
+func (stmt *SelectStatement) Builder() *writer.Query {
 	clauses := []core.Clause{
-		stmt.selectWrap, stmt.fromWrap, stmt.joinWrap,
-		stmt.whereWrap, stmt.groupByWrap, stmt.havingWrap,
-		stmt.orderByWrap, stmt.limitWrap, stmt.offsetWrap,
+		&stmt.clsSelect, &stmt.clsFrom, &stmt.clsJoin,
+		&stmt.clsWhere, &stmt.clsGroupBy, &stmt.clsHaving,
+		&stmt.clsOrderBy, &stmt.clsLimit, &stmt.clsOffset,
 	}
 
-	stmt.query.SetClauses(clauses, writer.SelectOrder)
-	return stmt.query.Build()
+	stmt.query.SetClauses(clauses, []core.ClauseType{
+		core.ClsTypSelect,
+		core.ClsTypFrom,
+		core.ClsTypJoin,
+		core.ClsTypWhere,
+		core.ClsTypGroupBy,
+		core.ClsTypHaving,
+		core.ClsTypOrderBy,
+		core.ClsTypLimit,
+		core.ClsTypOffset,
+	})
+
+	return stmt.query
 }

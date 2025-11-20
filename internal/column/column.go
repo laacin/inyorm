@@ -1,56 +1,107 @@
 package column
 
-import "github.com/laacin/inyorm/internal/core"
-
-type Column struct {
-	table   string
-	base    string
-	value   string
-	alias   string
-	builder columnBuilder
-}
-
-func (c *Column) Def(w core.Writer) {
-	wDef(w, c)
-}
-
-func (c *Column) Expr(w core.Writer) {
-	wExpr(w, c)
-}
-
-func (c *Column) Alias(w core.Writer) {
-	wAlias(w, c)
-}
-
-func (c *Column) Base(w core.Writer) {
-	w.Column(c.table, c.base)
+type Column[Self, Value any] struct {
+	Table    string
+	BaseName string
+	alias    string
+	value    string
+	Builder  columnBuilder[Self, Value]
 }
 
 // -- Aggregation
 
-func (c *Column) Count(distinct bool) { c.builder.wAggr(distinct, countAggr) }
-func (c *Column) Sum(distinct bool)   { c.builder.wAggr(distinct, sumAggr) }
-func (c *Column) Min(distinct bool)   { c.builder.wAggr(distinct, minAggr) }
-func (c *Column) Max(distinct bool)   { c.builder.wAggr(distinct, maxAggr) }
-func (c *Column) Avg(distinct bool)   { c.builder.wAggr(distinct, avgAggr) }
+func (c *Column[Self, Value]) Count(distinct ...bool) Self {
+	dist := len(distinct) > 0 && distinct[0]
+	c.Builder.wAggr(dist, countAggr)
+	return any(c).(Self)
+}
+
+func (c *Column[Self, Value]) Sum(distinct ...bool) Self {
+	dist := len(distinct) > 0 && distinct[0]
+	c.Builder.wAggr(dist, sumAggr)
+	return any(c).(Self)
+}
+
+func (c *Column[Self, Value]) Min(distinct ...bool) Self {
+	dist := len(distinct) > 0 && distinct[0]
+	c.Builder.wAggr(dist, minAggr)
+	return any(c).(Self)
+}
+
+func (c *Column[Self, Value]) Max(distinct ...bool) Self {
+	dist := len(distinct) > 0 && distinct[0]
+	c.Builder.wAggr(dist, maxAggr)
+	return any(c).(Self)
+}
+
+func (c *Column[Self, Value]) Avg(distinct ...bool) Self {
+	dist := len(distinct) > 0 && distinct[0]
+	c.Builder.wAggr(dist, avgAggr)
+	return any(c).(Self)
+}
 
 // -- Operation
 
-func (c *Column) Add(v any) { c.builder.wOp(addOp, v) }
-func (c *Column) Sub(v any) { c.builder.wOp(subOp, v) }
-func (c *Column) Mul(v any) { c.builder.wOp(mulOp, v) }
-func (c *Column) Div(v any) { c.builder.wOp(divOp, v) }
-func (c *Column) Mod(v any) { c.builder.wOp(modOp, v) }
-func (c *Column) Wrap()     { c.builder.wWrap() }
+func (c *Column[Self, Value]) Add(v Value) Self {
+	c.Builder.wOp(addOp, v)
+	return any(c).(Self)
+}
+
+func (c *Column[Self, Value]) Sub(v Value) Self {
+	c.Builder.wOp(subOp, v)
+	return any(c).(Self)
+}
+
+func (c *Column[Self, Value]) Mul(v Value) Self {
+	c.Builder.wOp(mulOp, v)
+	return any(c).(Self)
+}
+
+func (c *Column[Self, Value]) Div(v Value) Self {
+	c.Builder.wOp(divOp, v)
+	return any(c).(Self)
+}
+
+func (c *Column[Self, Value]) Mod(v Value) Self {
+	c.Builder.wOp(modOp, v)
+	return any(c).(Self)
+}
+
+func (c *Column[Self, Value]) Wrap() Self {
+	c.Builder.wWrap()
+	return any(c).(Self)
+}
 
 // -- Scalar
 
-func (c *Column) Lower() { c.builder.wFunc(lowerFunc) }
-func (c *Column) Upper() { c.builder.wFunc(upperFunc) }
-func (c *Column) Trim()  { c.builder.wFunc(trimFunc) }
-func (c *Column) Round() { c.builder.wFunc(roundFunc) }
-func (c *Column) Abs()   { c.builder.wFunc(absFunc) }
+func (c *Column[Self, Value]) Lower() Self {
+	c.Builder.wFunc(lowerFunc)
+	return any(c).(Self)
+}
+
+func (c *Column[Self, Value]) Upper() Self {
+	c.Builder.wFunc(upperFunc)
+	return any(c).(Self)
+}
+
+func (c *Column[Self, Value]) Trim() Self {
+	c.Builder.wFunc(trimFunc)
+	return any(c).(Self)
+}
+
+func (c *Column[Self, Value]) Round() Self {
+	c.Builder.wFunc(roundFunc)
+	return any(c).(Self)
+}
+
+func (c *Column[Self, Value]) Abs() Self {
+	c.Builder.wFunc(absFunc)
+	return any(c).(Self)
+}
 
 // -- Alias
 
-func (c *Column) As(value string) { c.builder.wAs(value) }
+func (c *Column[Self, Value]) As(value string) Self {
+	c.Builder.wAs(value)
+	return any(c).(Self)
+}

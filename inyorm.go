@@ -1,39 +1,29 @@
 package inyorm
 
 import (
-	"context"
 	"database/sql"
 
+	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/writer"
 )
 
-type QueryEngine struct {
-	dialect string
+type Engine struct {
+	cfg *core.Config
+	db  *sql.DB
 }
 
-func New(dialect string, db *sql.DB) *QueryEngine {
-	qe := &QueryEngine{dialect: dialect}
-
-	return qe
+func New(dialect string, db *sql.DB, opts *Options) *Engine {
+	cfg := resolveOpts(dialect, &opts)
+	return &Engine{cfg: cfg, db: db}
 }
 
 // ---- Statements
 
-func (qe *QueryEngine) NewSelect(ctx context.Context, table string) (*SelectStatement, *ColumnExpr) {
-	query := writer.NewQuery(qe.dialect, table)
-	stmt := &SelectStatement{
-		query:      query,
-		selectCls:  wrapSelect(),
-		fromCls:    wrapFrom(),
-		joinCls:    wrapJoin(),
-		whereCls:   wrapWhere(),
-		groupByCls: wrapGroupBy(),
-		havingCls:  wrapHaving(),
-		orderByCls: wrapOrderBy(),
-		limitCls:   wrapLimit(),
-		offsetCls:  wrapOffset(),
-	}
-	stmt.From(table)
+func (e *Engine) NewSelect(table string) (SelectStmt, ColumnBuilder) {
+	query := writer.NewQuery(table, e.cfg)
 
-	return stmt, newColExpr(table)
+	stmt := &SelectStatement{query: query}
+	colBldr := ColumnBuilder(&colBuilder{Table: table})
+
+	return stmt, colBldr
 }

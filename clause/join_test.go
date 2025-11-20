@@ -1,30 +1,6 @@
 package clause_test
 
-import (
-	"testing"
-
-	"github.com/laacin/inyorm/clause"
-	"github.com/laacin/inyorm/internal/column"
-	"github.com/laacin/inyorm/internal/core"
-	"github.com/laacin/inyorm/internal/writer"
-)
-
-func NewJoin() (*clause.Join, core.ColExpr, func(t *testing.T, cls string)) {
-	q := writer.NewQuery("", "users")
-	var c core.ColExpr = &column.ColExpr{}
-	cls := &clause.Join{}
-
-	run := func(t *testing.T, clause string) {
-		q.SetClauses([]core.Clause{cls}, writer.SelectOrder)
-		statement, _ := q.Build()
-
-		if statement != clause {
-			t.Errorf("\nmismatch result:\nExpect:\n%s\nHave:\n%s\n", clause, statement)
-		}
-	}
-
-	return cls, c, run
-}
+import "testing"
 
 func TestJoin(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
@@ -32,32 +8,28 @@ func TestJoin(t *testing.T) {
 
 		id := c.Col("id", "users")
 
-		cls.Join("INNER", "posts")
-		cls.On(c.Col("user_id", "posts")).Equal(id)
+		cls.Join("posts").On(c.Col("user_id", "posts")).Equal(id)
 
 		exp := "INNER JOIN posts b ON (b.user_id = a.id)"
-		run(t, exp)
+		run(t, exp, nil)
 	})
 
 	t.Run("many_to_many", func(t *testing.T) {
 		cls, c, run := NewJoin()
 		id := c.Col("id", "users")
 
-		cls.Join("INNER", "posts")
-		cls.On(c.Col("user_id", "posts")).Equal(id)
+		cls.Join("posts").On(c.Col("user_id", "posts")).Equal(id)
 
-		cls.Join("INNER", "user_roles")
-		cls.On(c.Col("user_id", "user_roles")).Equal(id)
+		cls.Join("user_roles").On(c.Col("user_id", "user_roles")).Equal(id)
 
-		cls.Join("INNER", "roles")
-		cls.On(c.Col("id", "roles")).Equal(c.Col("role_id", "user_roles"))
+		cls.Join("roles").On(c.Col("id", "roles")).Equal(c.Col("role_id", "user_roles"))
 
 		exp := "INNER JOIN posts b ON (b.user_id = a.id)"
 		exp += " "
 		exp += "INNER JOIN user_roles c ON (c.user_id = a.id)"
 		exp += " "
 		exp += "INNER JOIN roles d ON (d.id = c.role_id)"
-		run(t, exp)
+		run(t, exp, nil)
 	})
 
 	t.Run("complex_many_to_many_with_conditions", func(t *testing.T) {
@@ -75,38 +47,24 @@ func TestJoin(t *testing.T) {
 			roleIDRoles    = c.Col("id", "roles")
 		)
 
-		cls.Join("INNER", "posts")
-		on := cls.On(userIDPosts)
-		on.Equal(id)
-		on.And(postPublished)
-		on.Equal(true)
+		cls.Join("posts").On(userIDPosts).
+			Equal(id).And(postPublished).Equal(true)
 
-		cls.Join("INNER", "user_roles")
-		on = cls.On(userIDUserRole)
-		on.Equal(id)
-		on.And(assignedAt)
-		on.Not()
-		on.IsNull()
+		cls.Join("user_roles").On(userIDUserRole).
+			Equal(id).And(assignedAt).Not().IsNull()
 
-		cls.Join("INNER", "roles")
-		on = cls.On(roleIDRoles)
-		on.Equal(roleID)
-		on.And(roleName)
-		on.In([]any{"admin", "editor", "manager"})
-		on.And(active)
-		on.Equal(true)
+		cls.Join("roles").On(roleIDRoles).
+			Equal(roleID).
+			And(roleName).
+			In("admin", "editor", "manager").
+			And(active).
+			Equal(true)
 
 		exp := "INNER JOIN posts b ON (b.user_id = a.id AND b.published = 1)"
 		exp += " "
 		exp += "INNER JOIN user_roles c ON (c.user_id = a.id AND c.assigned_at IS NOT NULL)"
 		exp += " "
 		exp += "INNER JOIN roles d ON (d.id = c.role_id AND d.name IN ('admin', 'editor', 'manager') AND a.active = 1)"
-		run(t, exp)
-	})
-
-	t.Run("cross_join", func(t *testing.T) {
-		cls, _, run := NewJoin()
-		cls.Join("CROSS", "building")
-		run(t, "CROSS JOIN building b")
+		run(t, exp, nil)
 	})
 }

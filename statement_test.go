@@ -1,19 +1,25 @@
 package inyorm_test
 
 import (
-	"context"
 	"reflect"
 	"testing"
 
 	"github.com/laacin/inyorm"
+	"github.com/laacin/inyorm/internal/writer"
 )
 
-type Stmt interface{ Build() (string, []any) }
+type Stmt interface{ Builder() *writer.Query }
 
-func run(t *testing.T, q Stmt, exp string, vals []any) {
-	stmt, values := q.Build()
-	if stmt != exp {
-		t.Errorf("mismatch statement:\nExpect:\n%s\nHave:\n%s", exp, stmt)
+func run(t *testing.T, stmt any, exp string, vals []any) {
+	st, ok := stmt.(Stmt)
+	if !ok {
+		t.Error("invalid stmt")
+	}
+
+	query, values := st.Builder().Build()
+
+	if query != exp {
+		t.Errorf("mismatch query:\nExpect:\n%s\nHave:\n%s", exp, query)
 	}
 
 	if !reflect.DeepEqual(values, vals) {
@@ -22,12 +28,13 @@ func run(t *testing.T, q Stmt, exp string, vals []any) {
 }
 
 func TestSelectStmt(t *testing.T) {
-	qe := inyorm.New("", nil)
+	qe := inyorm.New("", nil, nil)
 
 	t.Run("simple", func(t *testing.T) {
-		q, c := qe.NewSelect(context.Background(), "users")
+		q, c := qe.NewSelect("users")
 
 		q.Select(c.All())
+		q.From("users")
 		q.Where(c.Col("id")).Equal("uuid")
 		q.Limit(1)
 
@@ -37,7 +44,7 @@ func TestSelectStmt(t *testing.T) {
 	})
 
 	t.Run("pagination", func(t *testing.T) {
-		q, c := qe.NewSelect(context.Background(), "users")
+		q, c := qe.NewSelect("users")
 		var (
 			id      = c.Col("id")
 			age     = c.Col("age")
@@ -46,6 +53,7 @@ func TestSelectStmt(t *testing.T) {
 		)
 
 		q.Select(c.All())
+		q.From("users")
 		q.Join("posts").On(foreign).Equal(id)
 		q.Where(banned).IsNull().And(age).Greater(17)
 		q.OrderBy(age).Desc()
@@ -63,7 +71,7 @@ func TestSelectStmt(t *testing.T) {
 	})
 
 	t.Run("complex", func(t *testing.T) {
-		q, c := qe.NewSelect(context.Background(), "users")
+		q, c := qe.NewSelect("users")
 		var (
 			banned  = c.Col("banned")
 			fname   = c.Col("firstname")
@@ -94,6 +102,7 @@ func TestSelectStmt(t *testing.T) {
 		result := c.Concat("User: ", fname, " ", lname, " ", info).As("user_info")
 
 		q.Select(result)
+		q.From("users")
 		q.Join("posts").On(postsFk).Equal(id)
 		q.Join("user_roles").On(interUser).Equal(id)
 		q.Join("roles").On(roleId).Equal(interRole)

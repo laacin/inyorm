@@ -2,11 +2,9 @@ package core
 
 // Dialects
 const (
-	Postgres  = "postgresql"
-	MySQL     = "mysql"
-	SQLite    = "sqlite"
-	Oracle    = "oracle"
-	SQLServer = "sqlserver"
+	Postgres = "postgresql"
+	MySQL    = "mysql"
+	SQLite   = "sqlite"
 )
 
 // ----- Column
@@ -14,7 +12,8 @@ const (
 type ColumnType int
 
 const (
-	ColTypDef ColumnType = iota
+	ColTypUnset ColumnType = iota
+	ColTypDef
 	ColTypBase
 	ColTypExpr
 	ColTypAlias
@@ -25,7 +24,8 @@ const (
 type ClauseType int
 
 const (
-	ClsTypSelect ClauseType = iota
+	ClsTypUnset ClauseType = iota
+	ClsTypSelect
 	ClsTypFrom
 	ClsTypJoin
 	ClsTypWhere
@@ -34,5 +34,6 @@ const (
 	ClsTypOrderBy
 	ClsTypLimit
 	ClsTypOffset
-	ClsTypInsertInto
+	ClsTypInsert
+	ClsTypUpdate
 )

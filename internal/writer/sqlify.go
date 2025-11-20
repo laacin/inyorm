@@ -1,4 +1,4 @@
-package core
+package writer
 
 import "strconv"
 
@@ -42,7 +42,7 @@ func handleString(v string) string {
 }
 
 // SQLify returns the SQL-safe string representation of common comparable types without using reflection.
-func Sqlify(value any) string {
+func sqlify(value any) string {
 	switch t := value.(type) {
 
 	case string:

@@ -3,23 +3,23 @@ package clause
 import "github.com/laacin/inyorm/internal/core"
 
 type Offset struct {
-	offset int
+	declared bool
+	offset   int
 }
 
-func (o *Offset) Name() core.ClauseType { return core.ClsTypOffset }
-func (o *Offset) IsDeclared() bool      { return o != nil }
-func (o *Offset) Build(w core.Writer) {
-	if o.offset > 0 {
-		w.Write("OFFSET")
-		w.Char(' ')
-		w.Value(o.offset, core.OffsetWriteOpt)
-	}
+func (cls *Offset) Name() core.ClauseType { return core.ClsTypOffset }
+func (cls *Offset) IsDeclared() bool      { return cls != nil && cls.declared }
+func (cls *Offset) Build(w core.Writer) {
+	w.Write("OFFSET")
+	w.Char(' ')
+	w.Value(cls.offset, cls.Name())
 }
 
 // -- Methods
 
-func (o *Offset) Offset(value int) {
+func (cls *Offset) Offset(value int) {
 	if value > 0 {
-		o.offset = value
+		cls.declared = true
+		cls.offset = value
 	}
 }

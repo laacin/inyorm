@@ -13,15 +13,18 @@ const (
 	CrossJoin = "CROSS"
 )
 
-type Join struct {
-	joins   []*join
-	current *join
+type Join[Next, Cond, CondNext, Ident, Value any] struct {
+	declared bool
+	joins    []*join[Cond, CondNext, Ident, Value]
+	current  *join[Cond, CondNext, Ident, Value]
 }
 
-func (j *Join) Name() core.ClauseType { return core.ClsTypJoin }
-func (j *Join) IsDeclared() bool      { return j != nil }
-func (j *Join) Build(w core.Writer) {
-	for i, join := range j.joins {
+func (cls *Join[Next, Cond, CondNext, Ident, Value]) Name() core.ClauseType { return core.ClsTypJoin }
+func (cls *Join[Next, Cond, CondNext, Ident, Value]) IsDeclared() bool {
+	return cls != nil && cls.declared
+}
+func (cls *Join[Next, Cond, CondNext, Ident, Value]) Build(w core.Writer) {
+	for i, join := range cls.joins {
 		if i > 0 {
 			w.Char(' ')
 		}
@@ -32,34 +35,31 @@ func (j *Join) Build(w core.Writer) {
 		w.Table(join.table)
 		if join.cond != nil {
 			w.Write(" ON ")
-			join.cond.Build(
-				w,
-				core.JoinIdentWriteOpt,
-				core.JoinValueWriteOpt,
-			)
+			join.cond.Build(w, cls.Name())
 		}
 	}
 }
 
 // -- Methods
 
-func (j *Join) Join(typ, table string) {
-	join := &join{typ: typ, table: table}
-	j.current = join
-	j.joins = append(j.joins, join)
+func (cls *Join[Next, Cond, CondNext, Ident, Value]) Join(table string) Next {
+	cls.declared = true
+	join := &join[Cond, CondNext, Ident, Value]{typ: InnerJoin, table: table}
+	cls.current = join
+	cls.joins = append(cls.joins, join)
+	return any(cls).(Next)
 }
 
-func (j *Join) On(ident any) core.Condition {
-	cond := &condition.Condition{}
-	j.current.cond = cond
-	cond.Start(ident)
-	return cond
+func (cls *Join[Next, Cond, CondNext, Ident, Value]) On(ident Ident) Cond {
+	cond := &condition.Condition[Cond, CondNext, Ident, Value]{}
+	cls.current.cond = cond
+	return cond.Start(ident)
 }
 
 // -- internal
 
-type join struct {
+type join[Cond, CondNext, Ident, Value any] struct {
 	typ   string
 	table string
-	cond  *condition.Condition
+	cond  *condition.Condition[Cond, CondNext, Ident, Value]
 }

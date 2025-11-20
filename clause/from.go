@@ -3,19 +3,21 @@ package clause
 import "github.com/laacin/inyorm/internal/core"
 
 type From struct {
-	value string
+	declared bool
+	value    string
 }
 
-func (f *From) Name() core.ClauseType { return core.ClsTypFrom }
-func (f *From) IsDeclared() bool      { return f != nil }
-func (f *From) Build(w core.Writer) {
+func (cls *From) Name() core.ClauseType { return core.ClsTypFrom }
+func (cls *From) IsDeclared() bool      { return cls != nil && cls.declared }
+func (cls *From) Build(w core.Writer) {
 	w.Write("FROM")
 	w.Char(' ')
-	w.Table(f.value)
+	w.Table(cls.value)
 }
 
 // -- Methods
 
-func (f *From) From(from string) {
-	f.value = from
+func (cls *From) From(from string) {
+	cls.declared = true
+	cls.value = from
 }

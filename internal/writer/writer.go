@@ -7,9 +7,11 @@ import (
 )
 
 type Writer struct {
-	sb      strings.Builder
-	ph      *Placeholder
-	aliases *Alias
+	sb        strings.Builder
+	ph        *Placeholder
+	aliases   *Alias
+	autoPh    *core.AutoPlaceholder
+	colWriter *core.ColumnWriter
 }
 
 func (w *Writer) Write(v string) {
@@ -20,30 +22,63 @@ func (w *Writer) Char(v byte) {
 	w.sb.WriteByte(v)
 }
 
-func (w *Writer) Value(v any, opts *core.WriterOpts) {
-	if opts.Placeholder {
-		w.sb.WriteString(w.ph.next(v))
-		return
-	}
+func (w *Writer) Placeholder() {
+	w.sb.WriteString(w.ph.write())
+}
 
+func (w *Writer) Identifier(v any, ctx core.ClauseType) {
 	switch val := v.(type) {
 	case core.Builder:
 		val(w)
 
 	case core.Column:
-		switch opts.ColType {
+		mode := inferColumn(ctx, w.colWriter)
+		switch mode {
 		case core.ColTypBase:
-			val.Base(w)
+			val.Base()(w)
+
 		case core.ColTypExpr:
-			val.Expr(w)
-		case core.ColTypAlias:
-			val.Alias(w)
+			val.Expr()(w)
+
 		case core.ColTypDef:
-			val.Def(w)
+			val.Def()(w)
+
+		case core.ColTypAlias:
+			val.Alias()(w)
 		}
 
 	default:
-		w.sb.WriteString(core.Sqlify(v))
+		w.sb.WriteString(sqlify(val))
+	}
+}
+
+func (w *Writer) Value(v any, ctx core.ClauseType) {
+	switch val := v.(type) {
+	case core.Builder:
+		val(w)
+
+	case core.Column:
+		mode := inferColumn(ctx, w.colWriter)
+		switch mode {
+		case core.ColTypBase:
+			val.Base()(w)
+
+		case core.ColTypExpr:
+			val.Expr()(w)
+
+		case core.ColTypDef:
+			val.Def()(w)
+
+		case core.ColTypAlias:
+			val.Alias()(w)
+		}
+
+	default:
+		if isAuthPh(ctx, w.autoPh) {
+			w.sb.WriteString(w.ph.withValue(val))
+			return
+		}
+		w.sb.WriteString(sqlify(val))
 	}
 }
 

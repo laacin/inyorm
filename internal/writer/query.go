@@ -3,7 +3,7 @@ package writer
 import "github.com/laacin/inyorm/internal/core"
 
 type Query struct {
-	dialect      string
+	cfg          *core.Config
 	table        string
 	aliases      Alias
 	placeholders Placeholder
@@ -11,22 +11,26 @@ type Query struct {
 	clauseOrder  []core.ClauseType
 }
 
-func NewQuery(dialect string, defaultTable string) *Query {
+func NewQuery(table string, cfg *core.Config) *Query {
 	builder := &Query{
-		table:   defaultTable,
-		dialect: dialect,
+		table: table,
+		cfg:   cfg,
 	}
+	builder.placeholders.dialect = cfg.Dialect
 
-	builder.placeholders.dialect = dialect
-	if defaultTable != "" {
-		builder.aliases.Get(defaultTable)
+	if table != "" {
+		builder.aliases.Get(table)
 	}
 
 	return builder
 }
 
 func (q *Query) Build() (string, []any) {
-	w := &Writer{ph: &q.placeholders}
+	w := &Writer{
+		ph:        &q.placeholders,
+		autoPh:    &q.cfg.AutoPh,
+		colWriter: &q.cfg.ColWrite,
+	}
 
 	if cls, exists := q.clauses[core.ClsTypJoin]; exists && cls.IsDeclared() {
 		w.aliases = &q.aliases

@@ -2,7 +2,7 @@ package condition
 
 import "github.com/laacin/inyorm/internal/core"
 
-func (c *Condition) Build(w core.Writer, identOpt, valueOpt *core.WriterOpts) {
+func (c *Condition[Self, Next, Ident, Value]) Build(w core.Writer, ctx core.ClauseType) {
 	w.Char('(')
 	for i, expr := range c.Exprs {
 		if i > 0 {
@@ -10,18 +10,18 @@ func (c *Condition) Build(w core.Writer, identOpt, valueOpt *core.WriterOpts) {
 			w.Write(c.Connectors[i-1])
 			w.Char(' ')
 		}
-		w.Value(expr.identifier, identOpt)
+		w.Identifier(expr.identifier, ctx)
 		w.Char(' ')
 		w.Write(getOp(expr.operator, expr.negated))
 		switch expr.operator {
 		case isNull:
 		case between:
 			w.Char(' ')
-			w.Value(expr.values[0], valueOpt)
+			w.Value(expr.values[0], ctx)
 			w.Char(' ')
 			w.Write(and)
 			w.Char(' ')
-			w.Value(expr.values[1], valueOpt)
+			w.Value(expr.values[1], ctx)
 		case in:
 			w.Char(' ')
 			w.Char('(')
@@ -29,13 +29,13 @@ func (c *Condition) Build(w core.Writer, identOpt, valueOpt *core.WriterOpts) {
 				if i > 0 {
 					w.Write(", ")
 				}
-				w.Value(v, valueOpt)
+				w.Value(v, ctx)
 			}
 			w.Char(')')
 
 		default:
 			w.Char(' ')
-			w.Value(expr.values[0], valueOpt)
+			w.Value(expr.values[0], ctx)
 		}
 	}
 	w.Char(')')

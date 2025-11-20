@@ -4,7 +4,11 @@ import "github.com/laacin/inyorm/internal/core"
 
 // ---- Export internal types
 
-type ColumnType = core.ColumnType
+type (
+	ColumnType      = core.ColumnType
+	AutoPlaceholder = core.AutoPlaceholder
+	ColumnWriter    = core.ColumnWriter
+)
 
 const (
 	TypeColumnDef   = core.ColTypDef
@@ -30,7 +34,7 @@ type Options struct {
 	// ColumnWriter
 	// Allows selecting the default way a column would be written
 	//
-	// If nil, the default configuration is:
+	// the default configuration is:
 	//  - Select  = TypeColumnDef
 	//  - Join    = TypeColumnBase
 	//  - Where   = TypeColumnExpr
@@ -55,72 +59,27 @@ type Options struct {
 	MaxLimit int
 }
 
-type AutoPlaceholder struct {
-	Insert bool
-	Update bool
-	Where  bool
-	Having bool
-	Join   bool
-}
-
-type ColumnWriter struct {
-	Select  ColumnType
-	Join    ColumnType
-	Where   ColumnType
-	GroupBy ColumnType
-	Having  ColumnType
-	OrderBy ColumnType
-}
-
 // ---- Resolves
 
-func resolveOpts(opts **Options) {
+func resolveOpts(dialect string, opts **Options) *core.Config {
 	ptr := *opts
 	if ptr == nil {
 		ptr = &Options{}
 	}
 
-	resolveAutoPlaceholder(&ptr.AutoPlaceholder)
-	resolveColumnWriter(&ptr.ColumnWriter)
+	core.ResolveAutoPlaceholder(&ptr.AutoPlaceholder)
+	core.ResolveColumnWriter(&ptr.ColumnWriter)
 
 	if ptr.ColumnTag == "" {
-		ptr.ColumnTag = "col"
+		ptr.ColumnTag = core.DefaultColumnTag
 	}
 
-	*opts = ptr
-}
-
-func resolveAutoPlaceholder(opt **AutoPlaceholder) {
-	ptr := *opt
-	if ptr == nil {
-		ptr = &AutoPlaceholder{
-			Insert: true,
-			Update: true,
-			Where:  true,
-		}
+	return &core.Config{
+		Dialect:   dialect,
+		AutoPh:    *ptr.AutoPlaceholder,
+		ColWrite:  *ptr.ColumnWriter,
+		ColumnTag: ptr.ColumnTag,
+		MaxLimit:  ptr.MaxLimit,
+		Limit:     ptr.Limit,
 	}
-	*opt = ptr
-}
-
-func resolveColumnWriter(opt **ColumnWriter) {
-	ptr := *opt
-	if ptr == nil {
-		ptr = &ColumnWriter{}
-	}
-
-	dflt := func(provided *ColumnType, dflt ColumnType) {
-		if *provided != core.ColTypUnset {
-			return
-		}
-		*provided = dflt
-	}
-
-	dflt(&ptr.Select, TypeColumnDef)
-	dflt(&ptr.Join, TypeColumnBase)
-	dflt(&ptr.Where, TypeColumnExpr)
-	dflt(&ptr.GroupBy, TypeColumnExpr)
-	dflt(&ptr.Having, TypeColumnExpr)
-	dflt(&ptr.OrderBy, TypeColumnAlias)
-
-	*opt = ptr
 }

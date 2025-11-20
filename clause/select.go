@@ -2,35 +2,38 @@ package clause
 
 import "github.com/laacin/inyorm/internal/core"
 
-type Select struct {
+type Select[Next, Ident any] struct {
+	declared bool
 	distinct bool
-	targets  []any
+	targets  []Ident
 }
 
-func (s *Select) Name() core.ClauseType { return core.ClsTypSelect }
-func (s *Select) IsDeclared() bool      { return s != nil }
-func (s *Select) Build(w core.Writer) {
+func (cls *Select[Next, Ident]) Name() core.ClauseType { return core.ClsTypSelect }
+func (cls *Select[Next, Ident]) IsDeclared() bool      { return cls != nil && cls.declared }
+func (cls *Select[Next, Ident]) Build(w core.Writer) {
 	w.Write("SELECT")
 	w.Char(' ')
 
-	if s.distinct {
+	if cls.distinct {
 		w.Write("DISTINCT ")
 	}
 
-	for i, sel := range s.targets {
+	for i, sel := range cls.targets {
 		if i > 0 {
 			w.Write(", ")
 		}
-		w.Value(sel, core.SelectWriteOpt)
+		w.Identifier(sel, cls.Name())
 	}
 }
 
 // -- Methods
 
-func (s *Select) Distinct() {
-	s.distinct = true
+func (cls *Select[Next, Ident]) Distinct() Next {
+	cls.distinct = true
+	return any(cls).(Next)
 }
 
-func (s *Select) Select(targets []any) {
-	s.targets = append(s.targets, targets...)
+func (cls *Select[Next, Ident]) Select(sel ...Ident) {
+	cls.declared = true
+	cls.targets = sel
 }

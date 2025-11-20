@@ -1,44 +1,19 @@
 package clause_test
 
-import (
-	"testing"
-
-	"github.com/laacin/inyorm/clause"
-	"github.com/laacin/inyorm/internal/column"
-	"github.com/laacin/inyorm/internal/core"
-	"github.com/laacin/inyorm/internal/writer"
-)
-
-func NewSelect() (*clause.Select, core.ColExpr, func(t *testing.T, cls string)) {
-	stmt := writer.NewQuery("", "users")
-	var c core.ColExpr = &column.ColExpr{}
-	cls := &clause.Select{}
-
-	run := func(t *testing.T, clause string) {
-		stmt.SetClauses([]core.Clause{cls}, writer.SelectOrder)
-		statement, _ := stmt.Build()
-
-		if statement != clause {
-			t.Errorf("\nmismatch result:\nExpect:\n%s\nHave:\n%s\n", clause, statement)
-		}
-	}
-
-	return cls, c, run
-}
+import "testing"
 
 func TestSelect(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		cls, c, run := NewSelect()
-		cls.Select([]any{"active", c.Col("name", "users")})
+		cls.Select("active", c.Col("name", "users"))
 
-		run(t, "SELECT 'active', name")
+		run(t, "SELECT 'active', name", nil)
 	})
 
 	t.Run("distinct", func(t *testing.T) {
 		cls, c, run := NewSelect()
-		cls.Distinct()
-		cls.Select([]any{c.Col("age", "users")})
+		cls.Distinct().Select(c.Col("age", "users"))
 
-		run(t, "SELECT DISTINCT age")
+		run(t, "SELECT DISTINCT age", nil)
 	})
 }

@@ -26,12 +26,3 @@ const (
 	roundFunc = "ROUND"
 	absFunc   = "ABS"
 )
-
-// Column type
-type ColumnType int
-
-// Column type
-const (
-	normalCol ColumnType = iota
-	customCol
-)

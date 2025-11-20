@@ -5,27 +5,24 @@ import (
 	"github.com/laacin/inyorm/internal/core"
 )
 
-type Having struct {
-	cond *condition.Condition
+type Having[Cond, CondNext, Ident, Value any] struct {
+	declared bool
+	cond     *condition.Condition[Cond, CondNext, Ident, Value]
 }
 
-func (h *Having) Name() core.ClauseType { return core.ClsTypHaving }
-func (h *Having) IsDeclared() bool      { return h != nil }
-func (h *Having) Build(w core.Writer) {
+func (cls *Having[Cond, CondNext, Ident, Value]) Name() core.ClauseType { return core.ClsTypHaving }
+func (cls *Having[Cond, CondNext, Ident, Value]) IsDeclared() bool      { return cls != nil && cls.declared }
+func (cls *Having[Cond, CondNext, Ident, Value]) Build(w core.Writer) {
 	w.Write("HAVING")
 	w.Char(' ')
-	h.cond.Build(
-		w,
-		core.HavingIdentWriteOpt,
-		core.HavingValueWriteOpt,
-	)
+	cls.cond.Build(w, cls.Name())
 }
 
 // -- Methods
 
-func (h *Having) Having(on any) core.Condition {
-	cond := &condition.Condition{}
-	h.cond = cond
-	cond.Start(on)
-	return cond
+func (cls *Having[Cond, CondNext, Ident, Value]) Having(on Ident) Cond {
+	cls.declared = true
+	cond := &condition.Condition[Cond, CondNext, Ident, Value]{}
+	cls.cond = cond
+	return cond.Start(on)
 }
