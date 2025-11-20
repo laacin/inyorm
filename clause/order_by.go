@@ -2,15 +2,15 @@ package clause
 
 import "github.com/laacin/inyorm/internal/core"
 
-type OrderBy[Next, Ident any] struct {
+type OrderBy[Next any] struct {
 	declared bool
 	orders   []*order
 	current  *order
 }
 
-func (cls *OrderBy[Next, Ident]) Name() core.ClauseType { return core.ClsTypOrderBy }
-func (cls *OrderBy[Next, Ident]) IsDeclared() bool      { return cls != nil && cls.declared }
-func (cls *OrderBy[Next, Ident]) Build(w core.Writer) {
+func (cls *OrderBy[Next]) Name() core.ClauseType { return core.ClsTypOrderBy }
+func (cls *OrderBy[Next]) IsDeclared() bool      { return cls != nil && cls.declared }
+func (cls *OrderBy[Next]) Build(w core.Writer) {
 	w.Write("ORDER BY")
 	w.Char(' ')
 
@@ -27,7 +27,7 @@ func (cls *OrderBy[Next, Ident]) Build(w core.Writer) {
 
 // -- Methods
 
-func (cls *OrderBy[Next, Ident]) OrderBy(value Ident) Next {
+func (cls *OrderBy[Next]) OrderBy(value any) Next {
 	cls.declared = true
 	order := &order{order: value}
 	cls.current = order
@@ -35,7 +35,7 @@ func (cls *OrderBy[Next, Ident]) OrderBy(value Ident) Next {
 	return any(cls).(Next)
 }
 
-func (cls *OrderBy[Next, Ident]) Desc() { cls.current.descending = true }
+func (cls *OrderBy[Next]) Desc() { cls.current.descending = true }
 
 // -- internal
 

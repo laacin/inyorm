@@ -5,14 +5,14 @@ import (
 	"github.com/laacin/inyorm/internal/core"
 )
 
-type Where[Cond, CondNext, Ident, Value any] struct {
+type Where[Cond, CondNext any] struct {
 	declared bool
-	exprs    []*condition.Condition[Cond, CondNext, Ident, Value]
+	exprs    []*condition.Condition[Cond, CondNext]
 }
 
-func (cls *Where[Cond, CondNext, Ident, Value]) Name() core.ClauseType { return core.ClsTypWhere }
-func (cls *Where[Cond, CondNext, Ident, Value]) IsDeclared() bool      { return cls != nil && cls.declared }
-func (cls *Where[Cond, CondNext, Ident, Value]) Build(w core.Writer) {
+func (cls *Where[Cond, CondNext]) Name() core.ClauseType { return core.ClsTypWhere }
+func (cls *Where[Cond, CondNext]) IsDeclared() bool      { return cls != nil && cls.declared }
+func (cls *Where[Cond, CondNext]) Build(w core.Writer) {
 	w.Write("WHERE")
 	w.Char(' ')
 	for i, expr := range cls.exprs {
@@ -25,9 +25,9 @@ func (cls *Where[Cond, CondNext, Ident, Value]) Build(w core.Writer) {
 
 // -- Methods
 
-func (cls *Where[Cond, CondNext, Ident, Value]) Where(identifier Ident) Cond {
+func (cls *Where[Cond, CondNext]) Where(identifier any) Cond {
 	cls.declared = true
-	cond := &condition.Condition[Cond, CondNext, Ident, Value]{}
+	cond := &condition.Condition[Cond, CondNext]{}
 	cls.exprs = append(cls.exprs, cond)
 	return Cond(cond.Start(identifier))
 }

@@ -94,7 +94,7 @@ func TestSelectStmt(t *testing.T) {
 			" his last login was: ", lastLog,
 		)
 
-		info := c.Search(func(cs inyorm.CaseSearch) {
+		info := c.Search(func(cs inyorm.Case) {
 			cs.When(c.Cond(banned).IsNull()).Then(success)
 			cs.Else(c.Concat("was banned at: ", banned))
 		})

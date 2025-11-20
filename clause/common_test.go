@@ -16,16 +16,15 @@ type (
 
 	colBuilder = column.ColBuilder[
 		inyorm.Column, inyorm.Condition, inyorm.ConditionNext,
-		inyorm.CaseSwitch, inyorm.CaseSearch, inyorm.CaseNext,
-		inyorm.Identifier, inyorm.Value,
+		inyorm.Case, inyorm.CaseNext,
 	]
 
-	clsSelect  = clause.Select[inyorm.SelectNext, inyorm.Identifier]
-	clsJoin    = clause.Join[inyorm.JoinNext, inyorm.Condition, inyorm.ConditionNext, inyorm.Identifier, inyorm.Value]
-	clsWhere   = clause.Where[inyorm.Condition, inyorm.ConditionNext, inyorm.Identifier, inyorm.Value]
-	clsGroupBy = clause.GroupBy[inyorm.Identifier]
-	clsHaving  = clause.Having[inyorm.Condition, inyorm.ConditionNext, inyorm.Identifier, inyorm.Value]
-	clsOrderBy = clause.OrderBy[inyorm.OrderByNext, inyorm.Identifier]
+	clsSelect  = clause.Select[inyorm.SelectNext]
+	clsJoin    = clause.Join[inyorm.JoinNext, inyorm.Condition, inyorm.ConditionNext]
+	clsWhere   = clause.Where[inyorm.Condition, inyorm.ConditionNext]
+	clsGroupBy = clause.GroupBy
+	clsHaving  = clause.Having[inyorm.Condition, inyorm.ConditionNext]
+	clsOrderBy = clause.OrderBy[inyorm.OrderByNext]
 )
 
 func New[T any](cls core.Clause, dialect []string) (T, inyorm.ColumnBuilder, runner) {

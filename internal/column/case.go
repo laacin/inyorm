@@ -1,30 +1,30 @@
 package column
 
-type Case[Self, Next, Ident, Value any] struct {
-	Exprs   []*caseExpr[Ident, Value]
-	current *caseExpr[Ident, Value]
-	Els     Value
+type Case[Self, Next any] struct {
+	Exprs   []*caseExpr
+	current *caseExpr
+	Els     any
 }
 
-func (c *Case[Self, Next, Ident, Value]) When(ident Ident) Next {
-	expr := &caseExpr[Ident, Value]{Identifier: ident}
+func (c *Case[Self, Next]) When(ident any) Next {
+	expr := &caseExpr{Identifier: ident}
 	c.Exprs = append(c.Exprs, expr)
 	c.current = expr
 	return any(c).(Next)
 }
 
-func (c *Case[Self, Next, Ident, Value]) Then(arg Value) Self {
+func (c *Case[Self, Next]) Then(arg any) Self {
 	c.current.Argument = arg
 	return any(c).(Self)
 }
 
-func (c *Case[Self, Next, Ident, Value]) Else(v Value) {
+func (c *Case[Self, Next]) Else(v any) {
 	c.Els = v
 }
 
 // -- Expression
 
-type caseExpr[Ident, Value any] struct {
-	Identifier Ident
-	Argument   Value
+type caseExpr struct {
+	Identifier any
+	Argument   any
 }

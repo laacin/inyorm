@@ -2,13 +2,13 @@ package column
 
 import "github.com/laacin/inyorm/internal/core"
 
-type columnBuilder[Col, Value any] struct {
+type columnBuilder[Col any] struct {
 	exprs       []core.Builder
 	aggregation core.Builder
 	alias       string
 }
 
-func (ch *columnBuilder[Col, Value]) first(w core.Writer, c *Column[Col, Value]) {
+func (ch *columnBuilder[Col]) first(w core.Writer, c *Column[Col]) {
 	if c.value == "" {
 		w.Column(c.Table, c.BaseName)
 		return
@@ -16,7 +16,7 @@ func (ch *columnBuilder[Col, Value]) first(w core.Writer, c *Column[Col, Value])
 	w.Write(c.value)
 }
 
-func (ch *columnBuilder[Col, Value]) build(w core.Writer, c *Column[Col, Value]) {
+func (ch *columnBuilder[Col]) build(w core.Writer, c *Column[Col]) {
 	if ch.exprs == nil && ch.aggregation == nil && ch.alias == "" {
 		return
 	}
@@ -45,11 +45,11 @@ func (ch *columnBuilder[Col, Value]) build(w core.Writer, c *Column[Col, Value])
 	w.Reset()
 }
 
-func (cb *columnBuilder[Col, Value]) WExpr(expr core.Builder) {
+func (cb *columnBuilder[Col]) WExpr(expr core.Builder) {
 	cb.exprs = append(cb.exprs, expr)
 }
 
-func (cb *columnBuilder[Col, Value]) wOp(arg byte, value any) {
+func (cb *columnBuilder[Col]) wOp(arg byte, value any) {
 	expr := func(w core.Writer) {
 		prev := w.ToString()
 		w.Reset()
@@ -58,12 +58,12 @@ func (cb *columnBuilder[Col, Value]) wOp(arg byte, value any) {
 		w.Char(' ')
 		w.Char(arg)
 		w.Char(' ')
-		inferColumn[Col, Value](w, value)
+		inferColumn[Col](w, value)
 	}
 	cb.exprs = append(cb.exprs, expr)
 }
 
-func (cb *columnBuilder[Col, Value]) wFunc(arg string) {
+func (cb *columnBuilder[Col]) wFunc(arg string) {
 	expr := func(w core.Writer) {
 		prev := w.ToString()
 		w.Reset()
@@ -76,7 +76,7 @@ func (cb *columnBuilder[Col, Value]) wFunc(arg string) {
 	cb.exprs = append(cb.exprs, expr)
 }
 
-func (cb *columnBuilder[Col, Value]) wWrap() {
+func (cb *columnBuilder[Col]) wWrap() {
 	expr := func(w core.Writer) {
 		prev := w.ToString()
 		w.Reset()
@@ -88,7 +88,7 @@ func (cb *columnBuilder[Col, Value]) wWrap() {
 	cb.exprs = append(cb.exprs, expr)
 }
 
-func (cb *columnBuilder[Col, Value]) wAggr(distinct bool, aggr string) {
+func (cb *columnBuilder[Col]) wAggr(distinct bool, aggr string) {
 	expr := func(w core.Writer) {
 		prev := w.ToString()
 		w.Reset()
@@ -104,6 +104,6 @@ func (cb *columnBuilder[Col, Value]) wAggr(distinct bool, aggr string) {
 	cb.aggregation = expr
 }
 
-func (cb *columnBuilder[Col, Value]) wAs(name string) {
+func (cb *columnBuilder[Col]) wAs(name string) {
 	cb.alias = name
 }

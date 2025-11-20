@@ -5,14 +5,14 @@ import (
 	"github.com/laacin/inyorm/internal/core"
 )
 
-type Having[Cond, CondNext, Ident, Value any] struct {
+type Having[Cond, CondNext any] struct {
 	declared bool
-	cond     *condition.Condition[Cond, CondNext, Ident, Value]
+	cond     *condition.Condition[Cond, CondNext]
 }
 
-func (cls *Having[Cond, CondNext, Ident, Value]) Name() core.ClauseType { return core.ClsTypHaving }
-func (cls *Having[Cond, CondNext, Ident, Value]) IsDeclared() bool      { return cls != nil && cls.declared }
-func (cls *Having[Cond, CondNext, Ident, Value]) Build(w core.Writer) {
+func (cls *Having[Cond, CondNext]) Name() core.ClauseType { return core.ClsTypHaving }
+func (cls *Having[Cond, CondNext]) IsDeclared() bool      { return cls != nil && cls.declared }
+func (cls *Having[Cond, CondNext]) Build(w core.Writer) {
 	w.Write("HAVING")
 	w.Char(' ')
 	cls.cond.Build(w, cls.Name())
@@ -20,9 +20,9 @@ func (cls *Having[Cond, CondNext, Ident, Value]) Build(w core.Writer) {
 
 // -- Methods
 
-func (cls *Having[Cond, CondNext, Ident, Value]) Having(on Ident) Cond {
+func (cls *Having[Cond, CondNext]) Having(on any) Cond {
 	cls.declared = true
-	cond := &condition.Condition[Cond, CondNext, Ident, Value]{}
+	cond := &condition.Condition[Cond, CondNext]{}
 	cls.cond = cond
 	return cond.Start(on)
 }

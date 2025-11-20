@@ -13,17 +13,17 @@ const (
 	CrossJoin = "CROSS"
 )
 
-type Join[Next, Cond, CondNext, Ident, Value any] struct {
+type Join[Next, Cond, CondNext any] struct {
 	declared bool
-	joins    []*join[Cond, CondNext, Ident, Value]
-	current  *join[Cond, CondNext, Ident, Value]
+	joins    []*join[Cond, CondNext]
+	current  *join[Cond, CondNext]
 }
 
-func (cls *Join[Next, Cond, CondNext, Ident, Value]) Name() core.ClauseType { return core.ClsTypJoin }
-func (cls *Join[Next, Cond, CondNext, Ident, Value]) IsDeclared() bool {
+func (cls *Join[Next, Cond, CondNext]) Name() core.ClauseType { return core.ClsTypJoin }
+func (cls *Join[Next, Cond, CondNext]) IsDeclared() bool {
 	return cls != nil && cls.declared
 }
-func (cls *Join[Next, Cond, CondNext, Ident, Value]) Build(w core.Writer) {
+func (cls *Join[Next, Cond, CondNext]) Build(w core.Writer) {
 	for i, join := range cls.joins {
 		if i > 0 {
 			w.Char(' ')
@@ -42,24 +42,24 @@ func (cls *Join[Next, Cond, CondNext, Ident, Value]) Build(w core.Writer) {
 
 // -- Methods
 
-func (cls *Join[Next, Cond, CondNext, Ident, Value]) Join(table string) Next {
+func (cls *Join[Next, Cond, CondNext]) Join(table string) Next {
 	cls.declared = true
-	join := &join[Cond, CondNext, Ident, Value]{typ: InnerJoin, table: table}
+	join := &join[Cond, CondNext]{typ: InnerJoin, table: table}
 	cls.current = join
 	cls.joins = append(cls.joins, join)
 	return any(cls).(Next)
 }
 
-func (cls *Join[Next, Cond, CondNext, Ident, Value]) On(ident Ident) Cond {
-	cond := &condition.Condition[Cond, CondNext, Ident, Value]{}
+func (cls *Join[Next, Cond, CondNext]) On(ident any) Cond {
+	cond := &condition.Condition[Cond, CondNext]{}
 	cls.current.cond = cond
 	return cond.Start(ident)
 }
 
 // -- internal
 
-type join[Cond, CondNext, Ident, Value any] struct {
+type join[Cond, CondNext any] struct {
 	typ   string
 	table string
-	cond  *condition.Condition[Cond, CondNext, Ident, Value]
+	cond  *condition.Condition[Cond, CondNext]
 }

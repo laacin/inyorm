@@ -2,7 +2,7 @@ package column
 
 import "github.com/laacin/inyorm/internal/core"
 
-func (c *Column[Self, Value]) Expr() core.Builder {
+func (c *Column[Self]) Expr() core.Builder {
 	return func(w core.Writer) {
 		c.Builder.build(w.Split(), c)
 
@@ -14,7 +14,7 @@ func (c *Column[Self, Value]) Expr() core.Builder {
 	}
 }
 
-func (c *Column[Self, Value]) Alias() core.Builder {
+func (c *Column[Self]) Alias() core.Builder {
 	return func(w core.Writer) {
 		c.Builder.build(w.Split(), c)
 
@@ -31,7 +31,7 @@ func (c *Column[Self, Value]) Alias() core.Builder {
 	}
 }
 
-func (c *Column[Self, Value]) Def() core.Builder {
+func (c *Column[Self]) Def() core.Builder {
 	return func(w core.Writer) {
 		c.Builder.build(w.Split(), c)
 
@@ -48,7 +48,7 @@ func (c *Column[Self, Value]) Def() core.Builder {
 	}
 }
 
-func (c *Column[Self, Value]) Base() core.Builder {
+func (c *Column[Self]) Base() core.Builder {
 	return func(w core.Writer) {
 		w.Column(c.Table, c.BaseName)
 	}

@@ -1,27 +1,27 @@
 package condition
 
-type expression[Ident, Value any] struct {
-	identifier Ident
+type expression struct {
+	identifier any
 	operator   string
 	negated    bool
-	values     []Value
+	values     []any
 }
 
-func (e *expression[Ident, Value]) addZero(op string) {
+func (e *expression) addZero(op string) {
 	e.operator = op
 }
 
-func (e *expression[Ident, Value]) addOne(op string, value Value) {
+func (e *expression) addOne(op string, value any) {
 	e.operator = op
-	e.values = []Value{value}
+	e.values = []any{value}
 }
 
-func (e *expression[Ident, Value]) addTwo(op string, val1, val2 Value) {
+func (e *expression) addTwo(op string, val1, val2 any) {
 	e.operator = op
-	e.values = []Value{val1, val2}
+	e.values = []any{val1, val2}
 }
 
-func (e *expression[Ident, Value]) addMany(op string, vals []Value) {
+func (e *expression) addMany(op string, vals []any) {
 	e.operator = op
 	e.values = vals
 }

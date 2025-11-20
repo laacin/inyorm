@@ -2,8 +2,8 @@ package column
 
 import "github.com/laacin/inyorm/internal/core"
 
-func inferColumn[T, K any](w core.Writer, v any) {
-	if col, ok := v.(*Column[T, K]); ok {
+func inferColumn[T any](w core.Writer, v any) {
+	if col, ok := v.(*Column[T]); ok {
 		col.Expr()(w)
 		return
 	}

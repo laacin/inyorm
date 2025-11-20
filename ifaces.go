@@ -13,17 +13,16 @@ type (
 
 	colBuilder = column.ColBuilder[
 		Column, Condition, ConditionNext,
-		CaseSwitch, CaseSearch, CaseNext,
-		Identifier, Value,
+		Case, CaseNext,
 	]
 
-	clsSelect  = clause.Select[SelectNext, Identifier]
+	clsSelect  = clause.Select[SelectNext]
 	clsFrom    = clause.From
-	clsJoin    = clause.Join[JoinNext, Condition, ConditionNext, Identifier, Value]
-	clsWhere   = clause.Where[Condition, ConditionNext, Identifier, Value]
-	clsGroupBy = clause.GroupBy[Identifier]
-	clsHaving  = clause.Having[Condition, ConditionNext, Identifier, Value]
-	clsOrderBy = clause.OrderBy[OrderByNext, Identifier]
+	clsJoin    = clause.Join[JoinNext, Condition, ConditionNext]
+	clsWhere   = clause.Where[Condition, ConditionNext]
+	clsGroupBy = clause.GroupBy
+	clsHaving  = clause.Having[Condition, ConditionNext]
+	clsOrderBy = clause.OrderBy[OrderByNext]
 	clsLimit   = clause.Limit
 	clsOffset  = clause.Offset
 )
@@ -79,18 +78,13 @@ type ConditionNext interface {
 
 // ----- Case -----
 
-type CaseSwitch interface {
-	When(v Value) CaseNext
-	Else(v Value)
-}
-
-type CaseSearch interface {
-	When(cond ConditionNext) CaseNext
-	Else(v Value)
+type Case interface {
+	When(cond Identifier) CaseNext
+	Else(els Value)
 }
 
 type CaseNext interface {
-	Then(v Value) CaseSearch
+	Then(then Value) Case
 }
 
 // ----- Column Builder -----
@@ -103,8 +97,8 @@ type ColumnBuilder interface {
 	Cond(ident Identifier) Condition
 
 	Concat(v ...Identifier) Column
-	Switch(cond Identifier, fn func(cs CaseSwitch)) Column
-	Search(fn func(cs CaseSearch)) Column
+	Switch(cond Identifier, fn func(cs Case)) Column
+	Search(fn func(cs Case)) Column
 }
 
 // ----- Clauses -----

@@ -2,7 +2,7 @@ package condition
 
 import "github.com/laacin/inyorm/internal/core"
 
-func (c *Condition[Self, Next, Ident, Value]) Build(w core.Writer, ctx core.ClauseType) {
+func (c *Condition[Self, Next]) Build(w core.Writer, ctx core.ClauseType) {
 	w.Char('(')
 	for i, expr := range c.Exprs {
 		if i > 0 {

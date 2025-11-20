@@ -2,14 +2,14 @@ package clause
 
 import "github.com/laacin/inyorm/internal/core"
 
-type GroupBy[Ident any] struct {
+type GroupBy struct {
 	declared bool
-	groups   []Ident
+	groups   []any
 }
 
-func (cls *GroupBy[Ident]) Name() core.ClauseType { return core.ClsTypGroupBy }
-func (cls *GroupBy[Ident]) IsDeclared() bool      { return cls != nil && cls.declared }
-func (cls *GroupBy[Ident]) Build(w core.Writer) {
+func (cls *GroupBy) Name() core.ClauseType { return core.ClsTypGroupBy }
+func (cls *GroupBy) IsDeclared() bool      { return cls != nil && cls.declared }
+func (cls *GroupBy) Build(w core.Writer) {
 	w.Write("GROUP BY")
 	w.Char(' ')
 	for i, group := range cls.groups {
@@ -22,7 +22,7 @@ func (cls *GroupBy[Ident]) Build(w core.Writer) {
 
 // -- Methods
 
-func (cls *GroupBy[Ident]) GroupBy(value ...Ident) {
+func (cls *GroupBy) GroupBy(value ...any) {
 	cls.declared = true
 	cls.groups = value
 }

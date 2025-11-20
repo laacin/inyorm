@@ -2,15 +2,15 @@ package clause
 
 import "github.com/laacin/inyorm/internal/core"
 
-type Select[Next, Ident any] struct {
+type Select[Next any] struct {
 	declared bool
 	distinct bool
-	targets  []Ident
+	targets  []any
 }
 
-func (cls *Select[Next, Ident]) Name() core.ClauseType { return core.ClsTypSelect }
-func (cls *Select[Next, Ident]) IsDeclared() bool      { return cls != nil && cls.declared }
-func (cls *Select[Next, Ident]) Build(w core.Writer) {
+func (cls *Select[Next]) Name() core.ClauseType { return core.ClsTypSelect }
+func (cls *Select[Next]) IsDeclared() bool      { return cls != nil && cls.declared }
+func (cls *Select[Next]) Build(w core.Writer) {
 	w.Write("SELECT")
 	w.Char(' ')
 
@@ -28,12 +28,12 @@ func (cls *Select[Next, Ident]) Build(w core.Writer) {
 
 // -- Methods
 
-func (cls *Select[Next, Ident]) Distinct() Next {
+func (cls *Select[Next]) Distinct() Next {
 	cls.distinct = true
 	return any(cls).(Next)
 }
 
-func (cls *Select[Next, Ident]) Select(sel ...Ident) {
+func (cls *Select[Next]) Select(sel ...any) {
 	cls.declared = true
 	cls.targets = sel
 }
