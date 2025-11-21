@@ -5,11 +5,16 @@ import "github.com/laacin/inyorm/internal/core"
 func (c *Condition[Self, Next]) Build(w core.Writer, ctx core.ClauseType) {
 	w.Char('(')
 	for i, expr := range c.Exprs {
+		if !expr.closed {
+			continue
+		}
+
 		if i > 0 {
 			w.Char(' ')
 			w.Write(c.Connectors[i-1])
 			w.Char(' ')
 		}
+
 		w.Identifier(expr.identifier, ctx)
 		w.Char(' ')
 		w.Write(getOp(expr.operator, expr.negated))
