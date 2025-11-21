@@ -22,7 +22,7 @@ func New(dialect string, db *sql.DB, opts *Options) *Engine {
 func (e *Engine) NewSelect(table string) (SelectStmt, ColumnBuilder) {
 	query := writer.NewQuery(table, e.cfg)
 
-	stmt := &SelectStatement{query: query}
+	stmt := &selectStmt{query: query}
 	colBldr := ColumnBuilder(&colBuilder{Table: table})
 
 	return stmt, colBldr

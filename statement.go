@@ -5,7 +5,7 @@ import (
 	"github.com/laacin/inyorm/internal/writer"
 )
 
-type SelectStatement struct {
+type selectStmt struct {
 	query *writer.Query
 	clsSelect
 	clsFrom
@@ -18,7 +18,7 @@ type SelectStatement struct {
 	clsOffset
 }
 
-func (stmt *SelectStatement) Builder() *writer.Query {
+func (stmt *selectStmt) Builder() *writer.Query {
 	clauses := []core.Clause{
 		&stmt.clsSelect, &stmt.clsFrom, &stmt.clsJoin,
 		&stmt.clsWhere, &stmt.clsGroupBy, &stmt.clsHaving,

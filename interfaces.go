@@ -103,68 +103,121 @@ type ColumnBuilder interface {
 
 // ----- Clauses -----
 
-// -- SELECT
+// ----- SELECT
 
 type Select interface {
+	// Distinct writes DISTINCT in the SELECT clause
+	//
+	// @SQL: SELECT `DISTINCT` ...
 	Distinct() SelectNext
+
+	// Select writes the SELECT clause values
+	//
+	// @SQL: SELECT `DISTINCT?` `sel1`, `sel2`, `sel3` ... [SelectNext]
 	Select(sel ...Identifier)
 }
 
 type SelectNext interface {
+	// Select writes the SELECT clause values
+	//
+	// @SQL: SELECT `DISTINCT?` `sel1`, `sel2`, `sel3` ... [SelectNext]
 	Select(sel ...Identifier)
 }
 
-// -- FROM
+// ----- FROM
 
 type From interface {
+	// From writes the FROM clause
+	//
+	// # This method is auto-generated for the statement’s default table.
+	// Only use it for complex FROM clauses (such as subqueries)
+	//
+	// @SQL: FROM `table`
 	From(table string)
 }
 
-// -- JOIN
+// ----- JOIN
 
 type Join interface {
+	// Join writes the JOIN clause
+	//
+	// @SQL: INNER JOIN `table 'alias'` ... [JoinNext]
 	Join(table string) JoinNext
 }
 
 type JoinNext interface {
+	// On writes the join condition
+	//
+	// @SQL: [join] ... ON `on` ... [Condition]
 	On(on Identifier) Condition
 }
 
-// -- WHERE
+// ----- WHERE
 
 type Where interface {
+	// Where writes the WHERE clause
+	//
+	// # Can be called multiple times,
+	// Conditions are combined using the logical "AND".
+	// e.g: (cond1) AND (cond2) AND (cond3) ...
+	//
+	// @SQL: WHERE `ident` ... [Condition]
 	Where(ident Identifier) Condition
 }
 
-// -- GROUP BY
+// ----- GROUP BY
 
 type GroupBy interface {
+	// GroupBy writes the GROUP BY clause
+	//
+	// @SQL: GROUP BY `group1`, `group2`, `group3` ...
 	GroupBy(group ...Identifier)
 }
 
-// -- HAVING
+// ----- HAVING
 
 type Having interface {
+	// Having writes the HAVING clause
+	//
+	// @SQL: HAVING `having` ... [Condition]
 	Having(having Value) Condition
 }
 
-// -- ORDER BY
+// ----- ORDER BY
 
 type OrderBy interface {
+	// OrderBy writes the ORDER BY clause
+	//
+	// # Can be called multiple times for multiple orderings
+	//
+	// @SQL: ORDER BY `order` ... [OrderByNext]
 	OrderBy(order Identifier) OrderByNext
 }
 
 type OrderByNext interface {
+	// Desc sets the descending direction for the current order
+	//
+	// @SQL: [OrderBy] ... DESC
 	Desc()
 }
 
-// -- LIMIT
+// ----- LIMIT
 
 type Limit interface {
+	// Limit writes the LIMIT clause value
+	//
+	// # Values less than 1 will be ignored
+	//
+	// @SQL: LIMIT `limit`
 	Limit(limit int)
 }
 
 type Offset interface {
+	// Offset writes the OFFSET clause value
+	//
+	// # Values less than 1 will be ignored
+	//
+	// @SQL: OFFSET `offset`
 	Offset(offset int)
 }
 
