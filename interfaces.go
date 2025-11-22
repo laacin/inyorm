@@ -456,10 +456,6 @@ type Offset interface {
 
 // ----- Statements -----
 
-type Statement interface {
-	Build() (string, []any)
-}
-
 // SelectStmt represents a full SELECT statement
 type SelectStmt interface {
 	Executor
