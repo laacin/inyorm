@@ -45,15 +45,15 @@ func (cls *Join[Next, Cond, CondNext]) Build(w core.Writer) {
 func (cls *Join[Next, Cond, CondNext]) Join(table string) Next {
 	cls.declared = true
 	join := &join[Cond, CondNext]{typ: InnerJoin, table: table}
-	cls.current = join
 	cls.joins = append(cls.joins, join)
+	cls.current = join
 	return any(cls).(Next)
 }
 
 func (cls *Join[Next, Cond, CondNext]) On(ident any) Cond {
 	cond := &condition.Condition[Cond, CondNext]{}
 	cls.current.cond = cond
-	return cond.Start(ident)
+	return cls.current.cond.Start(ident)
 }
 
 // -- internal

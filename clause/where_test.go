@@ -21,7 +21,7 @@ func TestWhere(t *testing.T) {
 	t.Run("basic_2", func(t *testing.T) {
 		cls, c, run := NewWhere()
 		lname := c.Col("lastname", "users")
-		cls.Where(lname).Like("%alv%").And(lname).Not().In("calvin", "malvina", "salvatore")
+		cls.Where(lname).Like("%alv%").And(lname).Not().In([]any{"calvin", "malvina", "salvatore"})
 
 		exp := "WHERE (lastname LIKE ? AND lastname NOT IN (?, ?, ?))"
 		run(t, exp, []any{"%alv%", "calvin", "malvina", "salvatore"})
@@ -46,7 +46,7 @@ func TestWhere(t *testing.T) {
 		)
 
 		cls.Where(age).Between(17, 70).And(age).Not().Equal(45)
-		cls.Where(fname).Like("%alv%").And(fname).Not().In("calvin", "malvina", "salvatore")
+		cls.Where(fname).Like("%alv%").And(fname).Not().In([]any{"calvin", "malvina", "salvatore"})
 		cls.Where(lname).Equal("john").Or(lname).Not().Equal("mary")
 		cls.Where("literal").Not().IsNull()
 
@@ -71,7 +71,7 @@ func TestWhere(t *testing.T) {
 		)
 
 		cls.Where(age).Between(17, 70).And(age).Not().Equal(45)
-		cls.Where(fname).Like("%alv%").And(fname).Not().In("calvin", "malvina", "salvatore")
+		cls.Where(fname).Like("%alv%").And(fname).Not().In([]any{"calvin", "malvina", "salvatore"})
 		cls.Where(lname).Not().Not().Equal("john").Or(lname).Not().Equal("mary")
 		cls.Where("literal").Not().IsNull()
 

@@ -28,7 +28,7 @@ func (c *Condition[Self, Next]) Like(value any) Next {
 	return any(c).(Next)
 }
 
-func (c *Condition[Self, Next]) In(values ...any) Next {
+func (c *Condition[Self, Next]) In(values []any) Next {
 	c.Current.addMany(in, values)
 	return any(c).(Next)
 }

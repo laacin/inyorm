@@ -56,7 +56,7 @@ func TestJoin(t *testing.T) {
 		cls.Join("roles").On(roleIDRoles).
 			Equal(roleID).
 			And(roleName).
-			In("admin", "editor", "manager").
+			In([]any{"admin", "editor", "manager"}).
 			And(active).
 			Equal(true)
 
