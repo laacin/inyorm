@@ -1,22 +1,15 @@
 package inyorm_test
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
 	"github.com/laacin/inyorm"
-	"github.com/laacin/inyorm/internal/writer"
 )
 
-type Stmt interface{ Builder() *writer.Query }
-
-func run(t *testing.T, stmt any, exp string, vals []any) {
-	st, ok := stmt.(Stmt)
-	if !ok {
-		t.Error("invalid stmt")
-	}
-
-	query, values := st.Builder().Build()
+func run(t *testing.T, stmt interface{ Raw() (string, []any) }, exp string, vals []any) {
+	query, values := stmt.Raw()
 
 	if query != exp {
 		t.Errorf("mismatch query:\nExpect:\n%s\nHave:\n%s", exp, query)
@@ -31,7 +24,7 @@ func TestSelectStmt(t *testing.T) {
 	qe := inyorm.New("", nil, nil)
 
 	t.Run("simple", func(t *testing.T) {
-		q, c := qe.NewSelect("users")
+		q, c := qe.NewSelect(context.Background(), "users")
 
 		q.Select(c.All())
 		q.From("users")
@@ -44,7 +37,8 @@ func TestSelectStmt(t *testing.T) {
 	})
 
 	t.Run("pagination", func(t *testing.T) {
-		q, c := qe.NewSelect("users")
+		q, c := qe.NewSelect(context.Background(), "users")
+
 		var (
 			id      = c.Col("id")
 			age     = c.Col("age")
@@ -71,7 +65,8 @@ func TestSelectStmt(t *testing.T) {
 	})
 
 	t.Run("complex", func(t *testing.T) {
-		q, c := qe.NewSelect("users")
+		q, c := qe.NewSelect(context.Background(), "users")
+
 		var (
 			banned  = c.Col("banned")
 			fname   = c.Col("firstname")
