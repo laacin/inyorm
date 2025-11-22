@@ -24,13 +24,14 @@ type (
 	clsLimit   = clause.Limit
 	clsOffset  = clause.Offset
 
-	executor = exec.Executor
+	executor = exec.Executor[Prepare]
 )
 
 type (
 	Builder    = core.Builder
 	Value      = any
 	Identifier = any
+	Binder     = any
 )
 
 // ---- Column
@@ -455,8 +456,13 @@ type Offset interface {
 
 // ----- Statements -----
 
+type Statement interface {
+	Build() (string, []any)
+}
+
 // SelectStmt represents a full SELECT statement
 type SelectStmt interface {
+	Executor
 	Select
 	From
 	Join
@@ -466,4 +472,22 @@ type SelectStmt interface {
 	OrderBy
 	Limit
 	Offset
+	Raw() (string, []any)
+}
+
+// ----- Executor -----
+
+type Execute interface {
+	Run() error
+	Find(binder Binder) error
+}
+
+type Prepare interface {
+	Run(args []Value) error
+	Find(args []Value, binder Binder) error
+}
+
+type Executor interface {
+	Execute
+	Prepare(fn func(exec Prepare) error) error
 }
