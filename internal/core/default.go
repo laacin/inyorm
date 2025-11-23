@@ -1,5 +1,10 @@
 package core
 
+var DefaultConfig = Config{
+	ColWrite:  DefaultColumnWriter,
+	ColumnTag: DefaultColumnTag,
+}
+
 var DefaultColumnWriter = ColumnWriter{
 	Select:  ColTypDef,
 	Join:    ColTypBase,

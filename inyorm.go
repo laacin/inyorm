@@ -13,7 +13,7 @@ type Engine struct {
 }
 
 func New(dialect string, db *sql.DB, opts *Options) *Engine {
-	cfg := resolveOpts(dialect, &opts)
+	cfg := resolveOpts(dialect, opts)
 	return &Engine{cfg: *cfg, db: db}
 }
 

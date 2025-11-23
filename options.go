@@ -27,7 +27,7 @@ type Options struct {
 	//  - GroupBy = TypeColumnExpr
 	//  - Having  = TypeColumnExpr
 	//  - OrderBy = TypeColumnAlias
-	ColumnWriter *ColumnWriter
+	ColumnWriter ColumnWriter
 
 	// ColumnTag
 	// Defines the tag that the mapper uses to read and bind values.
@@ -47,23 +47,22 @@ type Options struct {
 
 // ---- Resolves
 
-func resolveOpts(dialect string, opts **Options) *core.Config {
-	ptr := *opts
-	if ptr == nil {
-		ptr = &Options{}
+func resolveOpts(dialect string, opts *Options) *core.Config {
+	if opts == nil {
+		return &core.DefaultConfig
 	}
 
-	core.ResolveColumnWriter(&ptr.ColumnWriter)
+	core.ResolveColumnWriter(&opts.ColumnWriter)
 
-	if ptr.ColumnTag == "" {
-		ptr.ColumnTag = core.DefaultColumnTag
+	if opts.ColumnTag == "" {
+		opts.ColumnTag = core.DefaultColumnTag
 	}
 
 	return &core.Config{
 		Dialect:   dialect,
-		ColWrite:  *ptr.ColumnWriter,
-		ColumnTag: ptr.ColumnTag,
-		MaxLimit:  ptr.MaxLimit,
-		Limit:     ptr.Limit,
+		ColWrite:  opts.ColumnWriter,
+		ColumnTag: opts.ColumnTag,
+		MaxLimit:  opts.MaxLimit,
+		Limit:     opts.Limit,
 	}
 }

@@ -1,11 +1,6 @@
 package core
 
-func ResolveColumnWriter(opt **ColumnWriter) {
-	ptr := *opt
-	if ptr == nil {
-		ptr = &ColumnWriter{}
-	}
-
+func ResolveColumnWriter(opt *ColumnWriter) {
 	resolve := func(provided *ColumnType, dflt ColumnType) {
 		if *provided != ColTypUnset {
 			return
@@ -15,12 +10,10 @@ func ResolveColumnWriter(opt **ColumnWriter) {
 
 	dflt := &DefaultColumnWriter
 
-	resolve(&ptr.Select, dflt.Select)
-	resolve(&ptr.Join, dflt.Join)
-	resolve(&ptr.Where, dflt.Where)
-	resolve(&ptr.GroupBy, dflt.GroupBy)
-	resolve(&ptr.Having, dflt.Having)
-	resolve(&ptr.OrderBy, dflt.OrderBy)
-
-	*opt = ptr
+	resolve(&opt.Select, dflt.Select)
+	resolve(&opt.Join, dflt.Join)
+	resolve(&opt.Where, dflt.Where)
+	resolve(&opt.GroupBy, dflt.GroupBy)
+	resolve(&opt.Having, dflt.Having)
+	resolve(&opt.OrderBy, dflt.OrderBy)
 }
