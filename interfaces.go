@@ -202,7 +202,7 @@ type Condition interface {
 	// In writes column IN (...)
 	//
 	// @SQL: `col` IN (value1, value2, ...)
-	In(v ...Value) ConditionNext
+	In(v []Value) ConditionNext
 
 	// Between writes column BETWEEN min AND max
 	//
@@ -266,8 +266,11 @@ type ColumnBuilder interface {
 
 	// All writes the wildcard *
 	//
+	// You can specify a table to provide context when joins exist.
+	// If not specified, the default table will be used.
+	//
 	// @SQL: *
-	All() Column
+	All(table ...string) Column
 
 	// Ph writes a placeholder
 	//
@@ -454,6 +457,10 @@ type Offset interface {
 	Offset(offset int)
 }
 
+type Returning interface {
+	Returning(ident []Identifier)
+}
+
 // ----- Statements -----
 
 // SelectStmt represents a full SELECT statement
@@ -469,6 +476,28 @@ type SelectStmt interface {
 	Limit
 	Offset
 	Raw() (string, []any)
+}
+
+type InsertStmt interface {
+	Insert(values Binder)
+	Into(table string)
+	Returning
+	Raw() (string, []any)
+}
+
+type UpdateStmt interface {
+	Update(table string)
+	Set(value Binder)
+	From
+	Where
+	Returning
+	Raw() (string, []any)
+}
+
+type DeleteStmt interface {
+	From
+	Where
+	Returning
 }
 
 // ----- Executor -----

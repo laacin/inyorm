@@ -10,17 +10,12 @@ type ColBuilder[Col, Cond, CondNext, Case, CaseNext any] struct {
 }
 
 func (c *ColBuilder[Col, Cond, CondNext, Case, CaseNext]) Col(name string, table ...string) Col {
-	tbl := c.Table
-	if len(table) > 0 {
-		tbl = table[0]
-	}
-
-	col := &Column[Col]{BaseName: name, Table: tbl}
+	col := &Column[Col]{BaseName: name, Table: tbl(c.Table, table)}
 	return any(col).(Col)
 }
 
-func (c *ColBuilder[Col, Cond, CondNext, Case, CaseNext]) All() Col {
-	col := &Column[Col]{BaseName: "*"}
+func (c *ColBuilder[Col, Cond, CondNext, Case, CaseNext]) All(table ...string) Col {
+	col := &Column[Col]{BaseName: "*", Table: tbl(c.Table, table)}
 	return any(col).(Col)
 }
 

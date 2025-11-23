@@ -54,7 +54,7 @@ func TestSelectStmt(t *testing.T) {
 		q.Limit(100)
 		q.Offset(20)
 
-		exp := "SELECT * "
+		exp := "SELECT a.* "
 		exp += "FROM users a "
 		exp += "INNER JOIN posts b ON (b.user_id = a.id) "
 		exp += "WHERE (a.banned IS NULL AND a.age > ?) "
