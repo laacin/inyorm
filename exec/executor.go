@@ -17,14 +17,19 @@ type Executor[Prep any] struct {
 
 func (e *Executor[Prep]) Raw() (string, []any) { return e.Query.Build() }
 
-func (e *Executor[Prep]) Run() error {
+func (e *Executor[Prep]) Run(binder ...any) error {
+	qty := len(binder)
 	query, args := e.Query.Build()
-	return run(e.Ctx, e.Instance, query, args)
-}
 
-func (e *Executor[Prep]) Find(binder any) error {
-	query, args := e.Query.Build()
-	return find(e.Ctx, e.Instance, e.Cfg.ColumnTag, query, args, binder)
+	if qty == 0 {
+		return run(e.Ctx, e.Instance, query, args)
+	}
+
+	if qty == 1 {
+		return scan(e.Ctx, e.Instance, e.Cfg.ColumnTag, query, args, binder[0])
+	}
+
+	return scan(e.Ctx, e.Instance, e.Cfg.ColumnTag, query, args, binder)
 }
 
 func (e *Executor[Prep]) Prepare(fn func(exec Prep) error) error {

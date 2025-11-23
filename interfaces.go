@@ -460,10 +460,17 @@ type Offset interface {
 }
 
 type Returning interface {
-	Returning(ident []Identifier)
+	Returning(ident ...Identifier)
 }
 
 // ----- Statements -----
+
+type PreStatement interface {
+	Select(sel ...Identifier) SelectStmt
+	Insert(table string) InsertStmt
+	Update(table string) UpdateStmt
+	Delete() DeleteStmt
+}
 
 // SelectStmt represents a full SELECT statement
 type SelectStmt interface {
@@ -504,17 +511,11 @@ type DeleteStmt interface {
 
 // ----- Executor -----
 
-type Execute interface {
-	Run() error
-	Find(binder Binder) error
-}
-
 type Prepare interface {
-	Run(args []Value) error
-	Find(args []Value, binder Binder) error
+	Run(args []Value, binder ...Binder) error
 }
 
 type Executor interface {
-	Execute
+	Run(binder ...Binder) error
 	Prepare(fn func(exec Prepare) error) error
 }

@@ -26,7 +26,7 @@ func run(
 	return nil
 }
 
-func find(
+func scan(
 	ctx context.Context,
 	db instance,
 	tag string,
@@ -53,7 +53,7 @@ func runPrep(
 	return nil
 }
 
-func findPrep(
+func scanPrep(
 	ctx context.Context,
 	stmt *sql.Stmt,
 	tag string,
