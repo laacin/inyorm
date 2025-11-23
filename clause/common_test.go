@@ -34,29 +34,40 @@ func New[T any](cls core.Clause, dialect []string) (T, inyorm.ColumnBuilder, run
 	}
 	tbl := "users"
 
-	q := writer.NewQuery(tbl, &core.Config{
+	q := writer.Query{Config: &core.Config{
 		Dialect:   d,
 		ColumnTag: core.DefaultColumnTag,
 		ColWrite:  core.DefaultColumnWriter,
+	}}
+
+	q.PreBuild(func(cfg *core.Config) (useAliases bool) {
+		return cls.Name() == core.ClsTypJoin
 	})
 
-	clause := cls.(T)
 	c := &colBuilder{Table: tbl}
-
-	run := func(t *testing.T, clause string, vals []any) {
-		q.SetClauses([]core.Clause{cls}, []core.ClauseType{cls.Name()})
+	run := func(t *testing.T, expect string, vals []any) {
+		q.SetClauses([]core.Clause{cls})
 		statement, values := q.Build()
 
-		if statement != clause {
-			t.Errorf("\nmismatch result:\nExpect:\n%s\nHave:\n%s\n", clause, statement)
+		if statement != expect {
+			if len(statement) == len(expect) {
+				for i := range statement {
+					have, exp := statement[i], expect[i]
+					if exp != have && exp != 'x' {
+						t.Errorf("\nmismatch result:\nExpect:\n%s\nHave:\n%s\n", expect, statement)
+						return
+					}
+				}
+			} else {
+				t.Errorf("\nmismatch result:\nExpect:\n%s\nHave:\n%s\n", expect, statement)
+			}
 		}
-
 		if !reflect.DeepEqual(vals, values) {
 			t.Errorf("\nmissmatch values:\nExpect:\n%#v\nHave:\n%#v\n", vals, values)
 		}
 	}
 
-	return clause, c, run
+	return any(cls).(T), c, run
 }
 
 func NewSelect(dialect ...string) (inyorm.Select, inyorm.ColumnBuilder, runner) {

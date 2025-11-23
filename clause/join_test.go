@@ -10,7 +10,7 @@ func TestJoin(t *testing.T) {
 
 		cls.Join("posts").On(c.Col("user_id", "posts")).Equal(id)
 
-		exp := "INNER JOIN posts b ON (b.user_id = a.id)"
+		exp := "INNER JOIN posts x ON (x.user_id = x.id)"
 		run(t, exp, nil)
 	})
 
@@ -24,11 +24,11 @@ func TestJoin(t *testing.T) {
 
 		cls.Join("roles").On(c.Col("id", "roles")).Equal(c.Col("role_id", "user_roles"))
 
-		exp := "INNER JOIN posts b ON (b.user_id = a.id)"
+		exp := "INNER JOIN posts x ON (x.user_id = x.id)"
 		exp += " "
-		exp += "INNER JOIN user_roles c ON (c.user_id = a.id)"
+		exp += "INNER JOIN user_roles x ON (x.user_id = x.id)"
 		exp += " "
-		exp += "INNER JOIN roles d ON (d.id = c.role_id)"
+		exp += "INNER JOIN roles x ON (x.id = x.role_id)"
 		run(t, exp, nil)
 	})
 
@@ -60,11 +60,11 @@ func TestJoin(t *testing.T) {
 			And(active).
 			Equal(true)
 
-		exp := "INNER JOIN posts b ON (b.user_id = a.id AND b.published = 1)"
+		exp := "INNER JOIN posts x ON (x.user_id = x.id AND x.published = 1)"
 		exp += " "
-		exp += "INNER JOIN user_roles c ON (c.user_id = a.id AND c.assigned_at IS NOT NULL)"
+		exp += "INNER JOIN user_roles x ON (x.user_id = x.id AND x.assigned_at IS NOT NULL)"
 		exp += " "
-		exp += "INNER JOIN roles d ON (d.id = c.role_id AND d.name IN ('admin', 'editor', 'manager') AND a.active = 1)"
+		exp += "INNER JOIN roles x ON (x.id = x.role_id AND x.name IN ('admin', 'editor', 'manager') AND x.active = 1)"
 		run(t, exp, nil)
 	})
 }

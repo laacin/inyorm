@@ -27,7 +27,6 @@ func TestSelectStmt(t *testing.T) {
 		q, c := qe.NewSelect(context.Background(), "users")
 
 		q.Select(c.All())
-		q.From("users")
 		q.Where(c.Col("id")).Equal(c.Param("uuid"))
 		q.Limit(1)
 

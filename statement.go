@@ -23,7 +23,7 @@ type selectStmt struct {
 }
 
 func newSelect(ctx context.Context, cfg *core.Config, db *sql.DB, table string) SelectStmt {
-	query := writer.NewQuery(table, cfg)
+	query := &writer.Query{Config: cfg}
 	stmt := &selectStmt{
 		query: query,
 		executor: &executor{
@@ -34,22 +34,22 @@ func newSelect(ctx context.Context, cfg *core.Config, db *sql.DB, table string) 
 		},
 	}
 
-	clauses := []core.Clause{
+	query.SetClauses([]core.Clause{
 		&stmt.clsSelect, &stmt.clsFrom, &stmt.clsJoin,
 		&stmt.clsWhere, &stmt.clsGroupBy, &stmt.clsHaving,
 		&stmt.clsOrderBy, &stmt.clsLimit, &stmt.clsOffset,
-	}
+	})
 
-	query.SetClauses(clauses, []core.ClauseType{
-		core.ClsTypSelect,
-		core.ClsTypFrom,
-		core.ClsTypJoin,
-		core.ClsTypWhere,
-		core.ClsTypGroupBy,
-		core.ClsTypHaving,
-		core.ClsTypOrderBy,
-		core.ClsTypLimit,
-		core.ClsTypOffset,
+	query.PreBuild(func(cfg *core.Config) (useAliases bool) {
+		if !stmt.clsFrom.IsDeclared() && table != "" {
+			stmt.From(table)
+		}
+
+		if cfg.Limit > 0 && !stmt.clsLimit.IsDeclared() {
+			stmt.clsLimit.Limit(cfg.Limit)
+		}
+
+		return stmt.clsJoin.IsDeclared()
 	})
 
 	return stmt
