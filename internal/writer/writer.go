@@ -10,7 +10,6 @@ type Writer struct {
 	sb        strings.Builder
 	ph        *Placeholder
 	aliases   *Alias
-	autoPh    *core.AutoPlaceholder
 	colWriter *core.ColumnWriter
 }
 
@@ -22,34 +21,12 @@ func (w *Writer) Char(v byte) {
 	w.sb.WriteByte(v)
 }
 
-func (w *Writer) Placeholder() {
-	w.sb.WriteString(w.ph.write())
-}
-
-func (w *Writer) Identifier(v any, ctx core.ClauseType) {
-	switch val := v.(type) {
-	case core.Builder:
-		val(w)
-
-	case core.Column:
-		mode := inferColumn(ctx, w.colWriter)
-		switch mode {
-		case core.ColTypBase:
-			val.Base()(w)
-
-		case core.ColTypExpr:
-			val.Expr()(w)
-
-		case core.ColTypDef:
-			val.Def()(w)
-
-		case core.ColTypAlias:
-			val.Alias()(w)
-		}
-
-	default:
-		w.sb.WriteString(sqlify(val))
+func (w *Writer) Param(v []any) {
+	if len(v) > 0 {
+		w.sb.WriteString(w.ph.withValue(v[0]))
+		return
 	}
+	w.sb.WriteString(w.ph.write())
 }
 
 func (w *Writer) Value(v any, ctx core.ClauseType) {
@@ -74,10 +51,6 @@ func (w *Writer) Value(v any, ctx core.ClauseType) {
 		}
 
 	default:
-		if isAuthPh(ctx, w.autoPh) {
-			w.sb.WriteString(w.ph.withValue(val))
-			return
-		}
 		w.sb.WriteString(sqlify(val))
 	}
 }

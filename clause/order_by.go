@@ -18,7 +18,7 @@ func (cls *OrderBy[Next]) Build(w core.Writer) {
 		if i > 0 {
 			w.Write(", ")
 		}
-		w.Identifier(ord.order, cls.Name())
+		w.Value(ord.order, cls.Name())
 		if ord.descending {
 			w.Write(" DESC")
 		}

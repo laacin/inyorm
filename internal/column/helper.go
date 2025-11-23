@@ -7,7 +7,7 @@ func inferColumn[T any](w core.Writer, v any) {
 		col.Expr()(w)
 		return
 	}
-	w.Identifier(v, core.ClsTypUnset)
+	w.Value(v, core.ClsTypUnset)
 }
 
 func tbl(dflt string, provided []string) string {

@@ -37,7 +37,6 @@ func New[T any](cls core.Clause, dialect []string) (T, inyorm.ColumnBuilder, run
 	q := writer.NewQuery(tbl, &core.Config{
 		Dialect:   d,
 		ColumnTag: core.DefaultColumnTag,
-		AutoPh:    core.DefaultAutoPlaceholder,
 		ColWrite:  core.DefaultColumnWriter,
 	})
 

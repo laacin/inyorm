@@ -5,9 +5,8 @@ import "github.com/laacin/inyorm/internal/core"
 // ---- Export internal types
 
 type (
-	ColumnType      = core.ColumnType
-	AutoPlaceholder = core.AutoPlaceholder
-	ColumnWriter    = core.ColumnWriter
+	ColumnType   = core.ColumnType
+	ColumnWriter = core.ColumnWriter
 )
 
 const (
@@ -18,19 +17,6 @@ const (
 )
 
 type Options struct {
-	// AutoPlaceholder
-	// Allows selecting in which clauses to automatically insert placeholders.
-	// If the provided value is a literal, a placeholder (? | $1) is written instead,
-	// and the original value is stored.
-	//
-	// If nil, the default configuration is:
-	//   - Insert = true
-	//   - Update = true
-	//   - Where  = true
-	//   - Having = false
-	//   - Join   = false
-	AutoPlaceholder *AutoPlaceholder
-
 	// ColumnWriter
 	// Allows selecting the default way a column would be written
 	//
@@ -67,7 +53,6 @@ func resolveOpts(dialect string, opts **Options) *core.Config {
 		ptr = &Options{}
 	}
 
-	core.ResolveAutoPlaceholder(&ptr.AutoPlaceholder)
 	core.ResolveColumnWriter(&ptr.ColumnWriter)
 
 	if ptr.ColumnTag == "" {
@@ -76,7 +61,6 @@ func resolveOpts(dialect string, opts **Options) *core.Config {
 
 	return &core.Config{
 		Dialect:   dialect,
-		AutoPh:    *ptr.AutoPlaceholder,
 		ColWrite:  *ptr.ColumnWriter,
 		ColumnTag: ptr.ColumnTag,
 		MaxLimit:  ptr.MaxLimit,

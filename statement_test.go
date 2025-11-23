@@ -28,7 +28,7 @@ func TestSelectStmt(t *testing.T) {
 
 		q.Select(c.All())
 		q.From("users")
-		q.Where(c.Col("id")).Equal("uuid")
+		q.Where(c.Col("id")).Equal(c.Param("uuid"))
 		q.Limit(1)
 
 		exp := "SELECT * FROM users WHERE (id = ?) LIMIT 1"
@@ -49,7 +49,7 @@ func TestSelectStmt(t *testing.T) {
 		q.Select(c.All())
 		q.From("users")
 		q.Join("posts").On(foreign).Equal(id)
-		q.Where(banned).IsNull().And(age).Greater(17)
+		q.Where(banned).IsNull().And(age).Greater(c.Param(17))
 		q.OrderBy(age).Desc()
 		q.Limit(100)
 		q.Offset(20)
@@ -101,7 +101,7 @@ func TestSelectStmt(t *testing.T) {
 		q.Join("posts").On(postsFk).Equal(id)
 		q.Join("user_roles").On(interUser).Equal(id)
 		q.Join("roles").On(roleId).Equal(interRole)
-		q.Where(age).Greater(17).And(age).Less(30)
+		q.Where(age).Greater(c.Param(17)).And(age).Less(c.Param(30))
 		q.GroupBy(postNum.Base())
 		q.Having(postNum).Greater(10)
 		q.OrderBy(age).Desc()

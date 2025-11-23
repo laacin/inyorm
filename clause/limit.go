@@ -12,7 +12,7 @@ func (cls *Limit) IsDeclared() bool      { return cls != nil && cls.declared }
 func (cls *Limit) Build(w core.Writer) {
 	w.Write("LIMIT")
 	w.Char(' ')
-	w.Identifier(cls.limit, cls.Name())
+	w.Value(cls.limit, cls.Name())
 }
 
 // -- Methods

@@ -28,7 +28,6 @@ func NewQuery(table string, cfg *core.Config) *Query {
 func (q *Query) Build() (string, []any) {
 	w := &Writer{
 		ph:        &q.placeholders,
-		autoPh:    &q.cfg.AutoPh,
 		colWriter: &q.cfg.ColWrite,
 	}
 

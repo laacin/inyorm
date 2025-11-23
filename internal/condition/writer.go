@@ -15,7 +15,7 @@ func (c *Condition[Self, Next]) Build(w core.Writer, ctx core.ClauseType) {
 			w.Char(' ')
 		}
 
-		w.Identifier(expr.identifier, ctx)
+		w.Value(expr.identifier, ctx)
 		w.Char(' ')
 		w.Write(getOp(expr.operator, expr.negated))
 		switch expr.operator {

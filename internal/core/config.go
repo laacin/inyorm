@@ -2,19 +2,10 @@ package core
 
 type Config struct {
 	Dialect   string
-	AutoPh    AutoPlaceholder
 	ColWrite  ColumnWriter
 	ColumnTag string
 	Limit     int
 	MaxLimit  int
-}
-
-type AutoPlaceholder struct {
-	Insert bool
-	Update bool
-	Where  bool
-	Having bool
-	Join   bool
 }
 
 type ColumnWriter struct {

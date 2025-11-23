@@ -11,8 +11,8 @@ func TestWhere(t *testing.T) {
 		cls, c, run := NewWhere()
 		name := c.Col("firstname", "users")
 
-		cond := cls.Where(name).Not().Not().Equal("john")
-		cond.Or(name).Not().Equal("mary")
+		cond := cls.Where(name).Not().Not().Equal(c.Param("john"))
+		cond.Or(name).Not().Equal(c.Param("mary"))
 
 		exp := "WHERE (firstname = ? OR firstname <> ?)"
 		run(t, exp, []any{"john", "mary"})
@@ -21,7 +21,9 @@ func TestWhere(t *testing.T) {
 	t.Run("basic_2", func(t *testing.T) {
 		cls, c, run := NewWhere()
 		lname := c.Col("lastname", "users")
-		cls.Where(lname).Like("%alv%").And(lname).Not().In([]any{"calvin", "malvina", "salvatore"})
+
+		in := []any{c.Param("calvin"), c.Param("malvina"), c.Param("salvatore")}
+		cls.Where(lname).Like(c.Param("%alv%")).And(lname).Not().In(in)
 
 		exp := "WHERE (lastname LIKE ? AND lastname NOT IN (?, ?, ?))"
 		run(t, exp, []any{"%alv%", "calvin", "malvina", "salvatore"})
@@ -30,8 +32,8 @@ func TestWhere(t *testing.T) {
 	t.Run("basic_3", func(t *testing.T) {
 		cls, c, run := NewWhere()
 		age := c.Col("age", "users")
-		cond := cls.Where(age).Between(17, 70)
-		cond.And(age).Not().Equal(45)
+		cond := cls.Where(age).Between(c.Param(17), c.Param(70))
+		cond.And(age).Not().Equal(c.Param(45))
 
 		exp := "WHERE (age BETWEEN ? AND ? AND age <> ?)"
 		run(t, exp, []any{17, 70, 45})
@@ -45,9 +47,11 @@ func TestWhere(t *testing.T) {
 			lname = c.Col("lastname", "users")
 		)
 
-		cls.Where(age).Between(17, 70).And(age).Not().Equal(45)
-		cls.Where(fname).Like("%alv%").And(fname).Not().In([]any{"calvin", "malvina", "salvatore"})
-		cls.Where(lname).Equal("john").Or(lname).Not().Equal("mary")
+		in := []any{c.Param("calvin"), c.Param("malvina"), c.Param("salvatore")}
+
+		cls.Where(age).Between(c.Param(17), c.Param(70)).And(age).Not().Equal(c.Param(45))
+		cls.Where(fname).Like(c.Param("%alv%")).And(fname).Not().In(in)
+		cls.Where(lname).Equal(c.Param("john")).Or(lname).Not().Equal(c.Param("mary"))
 		cls.Where("literal").Not().IsNull()
 
 		exp := "WHERE (age BETWEEN ? AND ? AND age <> ?)"
@@ -70,9 +74,11 @@ func TestWhere(t *testing.T) {
 			lname = c.Col("lastname", "users")
 		)
 
-		cls.Where(age).Between(17, 70).And(age).Not().Equal(45)
-		cls.Where(fname).Like("%alv%").And(fname).Not().In([]any{"calvin", "malvina", "salvatore"})
-		cls.Where(lname).Not().Not().Equal("john").Or(lname).Not().Equal("mary")
+		in := []any{c.Param("calvin"), c.Param("malvina"), c.Param("salvatore")}
+
+		cls.Where(age).Between(c.Param(17), c.Param(70)).And(age).Not().Equal(c.Param(45))
+		cls.Where(fname).Like(c.Param("%alv%")).And(fname).Not().In(in)
+		cls.Where(lname).Not().Not().Equal(c.Param("john")).Or(lname).Not().Equal(c.Param("mary"))
 		cls.Where("literal").Not().IsNull()
 
 		exp := "WHERE (age BETWEEN $1 AND $2 AND age <> $3)"

@@ -272,10 +272,12 @@ type ColumnBuilder interface {
 	// @SQL: *
 	All(table ...string) Column
 
-	// Ph writes a placeholder
+	// Param writes a placeholder
+	//
+	// You can omit the value for lazy parameters, useful in prepared statements.
 	//
 	// @SQL: ? / $[number]
-	Ph() Builder
+	Param(value ...Value) Builder
 
 	// Cond starts a condition block with the given identifier
 	//

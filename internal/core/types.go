@@ -6,8 +6,7 @@ type Writer interface {
 	Write(str string)
 	Char(byt byte)
 
-	Placeholder()
-	Identifier(v any, ctx ClauseType)
+	Param(value []any)
 	Value(v any, ctx ClauseType)
 	Column(table, base string)
 	Table(table string)

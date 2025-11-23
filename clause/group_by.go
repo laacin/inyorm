@@ -16,7 +16,7 @@ func (cls *GroupBy) Build(w core.Writer) {
 		if i > 0 {
 			w.Write(", ")
 		}
-		w.Identifier(group, cls.Name())
+		w.Value(group, cls.Name())
 	}
 }
 

@@ -1,13 +1,5 @@
 package core
 
-func ResolveAutoPlaceholder(opt **AutoPlaceholder) {
-	ptr := *opt
-	if ptr == nil {
-		ptr = &DefaultAutoPlaceholder
-	}
-	*opt = ptr
-}
-
 func ResolveColumnWriter(opt **ColumnWriter) {
 	ptr := *opt
 	if ptr == nil {

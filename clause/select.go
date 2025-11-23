@@ -22,7 +22,7 @@ func (cls *Select[Next]) Build(w core.Writer) {
 		if i > 0 {
 			w.Write(", ")
 		}
-		w.Identifier(sel, cls.Name())
+		w.Value(sel, cls.Name())
 	}
 }
 

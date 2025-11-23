@@ -19,8 +19,8 @@ func (c *ColBuilder[Col, Cond, CondNext, Case, CaseNext]) All(table ...string) C
 	return any(col).(Col)
 }
 
-func (c *ColBuilder[Col, Cond, CondNext, Case, CaseNext]) Ph() core.Builder {
-	return func(w core.Writer) { w.Placeholder() }
+func (c *ColBuilder[Col, Cond, CondNext, Case, CaseNext]) Param(value ...any) core.Builder {
+	return func(w core.Writer) { w.Param(value) }
 }
 
 func (c *ColBuilder[Col, Cond, CondNext, Case, CaseNext]) Cond(ident any) Cond {
