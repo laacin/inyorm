@@ -465,13 +465,6 @@ type Returning interface {
 
 // ----- Statements -----
 
-type PreStatement interface {
-	Select(sel ...Identifier) SelectStmt
-	Insert(table string) InsertStmt
-	Update(table string) UpdateStmt
-	Delete() DeleteStmt
-}
-
 // SelectStmt represents a full SELECT statement
 type SelectStmt interface {
 	Executor

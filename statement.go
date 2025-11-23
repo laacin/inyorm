@@ -35,9 +35,15 @@ func newSelect(ctx context.Context, cfg *core.Config, db *sql.DB, table string) 
 	}
 
 	query.SetClauses([]core.Clause{
-		&stmt.clsSelect, &stmt.clsFrom, &stmt.clsJoin,
-		&stmt.clsWhere, &stmt.clsGroupBy, &stmt.clsHaving,
-		&stmt.clsOrderBy, &stmt.clsLimit, &stmt.clsOffset,
+		&stmt.clsSelect,
+		&stmt.clsFrom,
+		&stmt.clsJoin,
+		&stmt.clsWhere,
+		&stmt.clsGroupBy,
+		&stmt.clsHaving,
+		&stmt.clsOrderBy,
+		&stmt.clsLimit,
+		&stmt.clsOffset,
 	})
 
 	query.PreBuild(func(cfg *core.Config) (useAliases bool) {
