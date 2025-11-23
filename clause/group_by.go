@@ -9,14 +9,14 @@ type GroupBy struct {
 
 func (cls *GroupBy) Name() core.ClauseType { return core.ClsTypGroupBy }
 func (cls *GroupBy) IsDeclared() bool      { return cls != nil && cls.declared }
-func (cls *GroupBy) Build(w core.Writer) {
+func (cls *GroupBy) Build(w core.Writer, cfg *core.Config) {
 	w.Write("GROUP BY")
 	w.Char(' ')
 	for i, group := range cls.groups {
 		if i > 0 {
 			w.Write(", ")
 		}
-		w.Value(group, cls.Name())
+		w.Value(group, cfg.ColWrite.GroupBy)
 	}
 }
 

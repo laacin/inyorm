@@ -25,6 +25,7 @@ func NewQuery(table string, cfg *core.Config) *Query {
 	return builder
 }
 
+func (q *Query) Table() string { return q.table }
 func (q *Query) Build() (string, []any) {
 	w := &Writer{
 		ph:        &q.placeholders,
@@ -46,7 +47,7 @@ func (q *Query) Build() (string, []any) {
 			w.Char(' ')
 		}
 
-		cls.Build(w)
+		cls.Build(w, q.cfg)
 		i++
 	}
 

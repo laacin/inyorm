@@ -9,7 +9,7 @@ type From struct {
 
 func (cls *From) Name() core.ClauseType { return core.ClsTypFrom }
 func (cls *From) IsDeclared() bool      { return cls != nil && cls.declared }
-func (cls *From) Build(w core.Writer) {
+func (cls *From) Build(w core.Writer, cfg *core.Config) {
 	w.Write("FROM")
 	w.Char(' ')
 	w.Table(cls.value)

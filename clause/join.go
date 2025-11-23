@@ -23,7 +23,7 @@ func (cls *Join[Next, Cond, CondNext]) Name() core.ClauseType { return core.ClsT
 func (cls *Join[Next, Cond, CondNext]) IsDeclared() bool {
 	return cls != nil && cls.declared
 }
-func (cls *Join[Next, Cond, CondNext]) Build(w core.Writer) {
+func (cls *Join[Next, Cond, CondNext]) Build(w core.Writer, cfg *core.Config) {
 	for i, join := range cls.joins {
 		if i > 0 {
 			w.Char(' ')
@@ -35,7 +35,7 @@ func (cls *Join[Next, Cond, CondNext]) Build(w core.Writer) {
 		w.Table(join.table)
 		if join.cond != nil {
 			w.Write(" ON ")
-			join.cond.Build(w, cls.Name())
+			join.cond.Build(w, cfg.ColWrite.Join)
 		}
 	}
 }

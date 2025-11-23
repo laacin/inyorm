@@ -58,7 +58,7 @@ func (cb *columnBuilder[Col]) wOp(arg byte, value any) {
 		w.Char(' ')
 		w.Char(arg)
 		w.Char(' ')
-		inferColumn[Col](w, value)
+		w.Value(value, core.ColTypExpr)
 	}
 	cb.exprs = append(cb.exprs, expr)
 }

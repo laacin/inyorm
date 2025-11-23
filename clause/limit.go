@@ -9,10 +9,15 @@ type Limit struct {
 
 func (cls *Limit) Name() core.ClauseType { return core.ClsTypLimit }
 func (cls *Limit) IsDeclared() bool      { return cls != nil && cls.declared }
-func (cls *Limit) Build(w core.Writer) {
+func (cls *Limit) Build(w core.Writer, cfg *core.Config) {
+	lim := cls.limit
+	if cfg.Limit > 0 {
+		lim = max(lim, cfg.Limit)
+	}
+
 	w.Write("LIMIT")
 	w.Char(' ')
-	w.Value(cls.limit, cls.Name())
+	w.Value(lim, core.ColTypUnset)
 }
 
 // -- Methods

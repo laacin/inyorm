@@ -29,14 +29,13 @@ func (w *Writer) Param(v []any) {
 	w.sb.WriteString(w.ph.write())
 }
 
-func (w *Writer) Value(v any, ctx core.ClauseType) {
+func (w *Writer) Value(v any, colWriter core.ColumnType) {
 	switch val := v.(type) {
 	case core.Builder:
 		val(w)
 
 	case core.Column:
-		mode := inferColumn(ctx, w.colWriter)
-		switch mode {
+		switch colWriter {
 		case core.ColTypBase:
 			val.Base()(w)
 

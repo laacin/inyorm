@@ -2,7 +2,7 @@ package condition
 
 import "github.com/laacin/inyorm/internal/core"
 
-func (c *Condition[Self, Next]) Build(w core.Writer, ctx core.ClauseType) {
+func (c *Condition[Self, Next]) Build(w core.Writer, colWrite core.ColumnType) {
 	w.Char('(')
 	for i, expr := range c.Exprs {
 		if !expr.closed {
@@ -15,18 +15,18 @@ func (c *Condition[Self, Next]) Build(w core.Writer, ctx core.ClauseType) {
 			w.Char(' ')
 		}
 
-		w.Value(expr.identifier, ctx)
+		w.Value(expr.identifier, colWrite)
 		w.Char(' ')
 		w.Write(getOp(expr.operator, expr.negated))
 		switch expr.operator {
 		case isNull:
 		case between:
 			w.Char(' ')
-			w.Value(expr.values[0], ctx)
+			w.Value(expr.values[0], colWrite)
 			w.Char(' ')
 			w.Write(and)
 			w.Char(' ')
-			w.Value(expr.values[1], ctx)
+			w.Value(expr.values[1], colWrite)
 		case in:
 			w.Char(' ')
 			w.Char('(')
@@ -34,13 +34,13 @@ func (c *Condition[Self, Next]) Build(w core.Writer, ctx core.ClauseType) {
 				if i > 0 {
 					w.Write(", ")
 				}
-				w.Value(v, ctx)
+				w.Value(v, colWrite)
 			}
 			w.Char(')')
 
 		default:
 			w.Char(' ')
-			w.Value(expr.values[0], ctx)
+			w.Value(expr.values[0], colWrite)
 		}
 	}
 	w.Char(')')

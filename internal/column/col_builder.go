@@ -35,7 +35,7 @@ func (c *ColBuilder[Col, Cond, CondNext, Case, CaseNext]) Concat(v ...any) Col {
 			if i > 0 {
 				w.Write(", ")
 			}
-			inferColumn[Col](w, val)
+			w.Value(val, core.ColTypExpr)
 		}
 		w.Char(')')
 	}
@@ -51,17 +51,17 @@ func (c *ColBuilder[Col, Cond, CondNext, CaseT, CaseNext]) Switch(cond any, fn f
 
 	expr := func(w core.Writer) {
 		w.Write("CASE ")
-		inferColumn[Col](w, cond)
+		w.Value(cond, core.ColTypExpr)
 		for _, expr := range cs.Exprs {
 			w.Write(" WHEN ")
-			inferColumn[Col](w, expr.Identifier)
+			w.Value(expr.Identifier, core.ColTypExpr)
 			w.Write(" THEN ")
-			w.Value(expr.Argument, core.ClsTypUnset)
+			w.Value(expr.Argument, core.ColTypExpr)
 			w.Char(' ')
 		}
 		if any(cs.Els) != nil {
 			w.Write("ELSE ")
-			w.Value(cs.Els, core.ClsTypUnset)
+			w.Value(cs.Els, core.ColTypExpr)
 			w.Char(' ')
 		}
 		w.Write("END")
@@ -80,14 +80,14 @@ func (c *ColBuilder[Col, Cond, CondNext, CaseT, CaseNext]) Search(fn func(cs Cas
 		w.Write("CASE WHEN")
 		for _, arg := range cs.Exprs {
 			w.Char(' ')
-			any(arg.Identifier).(*condition.Condition[Cond, CondNext]).Build(w, core.ClsTypUnset)
+			any(arg.Identifier).(*condition.Condition[Cond, CondNext]).Build(w, core.ColTypExpr) // BUG: fragile
 			w.Write(" THEN ")
-			w.Value(arg.Argument, core.ClsTypUnset)
+			w.Value(arg.Argument, core.ColTypExpr)
 			w.Char(' ')
 		}
 		if any(cs.Els) != nil {
 			w.Write("ELSE ")
-			w.Value(cs.Els, core.ClsTypUnset)
+			w.Value(cs.Els, core.ColTypExpr)
 			w.Char(' ')
 		}
 		w.Write("END")

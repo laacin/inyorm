@@ -10,7 +10,7 @@ type Select[Next any] struct {
 
 func (cls *Select[Next]) Name() core.ClauseType { return core.ClsTypSelect }
 func (cls *Select[Next]) IsDeclared() bool      { return cls != nil && cls.declared }
-func (cls *Select[Next]) Build(w core.Writer) {
+func (cls *Select[Next]) Build(w core.Writer, cfg *core.Config) {
 	w.Write("SELECT")
 	w.Char(' ')
 
@@ -22,7 +22,7 @@ func (cls *Select[Next]) Build(w core.Writer) {
 		if i > 0 {
 			w.Write(", ")
 		}
-		w.Value(sel, cls.Name())
+		w.Value(sel, cfg.ColWrite.Select)
 	}
 }
 

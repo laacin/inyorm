@@ -10,7 +10,7 @@ type OrderBy[Next any] struct {
 
 func (cls *OrderBy[Next]) Name() core.ClauseType { return core.ClsTypOrderBy }
 func (cls *OrderBy[Next]) IsDeclared() bool      { return cls != nil && cls.declared }
-func (cls *OrderBy[Next]) Build(w core.Writer) {
+func (cls *OrderBy[Next]) Build(w core.Writer, cfg *core.Config) {
 	w.Write("ORDER BY")
 	w.Char(' ')
 
@@ -18,7 +18,7 @@ func (cls *OrderBy[Next]) Build(w core.Writer) {
 		if i > 0 {
 			w.Write(", ")
 		}
-		w.Value(ord.order, cls.Name())
+		w.Value(ord.order, cfg.ColWrite.OrderBy)
 		if ord.descending {
 			w.Write(" DESC")
 		}

@@ -9,10 +9,10 @@ type Offset struct {
 
 func (cls *Offset) Name() core.ClauseType { return core.ClsTypOffset }
 func (cls *Offset) IsDeclared() bool      { return cls != nil && cls.declared }
-func (cls *Offset) Build(w core.Writer) {
+func (cls *Offset) Build(w core.Writer, cfg *core.Config) {
 	w.Write("OFFSET")
 	w.Char(' ')
-	w.Value(cls.offset, cls.Name())
+	w.Value(cls.offset, core.ColTypUnset)
 }
 
 // -- Methods

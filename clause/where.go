@@ -12,14 +12,14 @@ type Where[Cond, CondNext any] struct {
 
 func (cls *Where[Cond, CondNext]) Name() core.ClauseType { return core.ClsTypWhere }
 func (cls *Where[Cond, CondNext]) IsDeclared() bool      { return cls != nil && cls.declared }
-func (cls *Where[Cond, CondNext]) Build(w core.Writer) {
+func (cls *Where[Cond, CondNext]) Build(w core.Writer, cfg *core.Config) {
 	w.Write("WHERE")
 	w.Char(' ')
 	for i, expr := range cls.exprs {
 		if i > 0 {
 			w.Write(" AND ")
 		}
-		expr.Build(w, cls.Name())
+		expr.Build(w, cfg.ColWrite.Where)
 	}
 }
 

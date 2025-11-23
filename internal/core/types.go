@@ -7,7 +7,7 @@ type Writer interface {
 	Char(byt byte)
 
 	Param(value []any)
-	Value(v any, ctx ClauseType)
+	Value(v any, colWrite ColumnType)
 	Column(table, base string)
 	Table(table string)
 
@@ -26,5 +26,5 @@ type Column interface {
 type Clause interface {
 	IsDeclared() bool
 	Name() ClauseType
-	Build(Writer)
+	Build(Writer, *Config)
 }
