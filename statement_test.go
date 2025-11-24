@@ -8,8 +8,8 @@ import (
 	"github.com/laacin/inyorm"
 )
 
-func run(t *testing.T, stmt interface{ Raw() (string, []any) }, exp string, vals []any) {
-	query, values := stmt.Raw()
+func run(t *testing.T, stmt any, exp string, vals []any) {
+	query, values := stmt.(interface{ Raw() (string, []any) }).Raw()
 
 	if query != exp {
 		t.Errorf("mismatch query:\nExpect:\n%s\nHave:\n%s", exp, query)
@@ -20,7 +20,7 @@ func run(t *testing.T, stmt interface{ Raw() (string, []any) }, exp string, vals
 	}
 }
 
-func TestSelectStmt(t *testing.T) {
+func TestSelect(t *testing.T) {
 	qe := inyorm.New("", nil, nil)
 
 	t.Run("simple", func(t *testing.T) {
@@ -125,5 +125,77 @@ func TestSelectStmt(t *testing.T) {
 		vals := []any{17, 30}
 
 		run(t, q, exp, vals)
+	})
+}
+
+func TestInsert(t *testing.T) {
+	qe := inyorm.New("", nil, nil)
+
+	type User struct {
+		Account string `col:"account"`
+		Age     int    `col:"age"`
+	}
+
+	t.Run("insert_one", func(t *testing.T) {
+		q, _ := qe.NewInsert(context.Background(), "users")
+
+		q.Insert(User{
+			Account: "myacc",
+			Age:     29,
+		})
+
+		exp := "INSERT INTO users (account, age) VALUES (?, ?)"
+		run(t, q, exp, []any{"myacc", 29})
+	})
+
+	t.Run("insert_many", func(t *testing.T) {
+		q, _ := qe.NewInsert(context.Background(), "users")
+
+		q.Insert([]User{
+			{Account: "acc1", Age: 10},
+			{Account: "acc2", Age: 20},
+			{Account: "acc3", Age: 30},
+			{Account: "acc4", Age: 40},
+			{Account: "acc5", Age: 50},
+			{Account: "acc6", Age: 60},
+		})
+
+		exp := "INSERT INTO users (account, age) VALUES "
+		exp += "(?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)"
+	})
+}
+
+func TestUpdate(t *testing.T) {
+	qe := inyorm.New("", nil, nil)
+
+	type Post struct {
+		Title       string `col:"title"`
+		Description string `col:"description"`
+	}
+
+	t.Run("update_one", func(t *testing.T) {
+		q, c := qe.NewUpdate(context.Background(), "posts")
+
+		q.Update(Post{
+			Title:       "something else",
+			Description: "little description",
+		})
+		q.Where(c.Col("id")).Equal(c.Param(10))
+
+		exp := "UPDATE posts SET title = ?, description = ? WHERE (id = ?)"
+		run(t, q, exp, []any{"something else", "little description", 10})
+	})
+}
+
+func TestDelete(t *testing.T) {
+	qe := inyorm.New("", nil, nil)
+
+	t.Run("delete_one", func(t *testing.T) {
+		q, c := qe.NewDelete(context.Background(), "comments")
+
+		q.Where(c.Col("id")).Equal(c.Param(12310))
+
+		exp := "DELETE FROM comments WHERE (id = ?)"
+		run(t, q, exp, []any{12310})
 	})
 }

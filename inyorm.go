@@ -24,3 +24,21 @@ func (e *Engine) NewSelect(ctx context.Context, table string) (SelectStmt, Colum
 	colBldr := ColumnBuilder(&colBuilder{Table: table})
 	return stmt, colBldr
 }
+
+func (e *Engine) NewInsert(ctx context.Context, table string) (InsertStmt, ColumnBuilder) {
+	stmt := newInsert(ctx, &e.cfg, e.db, table)
+	colBldr := ColumnBuilder(&colBuilder{Table: table})
+	return stmt, colBldr
+}
+
+func (e *Engine) NewUpdate(ctx context.Context, table string) (UpdateStmt, ColumnBuilder) {
+	stmt := newUpdate(ctx, &e.cfg, e.db, table)
+	colBldr := ColumnBuilder(&colBuilder{Table: table})
+	return stmt, colBldr
+}
+
+func (e *Engine) NewDelete(ctx context.Context, table string) (DeleteStmt, ColumnBuilder) {
+	stmt := newDelete(ctx, &e.cfg, e.db, table)
+	colBldr := ColumnBuilder(&colBuilder{Table: table})
+	return stmt, colBldr
+}

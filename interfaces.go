@@ -24,6 +24,10 @@ type (
 	clsLimit   = clause.Limit
 	clsOffset  = clause.Offset
 
+	clsInsert = clause.InsertInto
+	clsUpdate = clause.Update
+	clsDelete = clause.Delete
+
 	executor = exec.Executor[Prepare]
 )
 
@@ -459,8 +463,27 @@ type Offset interface {
 	Offset(offset int)
 }
 
-type Returning interface {
-	Returning(ident ...Identifier)
+// Insert represents the INSERT INTO clause,
+// defining the data that will be inserted into a table.
+type Insert interface {
+	// Insert writes the INSERT INTO clause values.
+	//
+	// The value must be a struct, slice of structs,
+	// or any Binder-compatible type.
+	//
+	// @SQL: INSERT INTO `table` (`columns`) VALUES (`values`)
+	Insert(value Binder)
+}
+
+// Update represents the UPDATE clause,
+// defining the data that will be updated in a table.
+type Update interface {
+	// Update writes the UPDATE clause values.
+	//
+	// The value must be a struct or any Binder-compatible type.
+	//
+	// @SQL: UPDATE `table` SET `column` = `value`
+	Update(value Binder)
 }
 
 // ----- Statements -----
@@ -477,29 +500,26 @@ type SelectStmt interface {
 	OrderBy
 	Limit
 	Offset
-	Raw() (string, []any)
 }
 
+// InsertStmt represents a full INSERT statement
 type InsertStmt interface {
-	Insert(values Binder)
-	Into(table string)
-	Returning
-	Raw() (string, []any)
+	Executor
+	Insert
 }
 
+// UpdateStmt represents a full UPDATE statement
 type UpdateStmt interface {
-	Update(table string)
-	Set(value Binder)
-	From
+	Executor
+	Update
 	Where
-	Returning
-	Raw() (string, []any)
 }
 
+// DeleteStmt represents a full DELETE statement
 type DeleteStmt interface {
+	Executor
 	From
 	Where
-	Returning
 }
 
 // ----- Executor -----

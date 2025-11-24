@@ -36,4 +36,5 @@ const (
 	ClsTypOffset
 	ClsTypInsert
 	ClsTypUpdate
+	ClsTypDelete
 )
