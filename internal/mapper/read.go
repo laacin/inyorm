@@ -2,7 +2,7 @@ package mapper
 
 import "reflect"
 
-func ReadValues(columnTag string, v any) (int, []string, []any, error) {
+func ReadValues(columnTag string, v any) (rows int, cols []string, vals []any, err error) {
 	val, typ, err := resolveInput(true, v)
 	if err != nil {
 		return 0, nil, nil, err
