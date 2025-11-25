@@ -13,17 +13,17 @@ const (
 	CrossJoin = "CROSS"
 )
 
-type Join[Next, Cond, CondNext any] struct {
+type Join[Next, End, Cond, CondNext any] struct {
 	declared bool
 	joins    []*join[Cond, CondNext]
 	current  *join[Cond, CondNext]
 }
 
-func (cls *Join[Next, Cond, CondNext]) Name() core.ClauseType { return core.ClsTypJoin }
-func (cls *Join[Next, Cond, CondNext]) IsDeclared() bool {
+func (cls *Join[Next, End, Cond, CondNext]) Name() core.ClauseType { return core.ClsTypJoin }
+func (cls *Join[Next, End, Cond, CondNext]) IsDeclared() bool {
 	return cls != nil && cls.declared
 }
-func (cls *Join[Next, Cond, CondNext]) Build(w core.Writer, cfg *core.Config) {
+func (cls *Join[Next, End, Cond, CondNext]) Build(w core.Writer, cfg *core.Config) {
 	for i, join := range cls.joins {
 		if i > 0 {
 			w.Char(' ')
@@ -42,7 +42,7 @@ func (cls *Join[Next, Cond, CondNext]) Build(w core.Writer, cfg *core.Config) {
 
 // -- Methods
 
-func (cls *Join[Next, Cond, CondNext]) Join(table string) Next {
+func (cls *Join[Next, End, Cond, CondNext]) Join(table string) Next {
 	cls.declared = true
 	join := &join[Cond, CondNext]{typ: InnerJoin, table: table}
 	cls.joins = append(cls.joins, join)
@@ -50,7 +50,26 @@ func (cls *Join[Next, Cond, CondNext]) Join(table string) Next {
 	return any(cls).(Next)
 }
 
-func (cls *Join[Next, Cond, CondNext]) On(ident any) Cond {
+func (cls *Join[Next, End, Cond, CondNext]) Left() End {
+	cls.current.typ = LeftJoin
+	return any(cls).(End)
+}
+
+func (cls *Join[Next, End, Cond, CondNext]) Right() End {
+	cls.current.typ = RightJoin
+	return any(cls).(End)
+}
+
+func (cls *Join[Next, End, Cond, CondNext]) Full() End {
+	cls.current.typ = FullJoin
+	return any(cls).(End)
+}
+
+func (cls *Join[Next, End, Cond, CondNext]) Cross() {
+	cls.current.typ = CrossJoin
+}
+
+func (cls *Join[Next, End, Cond, CondNext]) On(ident any) Cond {
 	cond := &condition.Condition[Cond, CondNext]{}
 	cls.current.cond = cond
 	return cls.current.cond.Start(ident)

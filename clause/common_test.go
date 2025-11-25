@@ -20,7 +20,7 @@ type (
 	]
 
 	clsSelect  = clause.Select[inyorm.SelectNext]
-	clsJoin    = clause.Join[inyorm.JoinNext, inyorm.Condition, inyorm.ConditionNext]
+	clsJoin    = clause.Join[inyorm.JoinNext, inyorm.JoinEnd, inyorm.Condition, inyorm.ConditionNext]
 	clsWhere   = clause.Where[inyorm.Condition, inyorm.ConditionNext]
 	clsGroupBy = clause.GroupBy
 	clsHaving  = clause.Having[inyorm.Condition, inyorm.ConditionNext]

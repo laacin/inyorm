@@ -16,7 +16,7 @@ type (
 
 	clsSelect  = clause.Select[SelectNext]
 	clsFrom    = clause.From
-	clsJoin    = clause.Join[JoinNext, Condition, ConditionNext]
+	clsJoin    = clause.Join[JoinNext, JoinEnd, Condition, ConditionNext]
 	clsWhere   = clause.Where[Condition, ConditionNext]
 	clsGroupBy = clause.GroupBy
 	clsHaving  = clause.Having[Condition, ConditionNext]
@@ -374,6 +374,35 @@ type Join interface {
 // JoinNext represents the ON clause for a join,
 // returning a condition builder.
 type JoinNext interface {
+	// Left changes the current join type to LEFT JOIN.
+	//
+	// @SQL: LEFT JOIN `table` ... [JoinEnd]
+	Left() JoinEnd
+
+	// Right changes the current join type to RIGHT JOIN.
+	//
+	// @SQL: RIGHT JOIN `table` ... [JoinEnd]
+	Right() JoinEnd
+
+	// Full changes the current join type to FULL JOIN.
+	//
+	// @SQL: FULL JOIN `table` ... [JoinEnd]
+	Full() JoinEnd
+
+	// Cross changes the current join type to CROSS JOIN.
+	//
+	// CROSS JOIN does not use an ON clause.
+	//
+	// @SQL: CROSS JOIN `table`
+	Cross()
+
+	// On writes the join condition
+	//
+	// @SQL: [join] ... ON `on` ... [Condition]
+	On(on Identifier) Condition
+}
+
+type JoinEnd interface {
 	// On writes the join condition
 	//
 	// @SQL: [join] ... ON `on` ... [Condition]
