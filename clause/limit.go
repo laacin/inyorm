@@ -11,8 +11,8 @@ func (cls *Limit) Name() core.ClauseType { return core.ClsTypLimit }
 func (cls *Limit) IsDeclared() bool      { return cls != nil && cls.declared }
 func (cls *Limit) Build(w core.Writer, cfg *core.Config) {
 	lim := cls.limit
-	if cfg.Limit > 0 {
-		lim = max(lim, cfg.Limit)
+	if cfg.MaxLimit > 0 {
+		lim = max(lim, cfg.MaxLimit)
 	}
 
 	w.Write("LIMIT")
