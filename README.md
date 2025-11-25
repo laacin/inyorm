@@ -42,7 +42,7 @@ go get -u github.com/laacin/inyorm
 
 ### Minimal setup
 
-Inyorm is at its core a declarative query builder and object mapper. It doesn’t manage connections or drivers,
+Inyorm is at its core a query builder and object mapper. It doesn’t manage connections or drivers,
 so you remain fully in control of the database layer.
 
 ```go
@@ -117,6 +117,9 @@ c.Param()
 // You can include any value.
 c.Concat(c.Col("firstname"), " ", c.Col("lastname"))
 
+// Expected output:
+// CONCAT(firstname, ' ', lastname)
+
 // ----- Switch -----
 
 // Switch is a reference to a simple CASE.
@@ -126,6 +129,9 @@ c.Switch(c.Col("banned"), func(cs inyorm.Case) {
 	cs.When(true).Then("Invalid user")
 	cs.Else("Valid")
 })
+
+// Expected output:
+// CASE banned WHEN 1 THEN 'Invalid user' ELSE 'Valid' END
 
 // ----- Search -----
 
@@ -138,6 +144,9 @@ c.Search(func(cs inyorm.Case) {
 	cs.When(cond).Then("Adult")
 	cs.Else("Kid")
 })
+
+// Expected output:
+// CASE WHEN (age > 17) THEN 'Adult' ELSE 'Kid' END
 
 // ----- Cond -----
 
