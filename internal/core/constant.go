@@ -2,9 +2,9 @@ package core
 
 // Dialects
 const (
-	Postgres = "postgresql"
+	Postgres = "postgres"
 	MySQL    = "mysql"
-	SQLite   = "sqlite"
+	SQLite   = "sqlite3"
 )
 
 // ----- Column
