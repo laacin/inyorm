@@ -208,12 +208,109 @@ age.Avg().As("avg_age") // AVG(age) AS avg_age
 
 // Columns can be written differently depending on the clause.
 // If you want to force a specific written form, you can use:
+
+// sample:
 age.Count().As("avg_age") // (COUNT(age) AS avg_age)
 
 age.Base()  // age
 age.Expr()  // COUNT(age)
 age.Alias() // avg_age
 age.Def()   // COUNT(age) AS avg_age
+```
+
+</details>
+
+<details>
+<summary>Select statement</summary>
+
+```go
+// Start a new SELECT statement.
+// Returns (q) the statement and (c) the column builder.
+// Requires a context and a default table, which will be used
+// as the default table for the column builder and the Auto From() clause.
+q, c := qe.NewSelect(ctx, "users")
+
+// Sample columns
+var (
+	id       = c.Col("id")
+	fk       = c.Col("user_id", "posts")
+	age      = c.Col("age")
+	banned   = c.Col("banned")
+	example  = c.Col("example")
+	postsNum = c.Col("id", "posts").Count()
+)
+
+// ----- SELECT -----
+
+// Accepts a variadic parameter; you can select any columns you want.
+q.Select(c.All()) // SELECT *
+
+// You can also start with Distinct() for this purpose.
+q.Distinct().Select(id) // SELECT DISTINCT id
+
+// ----- FROM -----
+
+// From() selects the target table.
+// If omitted, the default table is used automatically.
+q.From("users")
+
+// ----- JOIN -----
+
+// Always start a JOIN clause with Join().
+// You can chain On() directly to set the condition, and it will default to INNER JOIN.
+q.Join("posts").On(fk).Equal(id)
+
+// You can also explicitly set the join type.
+q.Join("posts").Left().On(fk).Equal(id)
+q.Join("posts").Full().On(fk).Equal(id)
+
+// CROSS JOIN does not accept a condition.
+q.Join("posts").Cross()
+
+// ----- WHERE -----
+
+// Where() starts a condition. Each condition is wrapped in parentheses.
+q.Where(age).Greater(17)                     // WHERE (age > 17)
+q.Where(age).Less(40).And(banned).IsNull()  // WHERE (age < 40 AND banned IS NULL)
+
+// Multiple Where() calls are combined with AND at the top level.
+// Example: WHERE (age > 17) AND (age < 40 AND banned IS NULL)
+
+// You can negate any condition using Not()
+q.Where(example).Not().Equal(100)          // WHERE (example <> 100)
+q.Where(example).Not().Like("%something%") // WHERE (example NOT LIKE '%something%')
+q.Where(example).Not().Greater(40)         // WHERE (example <= 40)
+q.Where(example).Not().IsNull()            // WHERE (example IS NOT NULL)
+
+// You can also use parameters for external inputs.
+q.Where(id).Equal(c.Param("uuid")) // WHERE (id = ?)
+
+// ----- GROUP BY -----
+
+// GROUP BY behaves similarly to the SELECT clause.
+// You can pass multiple columns as variadic parameters.
+q.GroupBy(postsNum)
+
+// ----- HAVING -----
+
+// HAVING behaves like WHERE. Start with an identifier to define a condition.
+q.Having(postsNum).Greater(10)
+
+// ----- ORDER BY -----
+
+// ORDER BY accepts an identifier.
+q.OrderBy(age)
+
+// You can chain Desc() for descending order.
+// Multiple OrderBy() calls are allowed.
+q.OrderBy(age).Desc()
+q.OrderBy(id)
+
+// ----- LIMIT & OFFSET -----
+
+// Pass an integer to set the limit or offset.
+q.Limit(10)
+q.Offset(5)
 ```
 
 </details>
