@@ -138,9 +138,9 @@ c.Switch(c.Col("banned"), func(cs inyorm.Case) {
 // Search is a reference to a searched CASE.
 // It accepts one callback
 // where each When accepts a boolean expression,
-// such as an expression (built below) or literals.
+// such as a condition (built below) or literals.
 c.Search(func(cs inyorm.Case) {
-	cond := c.Cond(c.Cond("age")).Greater(17)
+	cond := c.Cond(c.Col("age")).Greater(17)
 	cs.When(cond).Then("Adult")
 	cs.Else("Kid")
 })
@@ -152,7 +152,7 @@ c.Search(func(cs inyorm.Case) {
 
 // Cond is a helper used to create a condition.
 // Currently, only used in the Search method.
-c.Cond(c.Cond("banned")).IsNull().And("age").Greater(17)
+c.Cond(c.Col("banned")).IsNull().And("age").Greater(17)
 ```
 
 </details>
