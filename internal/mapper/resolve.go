@@ -1,92 +1,69 @@
 package mapper
 
-import (
-	"reflect"
-	"sync"
-)
-
-type valueTyp int
+type typValue int
 
 const (
-	typStruct valueTyp = iota
-	typArray
-	typSlice
+	typReflect typValue = iota
 	typPrimitive
+	typMap
 )
 
-var resolveCache sync.Map
-
-func resolveInput(acceptValue bool, v any) (reflect.Value, valueTyp, error) {
-	if v == nil {
-		return reflect.Value{}, 0, ErrExpectedPointer
+func resolve(t any) (typ typValue, ptr, slc bool) {
+	if is, ptr, slc := isPrimitive(t); is {
+		return typPrimitive, ptr, slc
 	}
 
-	val := reflect.ValueOf(v)
-	if val.Kind() == reflect.Pointer {
-		if val.IsNil() {
-			return reflect.Value{}, 0, ErrExpectedPointer
-		}
-		val = val.Elem()
-
-	} else if !acceptValue {
-		return reflect.Value{}, 0, ErrExpectedPointer
+	if is, ptr, slc := isMap(t); is {
+		return typMap, ptr, slc
 	}
 
-	typ := val.Type()
-
-	if cached, ok := resolveCache.Load(typ); ok {
-		return val, cached.(valueTyp), nil
-	}
-
-	switch typ.Kind() {
-	case reflect.Struct:
-		resolveCache.Store(typ, typStruct)
-		return val, typStruct, nil
-
-	case reflect.Slice:
-		if err := resolveSlice(val); err != nil {
-			return reflect.Value{}, 0, err
-		}
-		resolveCache.Store(typ, typSlice)
-		return val, typSlice, nil
-
-	case reflect.Array:
-		if err := resolveSlice(val); err != nil {
-			return reflect.Value{}, 0, err
-		}
-		resolveCache.Store(typ, typArray)
-		return val, typArray, nil
-
-	default:
-		resolveCache.Store(typ, typPrimitive)
-		return val, typPrimitive, nil
-	}
-
+	return
 }
 
-func resolveSlice(val reflect.Value) error {
-	stTyp := val.Type().Elem()
+func isMap(t any) (is, ptr, slc bool) {
+	switch t.(type) {
+	case map[string]any:
+		return true, false, false
 
-	switch stTyp.Kind() {
-	case reflect.Struct: // continue
-	case reflect.Pointer:
-		return ErrSlicePtr
+	case []map[string]any:
+		return true, false, true
+
+	case []*map[string]any:
+		return true, true, true
+
 	default:
-		return ErrExpectedSlice
+		return
 	}
+}
 
-	if length := val.Len(); length > 0 {
-		for i := range length {
-			item := val.Index(i)
-			if item.Kind() == reflect.Pointer && item.IsNil() {
-				return ErrExpectedPointer
-			}
+func isPrimitive(t any) (is, ptr, slc bool) {
+	switch t.(type) {
 
-			if stTyp != val.Index(i).Type() {
-				return ErrMixedSliceElementTypes
-			}
-		}
+	case string,
+		int, int8, int16, int32, int64,
+		uint, uint8, uint16, uint32, uint64,
+		float32, float64, bool:
+		return true, false, false
+
+	case *string,
+		*int, *int8, *int16, *int32, *int64,
+		*uint, *uint8, *uint16, *uint32, *uint64,
+		*float32, *float64, *bool:
+		return true, true, false
+
+	case []string,
+		[]int, []int8, []int16, []int32, []int64,
+		[]uint, []uint8, []uint16, []uint32, []uint64,
+		[]float32, []float64, []bool, []any:
+		return true, false, true
+
+	case *[]string,
+		*[]int, *[]int8, *[]int16, *[]int32, *[]int64,
+		*[]uint, *[]uint8, *[]uint16, *[]uint32, *[]uint64,
+		*[]float32, *[]float64, *[]bool, *[]any:
+		return true, true, true
+
+	default:
+		return
 	}
-
-	return nil
 }

@@ -107,7 +107,7 @@ func newUpdate(ctx context.Context, cfg *core.Config, db *sql.DB, table string) 
 	})
 
 	q.PreBuild(func(cfg *core.Config) (useAliases bool) {
-		stmt.clsUpdate.To(table)
+		stmt.To(table)
 		return false
 	})
 
@@ -126,7 +126,7 @@ func newDelete(ctx context.Context, cfg *core.Config, db *sql.DB, table string) 
 	})
 
 	q.PreBuild(func(cfg *core.Config) (useAliases bool) {
-		stmt.clsDelete.Delete()
+		stmt.Delete()
 
 		if !stmt.clsFrom.IsDeclared() && table != "" {
 			stmt.From(table)

@@ -3,15 +3,11 @@ package mapper
 import "errors"
 
 var (
-	ErrSinglePrimitiveColumn  = errors.New("expected exactly one column for primitive type")
-	ErrNilPointer             = errors.New("value must be a non-nil pointer")
-	ErrInvalidType            = errors.New("invalid type")
-	ErrMixedSliceElementTypes = errors.New("slice elements must all be of the same struct type")
-	ErrEmptyValues            = errors.New("cannot call WithValues with an empty slice or nil value")
-	ErrSlicePtr               = errors.New("inyorm: slices of pointers not supported, use []T instead of []*T")
+	ErrPtrExpected   = errors.New("expected pointer")
+	ErrValueExpected = errors.New("expected value")
 
-	ErrExpectedStruct        = errors.New("expected struct")
-	ErrExpectedSlice         = errors.New("expected slice of structs")
-	ErrExpectedPrimitiveType = errors.New("expected primitive type")
-	ErrExpectedPointer       = errors.New("expected pointer")
+	ErrColumnMismatch = errors.New("column mismatch in slice")
+	ErrEmptySlice     = errors.New("empty slice")
+
+	ErrUnexpectedType = errors.New("unexpected type")
 )

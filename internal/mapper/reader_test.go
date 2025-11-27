@@ -8,19 +8,19 @@ import (
 )
 
 func newTest(t *testing.T, v any) func(rows int, cols []string, vals []any) {
-	r, columns, values, err := mapper.ReadValues("inyorm", v)
+	result, err := mapper.Read("inyorm", v)
 	if err != nil {
 		t.Fatal(err)
 	}
 	return func(rows int, cols []string, vals []any) {
-		if r != rows {
-			t.Fatalf("\nmismatch result:\nExpect:\n%d\nHave:\n%d\n", rows, r)
+		if result.Rows != rows {
+			t.Fatalf("\nmismatch result:\nExpect:\n%d\nHave:\n%d\n", rows, result.Rows)
 		}
-		if !reflect.DeepEqual(columns, cols) {
-			t.Fatalf("\nmismatch result:\nExpect:\n%#v\nHave:\n%#v\n", cols, columns)
+		if !reflect.DeepEqual(result.Columns, cols) {
+			t.Fatalf("\nmismatch result:\nExpect:\n%#v\nHave:\n%#v\n", cols, result.Columns)
 		}
-		if !reflect.DeepEqual(values, vals) {
-			t.Fatalf("\nmismatch result:\nExpect:\n%#v\nHave:\n%#v\n", vals, values)
+		if !reflect.DeepEqual(result.Args, vals) {
+			t.Fatalf("\nmismatch result:\nExpect:\n%#v\nHave:\n%#v\n", vals, result.Args)
 		}
 	}
 }

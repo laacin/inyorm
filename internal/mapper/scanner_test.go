@@ -35,8 +35,8 @@ func (m *MockRows) Scan(dest ...any) error {
 	return nil
 }
 
-func newBinder(t *testing.T, rows *MockRows, binder any) func(expect any, expErr ...error) {
-	err := mapper.BindRows(rows, "inyorm", binder)
+func newScanner(t *testing.T, rows *MockRows, binder any) func(expect any, expErr ...error) {
+	err := mapper.Scan(rows, "inyorm", binder)
 
 	return func(expect any, expErr ...error) {
 		if err != nil && len(expErr) > 0 && expErr[0] != nil {
@@ -55,7 +55,7 @@ func newBinder(t *testing.T, rows *MockRows, binder any) func(expect any, expErr
 	}
 }
 
-func TestBinder(t *testing.T) {
+func TestScanner(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		type User struct {
 			ID   int    `inyorm:"id"`
@@ -75,7 +75,7 @@ func TestBinder(t *testing.T) {
 		}
 
 		var u User
-		newBinder(t, rows, &u)(&exp)
+		newScanner(t, rows, &u)(&exp)
 	})
 
 	t.Run("pointer_element", func(t *testing.T) {
@@ -97,7 +97,7 @@ func TestBinder(t *testing.T) {
 		}
 
 		var u User
-		newBinder(t, rows, &u)(exp)
+		newScanner(t, rows, &u)(exp)
 	})
 
 	t.Run("missing_column", func(t *testing.T) {
@@ -121,7 +121,7 @@ func TestBinder(t *testing.T) {
 		}
 
 		var u User
-		newBinder(t, rows, &u)(&exp)
+		newScanner(t, rows, &u)(&exp)
 	})
 
 	t.Run("extra_column", func(t *testing.T) {
@@ -143,7 +143,7 @@ func TestBinder(t *testing.T) {
 		}
 
 		var u User
-		newBinder(t, rows, &u)(&exp)
+		newScanner(t, rows, &u)(&exp)
 	})
 
 	t.Run("slice_structs", func(t *testing.T) {
@@ -168,7 +168,7 @@ func TestBinder(t *testing.T) {
 		}
 
 		var u []User
-		newBinder(t, rows, &u)(&exp)
+		newScanner(t, rows, &u)(&exp)
 	})
 
 	t.Run("array_structs", func(t *testing.T) {
@@ -193,7 +193,7 @@ func TestBinder(t *testing.T) {
 		}
 
 		var u [3]User
-		newBinder(t, rows, &u)(&exp)
+		newScanner(t, rows, &u)(exp, mapper.ErrUnexpectedType)
 	})
 
 	t.Run("slice_ptr_structs", func(t *testing.T) {
@@ -216,7 +216,7 @@ func TestBinder(t *testing.T) {
 		}
 
 		var u []*User
-		newBinder(t, rows, &u)(exp, mapper.ErrSlicePtr)
+		newScanner(t, rows, &u)(&exp, mapper.ErrUnexpectedType)
 	})
 
 	t.Run("slice_preallocated", func(t *testing.T) {
@@ -241,7 +241,7 @@ func TestBinder(t *testing.T) {
 			{ID: 2, Name: "b"},
 		}
 
-		newBinder(t, rows, &u)(&exp)
+		newScanner(t, rows, &u)(&exp)
 	})
 
 	t.Run("struct_preallocated", func(t *testing.T) {
@@ -260,7 +260,7 @@ func TestBinder(t *testing.T) {
 		u := User{ID: 1, Name: "old"}
 		exp := User{ID: 100, Name: "zzz"}
 
-		newBinder(t, rows, &u)(&exp)
+		newScanner(t, rows, &u)(&exp)
 	})
 
 	t.Run("slice_less_capacity_than_rows", func(t *testing.T) {
@@ -285,30 +285,30 @@ func TestBinder(t *testing.T) {
 			{ID: 3, Name: "c"},
 		}
 
-		newBinder(t, rows, &u)(&exp)
+		newScanner(t, rows, &u)(&exp)
 	})
 
-	// t.Run("slice_greater_capacity_than_rows", func(t *testing.T) { // TODO:
-	// 	type User struct {
-	// 		ID   int    `inyorm:"id"`
-	// 		Name string `inyorm:"name"`
-	// 	}
-	//
-	// 	rows := &MockRows{
-	// 		Cols: []string{"id", "name"},
-	// 		Data: [][]any{
-	// 			{9, "x"},
-	// 		},
-	// 	}
-	//
-	// 	u := make([]User, 3)
-	// 	u[0] = User{ID: 1, Name: "a"}
-	// 	u[1] = User{ID: 2, Name: "b"}
-	// 	u[2] = User{ID: 3, Name: "c"}
-	//
-	// 	exp := []User{
-	// 		{ID: 9, Name: "x"},
-	// 	}
-	// 	newBinder(t, rows, &u)(&exp)
-	// })
+	t.Run("slice_greater_capacity_than_rows", func(t *testing.T) {
+		type User struct {
+			ID   int    `inyorm:"id"`
+			Name string `inyorm:"name"`
+		}
+
+		rows := &MockRows{
+			Cols: []string{"id", "name"},
+			Data: [][]any{
+				{9, "x"},
+			},
+		}
+
+		u := make([]User, 3)
+		u[0] = User{ID: 1, Name: "a"}
+		u[1] = User{ID: 2, Name: "b"}
+		u[2] = User{ID: 3, Name: "c"}
+
+		exp := []User{
+			{ID: 9, Name: "x"},
+		}
+		newScanner(t, rows, &u)(&exp)
+	})
 }

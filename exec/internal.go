@@ -38,7 +38,7 @@ func scan(
 	if err != nil {
 		return errSQL(err)
 	}
-	return mapper.BindRows(rows, tag, binder)
+	return mapper.Scan(rows, tag, binder)
 }
 
 func runPrep(
@@ -64,7 +64,7 @@ func scanPrep(
 	if err != nil {
 		return errSQL(err)
 	}
-	return mapper.BindRows(rows, tag, binder)
+	return mapper.Scan(rows, tag, binder)
 }
 
 func errSQL(err error) error {

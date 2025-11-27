@@ -152,7 +152,7 @@ c.Search(func(cs inyorm.Case) {
 
 // Cond is a helper used to create a condition.
 // Currently, only used in the Search method.
-c.Cond(c.Col("banned")).IsNull().And("age").Greater(17)
+c.Cond(c.Col("banned")).IsNull().And(c.Col("age")).Greater(17)
 ```
 
 </details>

@@ -15,7 +15,13 @@ func (cls *Update) Name() core.ClauseType { return core.ClsTypUpdate }
 func (cls *Update) IsDeclared() bool      { return cls != nil && cls.declared }
 func (cls *Update) Build(w core.Writer, cfg *core.Config) {
 	// TODO: handle error
-	_, cols, vals, _ := mapper.ReadValues(cfg.ColumnTag, cls.binder)
+	result, _ := mapper.Read(cfg.ColumnTag, cls.binder)
+
+	var (
+		cols = result.Columns
+		vals = result.Args
+	)
+
 	upds := make([]update, len(cols))
 	for i := range len(cols) {
 		upds[i] = update{src: cols[i], value: vals[i]}

@@ -16,7 +16,13 @@ func (cls *InsertInto) IsDeclared() bool      { return cls != nil && cls.declare
 
 func (cls *InsertInto) Build(w core.Writer, cfg *core.Config) {
 	// TODO: handle error
-	rows, cols, vals, _ := mapper.ReadValues(cfg.ColumnTag, cls.binder)
+	result, _ := mapper.Read(cfg.ColumnTag, cls.binder)
+
+	var (
+		rows = result.Rows
+		cols = result.Columns
+		vals = result.Args
+	)
 
 	w.Write("INSERT INTO")
 	w.Char(' ')

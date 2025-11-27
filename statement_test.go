@@ -182,8 +182,8 @@ func TestUpdate(t *testing.T) {
 		})
 		q.Where(c.Col("id")).Equal(c.Param(10))
 
-		exp := "UPDATE posts SET title = ?, description = ? WHERE (id = ?)"
-		run(t, q, exp, []any{"something else", "little description", 10})
+		exp := "UPDATE posts SET description = ?, title = ? WHERE (id = ?)"
+		run(t, q, exp, []any{"little description", "something else", 10})
 	})
 }
 
