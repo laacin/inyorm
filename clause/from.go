@@ -7,12 +7,13 @@ type From struct {
 	value    string
 }
 
-func (cls *From) Name() core.ClauseType { return core.ClsTypFrom }
-func (cls *From) IsDeclared() bool      { return cls != nil && cls.declared }
-func (cls *From) Build(w core.Writer, cfg *core.Config) {
+func (cls *From) Name() string     { return "FROM" }
+func (cls *From) IsDeclared() bool { return cls != nil && cls.declared }
+func (cls *From) Build(w core.Writer, cfg *core.Config) error {
 	w.Write("FROM")
 	w.Char(' ')
 	w.Table(cls.value)
+	return nil
 }
 
 // -- Methods

@@ -15,11 +15,14 @@ type Executor[Prep any] struct {
 	Query    *writer.Query
 }
 
-func (e *Executor[Prep]) Raw() (string, []any) { return e.Query.Build() }
+func (e *Executor[Prep]) Raw() (string, []any, error) { return e.Query.Build() }
 
 func (e *Executor[Prep]) Run(binder ...any) error {
 	qty := len(binder)
-	query, args := e.Query.Build()
+	query, args, err := e.Query.Build()
+	if err != nil {
+		return err
+	}
 
 	if qty == 0 {
 		return run(e.Ctx, e.Instance, query, args)
@@ -33,7 +36,11 @@ func (e *Executor[Prep]) Run(binder ...any) error {
 }
 
 func (e *Executor[Prep]) Prepare(fn func(exec Prep) error) error {
-	query, _ := e.Query.Build()
+	query, _, err := e.Query.Build()
+	if err != nil {
+		return err
+	}
+
 	prep, err := e.Instance.PrepareContext(e.Ctx, query)
 	if err != nil {
 		return errSQL(err)

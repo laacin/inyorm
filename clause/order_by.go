@@ -8,9 +8,9 @@ type OrderBy[Next any] struct {
 	current  *order
 }
 
-func (cls *OrderBy[Next]) Name() core.ClauseType { return core.ClsTypOrderBy }
-func (cls *OrderBy[Next]) IsDeclared() bool      { return cls != nil && cls.declared }
-func (cls *OrderBy[Next]) Build(w core.Writer, cfg *core.Config) {
+func (cls *OrderBy[Next]) Name() string     { return "ORDER BY" }
+func (cls *OrderBy[Next]) IsDeclared() bool { return cls != nil && cls.declared }
+func (cls *OrderBy[Next]) Build(w core.Writer, cfg *core.Config) error {
 	w.Write("ORDER BY")
 	w.Char(' ')
 
@@ -23,6 +23,7 @@ func (cls *OrderBy[Next]) Build(w core.Writer, cfg *core.Config) {
 			w.Write(" DESC")
 		}
 	}
+	return nil
 }
 
 // -- Methods

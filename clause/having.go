@@ -10,12 +10,13 @@ type Having[Cond, CondNext any] struct {
 	cond     *condition.Condition[Cond, CondNext]
 }
 
-func (cls *Having[Cond, CondNext]) Name() core.ClauseType { return core.ClsTypHaving }
-func (cls *Having[Cond, CondNext]) IsDeclared() bool      { return cls != nil && cls.declared }
-func (cls *Having[Cond, CondNext]) Build(w core.Writer, cfg *core.Config) {
+func (cls *Having[Cond, CondNext]) Name() string     { return "HAVING" }
+func (cls *Having[Cond, CondNext]) IsDeclared() bool { return cls != nil && cls.declared }
+func (cls *Having[Cond, CondNext]) Build(w core.Writer, cfg *core.Config) error {
 	w.Write("HAVING")
 	w.Char(' ')
 	cls.cond.Build(w, cfg.ColWrite.Having)
+	return nil
 }
 
 // -- Methods

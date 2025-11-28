@@ -18,23 +18,3 @@ const (
 	ColTypExpr
 	ColTypAlias
 )
-
-// ----- Clauses
-
-type ClauseType int
-
-const (
-	ClsTypUnset ClauseType = iota
-	ClsTypSelect
-	ClsTypFrom
-	ClsTypJoin
-	ClsTypWhere
-	ClsTypGroupBy
-	ClsTypHaving
-	ClsTypOrderBy
-	ClsTypLimit
-	ClsTypOffset
-	ClsTypInsert
-	ClsTypUpdate
-	ClsTypDelete
-)

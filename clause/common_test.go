@@ -41,13 +41,16 @@ func New[T any](cls core.Clause, dialect []string) (T, inyorm.ColumnBuilder, run
 	}}
 
 	q.PreBuild(func(cfg *core.Config) (useAliases bool) {
-		return cls.Name() == core.ClsTypJoin
+		return cls.Name() == "JOIN"
 	})
 
 	c := &colBuilder{Table: tbl}
 	run := func(t *testing.T, expect string, vals []any) {
 		q.SetClauses([]core.Clause{cls})
-		statement, values := q.Build()
+		statement, values, err := q.Build()
+		if err != nil {
+			t.Fatal(err)
+		}
 
 		if statement != expect {
 			if len(statement) == len(expect) {

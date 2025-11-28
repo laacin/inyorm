@@ -9,7 +9,10 @@ import (
 )
 
 func run(t *testing.T, stmt any, exp string, vals []any) {
-	query, values := stmt.(interface{ Raw() (string, []any) }).Raw()
+	query, values, err := stmt.(interface{ Raw() (string, []any, error) }).Raw()
+	if err != nil {
+		t.Error(err)
+	}
 
 	if query != exp {
 		t.Errorf("mismatch query:\nExpect:\n%s\nHave:\n%s", exp, query)

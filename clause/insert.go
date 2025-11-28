@@ -1,6 +1,8 @@
 package clause
 
 import (
+	"fmt"
+
 	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/mapper"
 )
@@ -11,12 +13,13 @@ type InsertInto struct {
 	binder   any
 }
 
-func (cls *InsertInto) Name() core.ClauseType { return core.ClsTypInsert }
-func (cls *InsertInto) IsDeclared() bool      { return cls != nil && cls.declared }
-
-func (cls *InsertInto) Build(w core.Writer, cfg *core.Config) {
-	// TODO: handle error
-	result, _ := mapper.Read(cfg.ColumnTag, cls.binder)
+func (cls *InsertInto) Name() string     { return "INSERT INTO" }
+func (cls *InsertInto) IsDeclared() bool { return cls != nil && cls.declared }
+func (cls *InsertInto) Build(w core.Writer, cfg *core.Config) error {
+	result, err := mapper.Read(cfg.ColumnTag, cls.binder)
+	if err != nil {
+		return fmt.Errorf("failed to map value: %w", err)
+	}
 
 	var (
 		rows = result.Rows
@@ -55,6 +58,7 @@ func (cls *InsertInto) Build(w core.Writer, cfg *core.Config) {
 		w.Char(')')
 		i = 0
 	}
+	return nil
 }
 
 // -- Methods

@@ -1,6 +1,8 @@
 package clause
 
 import (
+	"fmt"
+
 	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/mapper"
 )
@@ -11,11 +13,13 @@ type Update struct {
 	binder   any
 }
 
-func (cls *Update) Name() core.ClauseType { return core.ClsTypUpdate }
-func (cls *Update) IsDeclared() bool      { return cls != nil && cls.declared }
-func (cls *Update) Build(w core.Writer, cfg *core.Config) {
-	// TODO: handle error
-	result, _ := mapper.Read(cfg.ColumnTag, cls.binder)
+func (cls *Update) Name() string     { return "UPDATE" }
+func (cls *Update) IsDeclared() bool { return cls != nil && cls.declared }
+func (cls *Update) Build(w core.Writer, cfg *core.Config) error {
+	result, err := mapper.Read(cfg.ColumnTag, cls.binder)
+	if err != nil {
+		return fmt.Errorf("failed to map value: %w", err)
+	}
 
 	var (
 		cols = result.Columns
@@ -43,6 +47,7 @@ func (cls *Update) Build(w core.Writer, cfg *core.Config) {
 		w.Param([]any{u.value})
 		//w.Value(u.value, core.ColTypUnset)
 	}
+	return nil
 }
 
 // -- Methods

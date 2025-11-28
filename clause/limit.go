@@ -7,9 +7,9 @@ type Limit struct {
 	limit    int
 }
 
-func (cls *Limit) Name() core.ClauseType { return core.ClsTypLimit }
-func (cls *Limit) IsDeclared() bool      { return cls != nil && cls.declared }
-func (cls *Limit) Build(w core.Writer, cfg *core.Config) {
+func (cls *Limit) Name() string     { return "LIMIT" }
+func (cls *Limit) IsDeclared() bool { return cls != nil && cls.declared }
+func (cls *Limit) Build(w core.Writer, cfg *core.Config) error {
 	lim := cls.limit
 	if cfg.MaxLimit > 0 {
 		lim = max(lim, cfg.MaxLimit)
@@ -18,6 +18,7 @@ func (cls *Limit) Build(w core.Writer, cfg *core.Config) {
 	w.Write("LIMIT")
 	w.Char(' ')
 	w.Value(lim, core.ColTypUnset)
+	return nil
 }
 
 // -- Methods

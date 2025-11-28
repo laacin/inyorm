@@ -1,6 +1,10 @@
 package writer
 
-import "github.com/laacin/inyorm/internal/core"
+import (
+	"fmt"
+
+	"github.com/laacin/inyorm/internal/core"
+)
 
 type Query struct {
 	Config   *core.Config
@@ -16,7 +20,7 @@ func (q *Query) SetClauses(clauses []core.Clause) {
 	q.clauses = clauses
 }
 
-func (q *Query) Build() (string, []any) {
+func (q *Query) Build() (string, []any, error) {
 	var (
 		aliases *Alias
 		phs     = &Placeholder{dialect: q.Config.Dialect}
@@ -42,9 +46,11 @@ func (q *Query) Build() (string, []any) {
 			w.Char(' ')
 		}
 
-		cls.Build(w, q.Config)
+		if err := cls.Build(w, q.Config); err != nil {
+			return "", nil, fmt.Errorf("error building clause %s: %w", cls.Name(), err)
+		}
 		i++
 	}
 
-	return w.ToString(), phs.values
+	return w.ToString(), phs.values, nil
 }

@@ -7,9 +7,9 @@ type GroupBy struct {
 	groups   []any
 }
 
-func (cls *GroupBy) Name() core.ClauseType { return core.ClsTypGroupBy }
-func (cls *GroupBy) IsDeclared() bool      { return cls != nil && cls.declared }
-func (cls *GroupBy) Build(w core.Writer, cfg *core.Config) {
+func (cls *GroupBy) Name() string     { return "GROUP BY" }
+func (cls *GroupBy) IsDeclared() bool { return cls != nil && cls.declared }
+func (cls *GroupBy) Build(w core.Writer, cfg *core.Config) error {
 	w.Write("GROUP BY")
 	w.Char(' ')
 	for i, group := range cls.groups {
@@ -18,6 +18,7 @@ func (cls *GroupBy) Build(w core.Writer, cfg *core.Config) {
 		}
 		w.Value(group, cfg.ColWrite.GroupBy)
 	}
+	return nil
 }
 
 // -- Methods

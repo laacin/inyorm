@@ -10,9 +10,9 @@ type Where[Cond, CondNext any] struct {
 	exprs    []*condition.Condition[Cond, CondNext]
 }
 
-func (cls *Where[Cond, CondNext]) Name() core.ClauseType { return core.ClsTypWhere }
-func (cls *Where[Cond, CondNext]) IsDeclared() bool      { return cls != nil && cls.declared }
-func (cls *Where[Cond, CondNext]) Build(w core.Writer, cfg *core.Config) {
+func (cls *Where[Cond, CondNext]) Name() string     { return "WHERE" }
+func (cls *Where[Cond, CondNext]) IsDeclared() bool { return cls != nil && cls.declared }
+func (cls *Where[Cond, CondNext]) Build(w core.Writer, cfg *core.Config) error {
 	w.Write("WHERE")
 	w.Char(' ')
 	for i, expr := range cls.exprs {
@@ -21,6 +21,7 @@ func (cls *Where[Cond, CondNext]) Build(w core.Writer, cfg *core.Config) {
 		}
 		expr.Build(w, cfg.ColWrite.Where)
 	}
+	return nil
 }
 
 // -- Methods

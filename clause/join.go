@@ -19,11 +19,11 @@ type Join[Next, End, Cond, CondNext any] struct {
 	current  *join[Cond, CondNext]
 }
 
-func (cls *Join[Next, End, Cond, CondNext]) Name() core.ClauseType { return core.ClsTypJoin }
+func (cls *Join[Next, End, Cond, CondNext]) Name() string { return "JOIN" }
 func (cls *Join[Next, End, Cond, CondNext]) IsDeclared() bool {
 	return cls != nil && cls.declared
 }
-func (cls *Join[Next, End, Cond, CondNext]) Build(w core.Writer, cfg *core.Config) {
+func (cls *Join[Next, End, Cond, CondNext]) Build(w core.Writer, cfg *core.Config) error {
 	for i, join := range cls.joins {
 		if i > 0 {
 			w.Char(' ')
@@ -38,6 +38,7 @@ func (cls *Join[Next, End, Cond, CondNext]) Build(w core.Writer, cfg *core.Confi
 			join.cond.Build(w, cfg.ColWrite.Join)
 		}
 	}
+	return nil
 }
 
 // -- Methods

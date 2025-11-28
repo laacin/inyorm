@@ -8,9 +8,9 @@ type Select[Next any] struct {
 	targets  []any
 }
 
-func (cls *Select[Next]) Name() core.ClauseType { return core.ClsTypSelect }
-func (cls *Select[Next]) IsDeclared() bool      { return cls != nil && cls.declared }
-func (cls *Select[Next]) Build(w core.Writer, cfg *core.Config) {
+func (cls *Select[Next]) Name() string     { return "SELECT" }
+func (cls *Select[Next]) IsDeclared() bool { return cls != nil && cls.declared }
+func (cls *Select[Next]) Build(w core.Writer, cfg *core.Config) error {
 	w.Write("SELECT")
 	w.Char(' ')
 
@@ -24,6 +24,7 @@ func (cls *Select[Next]) Build(w core.Writer, cfg *core.Config) {
 		}
 		w.Value(sel, cfg.ColWrite.Select)
 	}
+	return nil
 }
 
 // -- Methods

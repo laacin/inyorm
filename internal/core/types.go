@@ -25,6 +25,6 @@ type Column interface {
 
 type Clause interface {
 	IsDeclared() bool
-	Name() ClauseType
-	Build(Writer, *Config)
+	Name() string
+	Build(Writer, *Config) error
 }
