@@ -28,7 +28,7 @@ func isMap(t any) (is, ptr, slc bool) {
 	case []map[string]any:
 		return true, false, true
 
-	case []*map[string]any:
+	case *[]map[string]any:
 		return true, true, true
 
 	default:
