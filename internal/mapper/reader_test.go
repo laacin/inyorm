@@ -107,8 +107,10 @@ func TestRead(t *testing.T) {
 			Age:     21,
 		}
 
+		var nl *string
+
 		cols := []string{"account", "age", "firstname", "lastname"}
-		vals := []any{"acc", 21, nil, nil}
+		vals := []any{"acc", 21, nl, nl}
 
 		run := newTest(t, u)
 		run(1, cols, vals)

@@ -311,4 +311,46 @@ func TestScanner(t *testing.T) {
 		}
 		newScanner(t, rows, &u)(&exp)
 	})
+
+	t.Run("single_map", func(t *testing.T) {
+		rows := &MockRows{
+			Cols: []string{"id", "name"},
+			Data: [][]any{
+				{9, "x"},
+			},
+		}
+
+		m := make(map[string]any)
+		exp := map[string]any{
+			"id":   9,
+			"name": "x",
+		}
+		newScanner(t, rows, m)(exp)
+	})
+
+	t.Run("many_maps", func(t *testing.T) {
+		rows := &MockRows{
+			Cols: []string{"id", "name", "age"},
+			Data: [][]any{
+				{1, "alice", 20},
+				{2, "bob", 31},
+				{3, "carol", 45},
+				{4, "dan", 18},
+				{5, "eva", 27},
+				{6, "mike", 52},
+			},
+		}
+
+		m := make([]map[string]any, 0)
+		exp := []map[string]any{
+			{"id": 1, "name": "alice", "age": 20},
+			{"id": 2, "name": "bob", "age": 31},
+			{"id": 3, "name": "carol", "age": 45},
+			{"id": 4, "name": "dan", "age": 18},
+			{"id": 5, "name": "eva", "age": 27},
+			{"id": 6, "name": "mike", "age": 52},
+		}
+
+		newScanner(t, rows, &m)(&exp)
+	})
 }
