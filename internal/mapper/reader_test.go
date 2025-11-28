@@ -115,4 +115,62 @@ func TestRead(t *testing.T) {
 		run := newTest(t, u)
 		run(1, cols, vals)
 	})
+
+	t.Run("one_map", func(t *testing.T) {
+		u := map[string]any{
+			"account":   "acc",
+			"age":       17,
+			"firstname": "max",
+			"lastname":  "porter",
+		}
+		cols := []string{"account", "age", "firstname", "lastname"}
+		vals := []any{"acc", 17, "max", "porter"}
+
+		newTest(t, u)(1, cols, vals)
+	})
+
+	t.Run("many_maps", func(t *testing.T) {
+		u := []map[string]any{
+			{
+				"account":   "acc1",
+				"age":       20,
+				"firstname": "john",
+				"lastname":  "doe",
+			},
+			{
+				"account":   "acc2",
+				"age":       30,
+				"firstname": "jane",
+				"lastname":  "smith",
+			},
+			{
+				"account":   "acc3",
+				"age":       41,
+				"firstname": "mark",
+				"lastname":  "stone",
+			},
+			{
+				"account":   "acc4",
+				"age":       28,
+				"firstname": "lucas",
+				"lastname":  "brown",
+			},
+			{
+				"account":   "acc5",
+				"age":       33,
+				"firstname": "alice",
+				"lastname":  "white",
+			},
+		}
+
+		cols := []string{"account", "age", "firstname", "lastname"}
+		vals := []any{
+			"acc1", 20, "john", "doe",
+			"acc2", 30, "jane", "smith",
+			"acc3", 41, "mark", "stone",
+			"acc4", 28, "lucas", "brown",
+			"acc5", 33, "alice", "white",
+		}
+		newTest(t, u)(5, cols, vals)
+	})
 }
