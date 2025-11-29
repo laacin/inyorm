@@ -7,17 +7,18 @@ import (
 	"github.com/laacin/inyorm/internal/mapper"
 )
 
-func newTest(t *testing.T, v any) func(rows int, cols []string, vals []any) {
-	result, err := mapper.Read("inyorm", v)
+func newTest(t *testing.T, schm, v any) func(rows int, cols []string, vals []any) {
+	result, err := mapper.Read("inyorm", schm, v)
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	return func(rows int, cols []string, vals []any) {
 		if result.Rows != rows {
-			t.Fatalf("\nmismatch result:\nExpect:\n%d\nHave:\n%d\n", rows, result.Rows)
+			t.Fatalf("\nmismatch rows:\nExpect:\n%d\nHave:\n%d\n", rows, result.Rows)
 		}
 		if !reflect.DeepEqual(result.Columns, cols) {
-			t.Fatalf("\nmismatch result:\nExpect:\n%#v\nHave:\n%#v\n", cols, result.Columns)
+			t.Fatalf("\nmismatch columns:\nExpect:\n%#v\nHave:\n%#v\n", cols, result.Columns)
 		}
 		if !reflect.DeepEqual(result.Args, vals) {
 			t.Fatalf("\nmismatch result:\nExpect:\n%#v\nHave:\n%#v\n", vals, result.Args)
@@ -50,8 +51,7 @@ func TestRead(t *testing.T) {
 		cols := []string{"account", "age", "firstname", "lastname"}
 		vals := []any{"acc", 17, "max", "porter"}
 
-		run := newTest(t, u)
-		run(1, cols, vals)
+		newTest(t, u, u)(1, cols, vals)
 	})
 
 	t.Run("many", func(t *testing.T) {
@@ -97,7 +97,7 @@ func TestRead(t *testing.T) {
 			"acc5", 33, "alice", "white",
 		}
 
-		run := newTest(t, users)
+		run := newTest(t, users[0], users)
 		run(5, cols, vals)
 	})
 
@@ -112,7 +112,7 @@ func TestRead(t *testing.T) {
 		cols := []string{"account", "age", "firstname", "lastname"}
 		vals := []any{"acc", 21, nl, nl}
 
-		run := newTest(t, u)
+		run := newTest(t, u, u)
 		run(1, cols, vals)
 	})
 
@@ -126,7 +126,7 @@ func TestRead(t *testing.T) {
 		cols := []string{"account", "age", "firstname", "lastname"}
 		vals := []any{"acc", 17, "max", "porter"}
 
-		newTest(t, u)(1, cols, vals)
+		newTest(t, u, u)(1, cols, vals)
 	})
 
 	t.Run("many_maps", func(t *testing.T) {
@@ -171,6 +171,6 @@ func TestRead(t *testing.T) {
 			"acc4", 28, "lucas", "brown",
 			"acc5", 33, "alice", "white",
 		}
-		newTest(t, u)(5, cols, vals)
+		newTest(t, u[0], u)(5, cols, vals)
 	})
 }

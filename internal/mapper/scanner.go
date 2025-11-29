@@ -3,6 +3,8 @@ package mapper
 import (
 	"database/sql"
 	"reflect"
+
+	"github.com/laacin/inyorm/internal/mapper/schema"
 )
 
 type RowScanner interface {
@@ -11,46 +13,50 @@ type RowScanner interface {
 	Scan(...any) error
 }
 
-func Scan(rows RowScanner, tag string, v any) error {
-	typ, ptr, slc := resolve(v)
-	if typ != typReflect && typ != typMap && !ptr {
+func Scan(rows RowScanner, tag string, columns, v any) error {
+	cols, err := schema.GetColumns(tag, columns)
+	if err != nil {
+		return err
+	}
+
+	s, err := schema.GetSchema(tag, v)
+	if err != nil {
+		return err
+	}
+
+	if s.Type != schema.TypeMap && !s.Slc && !s.Ptr {
 		return ErrPtrExpected
 	}
 
-	switch typ {
-	case typPrimitive:
-		if slc {
-			return scanSlcOfPrim(rows, v.(*[]any))
+	switch s.Type {
+	case schema.TypeString, schema.TypeInt, schema.TypeUint,
+		schema.TypeFloat, schema.TypeBool:
+		return scanPrim(rows, cols, v)
+
+	case schema.TypeStruct:
+		if s.Slc {
+			return scanSlcOfStruct(rows, s.IndexMap(), v)
 		}
-		return scanPrim(rows, v)
+		return scanStruct(rows, s.IndexMap(), v)
 
-	case typMap:
-		if slc {
-			return scanSlcOfMap(rows, v.(*[]map[string]any))
+	case schema.TypeMap:
+		if s.Slc {
+			return scanSlcOfMap(rows, v)
 		}
-		var m map[string]any
-		if ptr {
-			m = *v.(*map[string]any)
-		} else {
-			m = v.(map[string]any)
-		}
-		return scanMap(rows, m)
+		return scanMap(rows, v, s.Ptr)
 
+	default:
+		return ErrUnexpectedType
 	}
-
-	val, info := resolveRfl(v, tag, false)
-	if info.err != nil {
-		return info.err
-	}
-
-	if info.slc {
-		return scanSlcOfStruct(rows, info.index, val)
-	}
-
-	return scanStruct(rows, info.index, val)
 }
 
-func scanPrim(rows RowScanner, v any) error {
+// -- internal
+
+func scanPrim(rows RowScanner, cols []string, v any) error {
+	if len(cols) != 1 {
+		return ErrColumnMismatch
+	}
+
 	if rows.Next() {
 		return rows.Scan(v)
 	} else {
@@ -58,26 +64,14 @@ func scanPrim(rows RowScanner, v any) error {
 	}
 }
 
-// BUG: doesn't work
-func scanSlcOfPrim(rows RowScanner, v *[]any) error {
-	m := make([]any, len(*v))
-	for i := range m {
-		x := *v
-		m[i] = x[i]
+func scanMap(rows RowScanner, v any, ptr bool) error {
+	var mp map[string]any
+	if ptr {
+		mp = *(v).(*map[string]any)
+	} else {
+		mp = v.(map[string]any)
 	}
 
-	if !rows.Next() {
-		return sql.ErrNoRows
-	}
-
-	if err := rows.Scan(m...); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func scanMap(rows RowScanner, mp map[string]any) error {
 	cols, _ := rows.Columns()
 	args := make([]any, len(cols))
 	for i := range args {
@@ -100,7 +94,9 @@ func scanMap(rows RowScanner, mp map[string]any) error {
 	return nil
 }
 
-func scanSlcOfMap(rows RowScanner, mp *[]map[string]any) error {
+func scanSlcOfMap(rows RowScanner, v any) error {
+	mp := v.(*[]map[string]any)
+
 	cols, _ := rows.Columns()
 	length := len(*mp)
 	args := make([]any, len(cols))
@@ -132,13 +128,15 @@ func scanSlcOfMap(rows RowScanner, mp *[]map[string]any) error {
 	return nil
 }
 
-func scanStruct(rows RowScanner, indexFields map[string][]int, strct reflect.Value) error {
+func scanStruct(rows RowScanner, indexFields map[string][]int, v any) error {
+	val := reflect.ValueOf(v).Elem()
+
 	cols, _ := rows.Columns()
 	args := make([]any, len(cols))
 
 	for i, col := range cols {
 		if index, exists := indexFields[col]; exists {
-			args[i] = strct.FieldByIndex(index).Addr().Interface()
+			args[i] = val.FieldByIndex(index).Addr().Interface()
 		} else {
 			args[i] = new(any)
 		}
@@ -155,15 +153,17 @@ func scanStruct(rows RowScanner, indexFields map[string][]int, strct reflect.Val
 	return nil
 }
 
-func scanSlcOfStruct(rows RowScanner, indexField map[string][]int, slice reflect.Value) error {
-	typ := slice.Type().Elem()
+func scanSlcOfStruct(rows RowScanner, indexField map[string][]int, v any) error {
+	val := reflect.ValueOf(v).Elem()
+
+	typ := val.Type().Elem()
 	if typ.Kind() == reflect.Pointer {
 		typ = typ.Elem()
 	}
 
 	cols, _ := rows.Columns()
 	args := make([]any, len(cols))
-	length := slice.Len()
+	length := val.Len()
 
 	i := 0
 	for rows.Next() {
@@ -171,7 +171,7 @@ func scanSlcOfStruct(rows RowScanner, indexField map[string][]int, slice reflect
 			// update elem
 			for colIndex, col := range cols {
 				if index, exists := indexField[col]; exists {
-					addr := slice.Index(i).FieldByIndex(index).Addr().Interface()
+					addr := val.Index(i).FieldByIndex(index).Addr().Interface()
 					args[colIndex] = addr
 				} else {
 					args[colIndex] = new(any)
@@ -197,13 +197,13 @@ func scanSlcOfStruct(rows RowScanner, indexField map[string][]int, slice reflect
 			if err := rows.Scan(args...); err != nil {
 				return err
 			}
-			slice.Set(reflect.Append(slice, dummy))
+			val.Set(reflect.Append(val, dummy))
 		}
 		i++
 	}
 
 	if i < length {
-		slice.Set(slice.Slice(0, i))
+		val.Set(val.Slice(0, i))
 	}
 
 	return nil

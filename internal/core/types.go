@@ -17,6 +17,7 @@ type Writer interface {
 }
 
 type Column interface {
+	RawBase() string
 	Base() Builder
 	Expr() Builder
 	Def() Builder

@@ -2,159 +2,193 @@ package mapper
 
 import (
 	"reflect"
-	"sort"
+
+	"github.com/laacin/inyorm/internal/mapper/schema"
 )
 
 type ReadResult struct {
-	Args    []any
-	Columns []string
 	Rows    int
+	Columns []string
+	Args    []any
 }
 
-func Read(tag string, v any) (ReadResult, error) {
-	typ, ptr, slc := resolve(v)
-	if typ != typReflect && ptr {
-		return ReadResult{}, ErrValueExpected
+func Read(tag string, columns, v any) (*ReadResult, error) {
+	cols, err := schema.GetColumns(tag, columns)
+	if err != nil {
+		return nil, err
 	}
 
-	switch typ {
-	case typPrimitive:
-		if slc {
-			return readSlcOfPrim(v.([]any)), nil
+	s, err := schema.GetSchema(tag, v)
+	if err != nil {
+		return nil, err
+	}
+
+	switch s.Type {
+	case schema.TypeString, schema.TypeInt, schema.TypeUint,
+		schema.TypeFloat, schema.TypeBool:
+		return readPrim(cols, v, s.Slc, s.Ptr)
+
+	case schema.TypeAny:
+		return readAny(cols, v, s.Slc, s.Ptr)
+
+	case schema.TypeMap:
+		if s.Slc {
+			return readSlcOfMap(cols, v, s.Ptr)
 		}
-		return readPrim(v), nil
+		return readMap(cols, v, s.Ptr)
 
-	case typMap:
-		if slc {
-			return readSlcOfMap(v.([]map[string]any))
+	case schema.TypeStruct:
+		if s.Slc {
+			return readSlcOfStruct(cols, v, s.IndexMap(), s.Ptr)
 		}
-		return readMap(v.(map[string]any)), nil
-	}
+		return readStruct(cols, v, s.IndexMap(), s.Ptr)
 
-	val, info := resolveRfl(v, tag, true)
-	if info.err != nil {
-		return ReadResult{}, info.err
+	default:
+		return nil, ErrUnexpectedType
 	}
-
-	if info.slc {
-		return readSlcOfStruct(val, info.index)
-	}
-	return readStruct(val, info.index)
 }
 
-func readPrim(v any) ReadResult {
-	return ReadResult{Args: []any{v}}
+// -- internal
+
+func readPrim(cols []string, v any, slc, ptr bool) (*ReadResult, error) {
+	if slc || ptr {
+		return nil, ErrUnexpectedType
+	}
+
+	if len(cols) != 1 {
+		return nil, ErrColumnMismatch
+	}
+
+	return &ReadResult{
+		Rows:    1,
+		Columns: cols,
+		Args:    []any{v},
+	}, nil
 }
 
-func readSlcOfPrim(v []any) ReadResult {
-	return ReadResult{Args: v}
+func readAny(cols []string, v any, slc, ptr bool) (*ReadResult, error) {
+	if !slc {
+		return readPrim(cols, v, slc, ptr)
+	}
+
+	val := *(v).(*[]any)
+	colNum, valNum := len(cols), len(val)
+	if valNum == 0 {
+		return nil, ErrEmptySlice
+	}
+
+	return &ReadResult{
+		Rows:    valNum / colNum,
+		Columns: cols,
+		Args:    val,
+	}, nil
 }
 
-func readMap(mp map[string]any) ReadResult {
-	cols := make([]string, len(mp))
+func readMap(cols []string, v any, ptr bool) (*ReadResult, error) {
+	var mp map[string]any
+	if ptr {
+		mp = *(v).(*map[string]any)
+	} else {
+		mp = v.(map[string]any)
+	}
+
 	args := make([]any, len(mp))
 
-	i := 0
-	for k, v := range mp {
-		cols[i] = k
-		args[i] = v
-		i++
+	for i, col := range cols {
+		args[i] = mp[col]
 	}
 
-	return ReadResult{
+	return &ReadResult{
 		Columns: cols,
 		Args:    args,
 		Rows:    1,
-	}
+	}, nil
 }
 
-func readSlcOfMap(mp []map[string]any) (ReadResult, error) {
-	rows := len(mp)
+func readSlcOfMap(cols []string, v any, ptr bool) (*ReadResult, error) {
+	var mp []map[string]any
+	if ptr {
+		mp = *(v).(*[]map[string]any)
+	} else {
+		mp = v.([]map[string]any)
+	}
+
+	colNum, rows := len(cols), len(mp)
 	if rows == 0 {
-		return ReadResult{}, ErrEmptySlice
+		return nil, ErrEmptySlice
 	}
-
-	first := mp[0]
-	colNum := len(first)
-
-	cols := make([]string, 0, colNum)
-	for k := range first {
-		cols = append(cols, k)
-	}
-	sort.Strings(cols)
 
 	args := make([]any, colNum*rows)
+
 	for idx, m := range mp {
 		for i, col := range cols {
 			v, ok := m[col]
 			if !ok {
-				return ReadResult{}, ErrColumnMismatch
+				return nil, ErrColumnMismatch
 			}
 
 			args[idx*colNum+i] = v
 		}
 	}
 
-	return ReadResult{
+	return &ReadResult{
 		Rows:    rows,
 		Columns: cols,
 		Args:    args,
 	}, nil
 }
 
-func readStruct(v reflect.Value, indexField map[string][]int) (ReadResult, error) {
-	colNum := len(indexField)
-
-	cols := make([]string, 0, colNum)
-	args := make([]any, colNum)
-	for k := range indexField {
-		cols = append(cols, k)
+func readStruct(cols []string, v any, indexField map[string][]int, ptr bool) (*ReadResult, error) {
+	val := reflect.ValueOf(v)
+	if ptr {
+		val = val.Elem()
 	}
-	sort.Strings(cols)
+
+	colNum := len(indexField)
+	args := make([]any, colNum)
 
 	for i, col := range cols {
 		idx, ok := indexField[col]
 		if !ok {
-			return ReadResult{}, ErrColumnMismatch
+			return nil, ErrColumnMismatch
 		}
 
-		args[i] = v.FieldByIndex(idx).Interface()
+		args[i] = val.FieldByIndex(idx).Interface()
 	}
 
-	return ReadResult{
+	return &ReadResult{
 		Rows:    1,
 		Columns: cols,
 		Args:    args,
 	}, nil
 }
 
-func readSlcOfStruct(v reflect.Value, indexField map[string][]int) (ReadResult, error) {
-	rows := v.Len()
+func readSlcOfStruct(cols []string, v any, indexField map[string][]int, ptr bool) (*ReadResult, error) {
+	val := reflect.ValueOf(v)
+	if ptr {
+		val = val.Elem()
+	}
+
+	rows := val.Len()
 	if rows == 0 {
-		return ReadResult{}, ErrEmptySlice
+		return nil, ErrEmptySlice
 	}
 
 	colNum := len(indexField)
-	cols := make([]string, 0, colNum)
 	args := make([]any, rows*colNum)
 
-	for k := range indexField {
-		cols = append(cols, k)
-	}
-	sort.Strings(cols)
-
 	for row := range rows {
-		item := v.Index(row)
+		item := val.Index(row)
 		for i, col := range cols {
 			idx, ok := indexField[col]
 			if !ok {
-				return ReadResult{}, ErrColumnMismatch
+				return nil, ErrColumnMismatch
 			}
 			args[row*colNum+i] = item.FieldByIndex(idx).Interface()
 		}
 	}
 
-	return ReadResult{
+	return &ReadResult{
 		Rows:    rows,
 		Columns: cols,
 		Args:    args,

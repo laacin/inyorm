@@ -53,3 +53,7 @@ func (c *Column[Self]) Base() core.Builder {
 		w.Column(c.Table, c.BaseName)
 	}
 }
+
+func (c *Column[Self]) RawBase() string {
+	return c.BaseName
+}
