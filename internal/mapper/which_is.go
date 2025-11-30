@@ -1,4 +1,4 @@
-package schema
+package mapper
 
 import (
 	"reflect"
@@ -6,48 +6,59 @@ import (
 	"github.com/laacin/inyorm/internal/core"
 )
 
-type SchemaType int
+const (
+	typeUnknown = iota
+	typeString
+	typeInt
+	typeUint
+	typeFloat
+	typeBool
+	typeMap
+	typeColumn
+	typeStruct
+	typeAny
+)
 
 var ColumnIface = reflect.TypeOf((*core.Column)(nil)).Elem()
 
-func whichIs(t reflect.Type) SchemaType {
+func whichIs(t reflect.Type) int {
 	if t.Implements(ColumnIface) {
-		return TypeColumn
+		return typeColumn
 	}
 
 	knd := t.Kind()
 
 	if knd == reflect.Struct {
-		return TypeStruct
+		return typeStruct
 	}
 
 	if knd == reflect.Interface {
-		return TypeAny
+		return typeAny
 	}
 
 	if knd == reflect.Map {
-		return TypeMap
+		return typeMap
 	}
 
 	if knd == reflect.String {
-		return TypeString
+		return typeString
 	}
 
 	if knd == reflect.Bool {
-		return TypeBool
+		return typeBool
 	}
 
 	if knd >= reflect.Int && knd <= reflect.Int64 {
-		return TypeInt
+		return typeInt
 	}
 
 	if knd >= reflect.Uint && knd <= reflect.Uint64 {
-		return TypeUint
+		return typeUint
 	}
 
 	if knd == reflect.Float32 || knd == reflect.Float64 {
-		return TypeFloat
+		return typeFloat
 	}
 
-	return TypeUnknown
+	return typeUnknown
 }

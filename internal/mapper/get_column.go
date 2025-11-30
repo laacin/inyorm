@@ -1,4 +1,45 @@
-package schema
+package mapper
+
+import "slices"
+
+func GetColumns(tag string, v any) ([]string, error) {
+	s, err := getSchema(tag, v)
+	if err != nil {
+		return nil, err
+	}
+
+	var cols []string
+	switch s.Type {
+	case typeColumn:
+		cols = colsFromCol(v, s.Slc)
+
+	case typeString:
+		cols = colsFromString(v, s.Slc, s.Ptr)
+
+	case typeStruct:
+		cols = colsFromStruct(s.Index)
+
+	case typeMap:
+		if s.Slc {
+			return nil, ErrInvalidSchema
+		}
+		cols = colsFromMap(v, s.Ptr)
+
+	default:
+		return nil, ErrInvalidSchema
+	}
+
+	for _, col := range cols {
+		if col == "" || col == "*" {
+			return nil, ErrInvalidColumn
+		}
+	}
+
+	slices.Sort(cols)
+	return cols, nil
+}
+
+// -- internal
 
 func colsFromCol(v any, slc bool) []string {
 	type column interface{ RawBase() string }

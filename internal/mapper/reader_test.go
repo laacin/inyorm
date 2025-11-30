@@ -7,8 +7,13 @@ import (
 	"github.com/laacin/inyorm/internal/mapper"
 )
 
-func newTest(t *testing.T, schm, v any) func(rows int, cols []string, vals []any) {
-	result, err := mapper.Read("inyorm", schm, v)
+func newTest(t *testing.T, reference, v any) func(rows int, cols []string, vals []any) {
+	cols, err := mapper.GetColumns("inyorm", reference)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := mapper.Read("inyorm", cols, v)
 	if err != nil {
 		t.Fatal(err)
 	}

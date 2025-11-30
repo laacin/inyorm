@@ -1,10 +1,6 @@
 package mapper
 
-import (
-	"reflect"
-
-	"github.com/laacin/inyorm/internal/mapper/schema"
-)
+import "reflect"
 
 type ReadResult struct {
 	Rows    int
@@ -12,32 +8,27 @@ type ReadResult struct {
 	Args    []any
 }
 
-func Read(tag string, columns, v any) (*ReadResult, error) {
-	cols, err := schema.GetColumns(tag, columns)
-	if err != nil {
-		return nil, err
-	}
-
-	s, err := schema.GetSchema(tag, v)
+func Read(tag string, cols []string, v any) (*ReadResult, error) {
+	s, err := getSchema(tag, v)
 	if err != nil {
 		return nil, err
 	}
 
 	switch s.Type {
-	case schema.TypeString, schema.TypeInt, schema.TypeUint,
-		schema.TypeFloat, schema.TypeBool:
+	case typeString, typeInt, typeUint,
+		typeFloat, typeBool:
 		return readPrim(cols, v, s.Slc, s.Ptr)
 
-	case schema.TypeAny:
+	case typeAny:
 		return readAny(cols, v, s.Slc, s.Ptr)
 
-	case schema.TypeMap:
+	case typeMap:
 		if s.Slc {
 			return readSlcOfMap(cols, v, s.Ptr)
 		}
 		return readMap(cols, v, s.Ptr)
 
-	case schema.TypeStruct:
+	case typeStruct:
 		if s.Slc {
 			return readSlcOfStruct(cols, v, s.IndexMap(), s.Ptr)
 		}

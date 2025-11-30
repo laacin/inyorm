@@ -3,8 +3,6 @@ package mapper
 import (
 	"database/sql"
 	"reflect"
-
-	"github.com/laacin/inyorm/internal/mapper/schema"
 )
 
 type RowScanner interface {
@@ -14,32 +12,32 @@ type RowScanner interface {
 }
 
 func Scan(rows RowScanner, tag string, columns, v any) error {
-	cols, err := schema.GetColumns(tag, columns)
+	cols, err := GetColumns(tag, columns)
 	if err != nil {
 		return err
 	}
 
-	s, err := schema.GetSchema(tag, v)
+	s, err := getSchema(tag, v)
 	if err != nil {
 		return err
 	}
 
-	if s.Type != schema.TypeMap && !s.Slc && !s.Ptr {
+	if s.Type != typeMap && !s.Slc && !s.Ptr {
 		return ErrPtrExpected
 	}
 
 	switch s.Type {
-	case schema.TypeString, schema.TypeInt, schema.TypeUint,
-		schema.TypeFloat, schema.TypeBool:
+	case typeString, typeInt, typeUint,
+		typeFloat, typeBool:
 		return scanPrim(rows, cols, v)
 
-	case schema.TypeStruct:
+	case typeStruct:
 		if s.Slc {
 			return scanSlcOfStruct(rows, s.IndexMap(), v)
 		}
 		return scanStruct(rows, s.IndexMap(), v)
 
-	case schema.TypeMap:
+	case typeMap:
 		if s.Slc {
 			return scanSlcOfMap(rows, v)
 		}
