@@ -1,20 +1,19 @@
 package mapper
 
-import "slices"
+import (
+	"slices"
+
+	"github.com/laacin/inyorm/internal/core"
+)
 
 func GetColumns(tag string, v any) ([]string, error) {
-	s, err := getSchema(tag, v)
-	if err != nil {
-		return nil, err
-	}
+	s := getSchema(tag, v)
 
 	var cols []string
 	switch s.Type {
-	case typeColumn:
-		cols = colsFromCol(v, s.Slc)
 
-	case typeString:
-		cols = colsFromString(v, s.Slc, s.Ptr)
+	case typeAny, typeColumn:
+		cols = colsFromCol(v, s.Ptr, s.Slc)
 
 	case typeStruct:
 		cols = colsFromStruct(s.Index)
@@ -29,6 +28,10 @@ func GetColumns(tag string, v any) ([]string, error) {
 		return nil, ErrInvalidSchema
 	}
 
+	if len(cols) == 0 {
+		return nil, ErrNoColumns
+	}
+
 	for _, col := range cols {
 		if col == "" || col == "*" {
 			return nil, ErrInvalidColumn
@@ -41,40 +44,28 @@ func GetColumns(tag string, v any) ([]string, error) {
 
 // -- internal
 
-func colsFromCol(v any, slc bool) []string {
-	type column interface{ RawBase() string }
-
+func colsFromCol(v any, ptr, slc bool) []string {
 	if !slc {
-		col := v.(column)
-		return []string{col.RawBase()}
-	}
-
-	cols := v.([]column)
-	result := make([]string, len(cols))
-	for i, col := range cols {
-		result[i] = col.RawBase()
-	}
-
-	return result
-}
-
-func colsFromString(v any, slc, ptr bool) []string {
-	if !slc {
-		var str string
-		if ptr {
-			str = *(v).(*string)
-		} else {
-			str = v.(string)
+		if col, ok := v.(core.Column); ok {
+			return []string{col.RawBase()}
 		}
-
-		return []string{str}
+		return nil
 	}
 
-	var cols []string
+	var s []any
 	if ptr {
-		cols = *(v).(*[]string)
+		s = *v.(*[]any)
 	} else {
-		cols = v.([]string)
+		s = v.([]any)
+	}
+
+	cols := make([]string, len(s))
+	for i, elem := range s {
+		col, ok := elem.(core.Column)
+		if !ok {
+			continue
+		}
+		cols[i] = col.RawBase()
 	}
 
 	return cols
@@ -91,7 +82,7 @@ func colsFromStruct(fieldInfo []fieldInfo) []string {
 func colsFromMap(v any, ptr bool) []string {
 	var m map[string]any
 	if ptr {
-		m = *(v).(*map[string]any)
+		m = *v.(*map[string]any)
 	} else {
 		m = v.(map[string]any)
 	}

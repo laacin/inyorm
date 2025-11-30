@@ -9,10 +9,7 @@ type ReadResult struct {
 }
 
 func Read(tag string, cols []string, v any) (*ReadResult, error) {
-	s, err := getSchema(tag, v)
-	if err != nil {
-		return nil, err
-	}
+	s := getSchema(tag, v)
 
 	switch s.Type {
 	case typeString, typeInt, typeUint,
@@ -62,7 +59,13 @@ func readAny(cols []string, v any, slc, ptr bool) (*ReadResult, error) {
 		return readPrim(cols, v, slc, ptr)
 	}
 
-	val := *(v).(*[]any)
+	var val []any
+	if ptr {
+		val = *v.(*[]any)
+	} else {
+		val = v.([]any)
+	}
+
 	colNum, valNum := len(cols), len(val)
 	if valNum == 0 {
 		return nil, ErrEmptySlice
@@ -78,7 +81,7 @@ func readAny(cols []string, v any, slc, ptr bool) (*ReadResult, error) {
 func readMap(cols []string, v any, ptr bool) (*ReadResult, error) {
 	var mp map[string]any
 	if ptr {
-		mp = *(v).(*map[string]any)
+		mp = *v.(*map[string]any)
 	} else {
 		mp = v.(map[string]any)
 	}
@@ -99,7 +102,7 @@ func readMap(cols []string, v any, ptr bool) (*ReadResult, error) {
 func readSlcOfMap(cols []string, v any, ptr bool) (*ReadResult, error) {
 	var mp []map[string]any
 	if ptr {
-		mp = *(v).(*[]map[string]any)
+		mp = *v.(*[]map[string]any)
 	} else {
 		mp = v.([]map[string]any)
 	}
@@ -165,7 +168,7 @@ func readSlcOfStruct(cols []string, v any, indexField map[string][]int, ptr bool
 		return nil, ErrEmptySlice
 	}
 
-	colNum := len(indexField)
+	colNum := len(cols)
 	args := make([]any, rows*colNum)
 
 	for row := range rows {

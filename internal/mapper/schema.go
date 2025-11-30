@@ -24,11 +24,11 @@ func (s *schema) IndexMap() map[string][]int {
 
 var cache sync.Map
 
-func getSchema(tag string, v any) (*schema, error) {
+func getSchema(tag string, v any) *schema {
 	elemType := reflect.TypeOf(v)
 
 	if cached, ok := cache.Load(elemType); ok {
-		return cached.(*schema), nil
+		return cached.(*schema)
 	}
 
 	var (
@@ -61,7 +61,7 @@ func getSchema(tag string, v any) (*schema, error) {
 	}
 
 	cache.Store(elemType, schm)
-	return schm, nil
+	return schm
 }
 
 // -- which type is it
@@ -79,16 +79,16 @@ const (
 	typeAny
 )
 
-var ColumnIface = reflect.TypeOf((*core.Column)(nil)).Elem()
+var columnIface = reflect.TypeOf((*core.Column)(nil)).Elem()
 
 func whichIs(t reflect.Type) int {
-	if t.Implements(ColumnIface) {
-		return typeColumn
-	}
-
 	knd := t.Kind()
 
 	if knd == reflect.Struct {
+		if reflect.PointerTo(t).Implements(columnIface) {
+			return typeColumn
+		}
+
 		return typeStruct
 	}
 

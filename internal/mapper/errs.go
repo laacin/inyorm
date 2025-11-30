@@ -10,6 +10,7 @@ var (
 	ErrValueExpected = errors.New("expected value")
 
 	ErrColumnMismatch = errors.New("column mismatch in slice")
+	ErrNoColumns      = errors.New("no columns")
 	ErrEmptySlice     = errors.New("empty slice")
 
 	ErrUnexpectedType = errors.New("unexpected type")

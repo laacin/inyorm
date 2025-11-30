@@ -12,10 +12,7 @@ type RowScanner interface {
 }
 
 func Scan(rows RowScanner, tag string, v any) error {
-	s, err := getSchema(tag, v)
-	if err != nil {
-		return err
-	}
+	s := getSchema(tag, v)
 
 	if s.Type != typeMap && !s.Slc && !s.Ptr {
 		return ErrPtrExpected
