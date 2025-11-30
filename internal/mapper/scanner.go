@@ -11,7 +11,7 @@ type RowScanner interface {
 	Scan(...any) error
 }
 
-func Scan(rows RowScanner, tag string, cols []string, v any) error {
+func Scan(rows RowScanner, tag string, v any) error {
 	s, err := getSchema(tag, v)
 	if err != nil {
 		return err
@@ -24,7 +24,7 @@ func Scan(rows RowScanner, tag string, cols []string, v any) error {
 	switch s.Type {
 	case typeString, typeInt, typeUint,
 		typeFloat, typeBool:
-		return scanPrim(rows, cols, v)
+		return scanPrim(rows, v)
 
 	case typeStruct:
 		if s.Slc {
@@ -45,11 +45,7 @@ func Scan(rows RowScanner, tag string, cols []string, v any) error {
 
 // -- internal
 
-func scanPrim(rows RowScanner, cols []string, v any) error {
-	if len(cols) != 1 {
-		return ErrColumnMismatch
-	}
-
+func scanPrim(rows RowScanner, v any) error {
 	if rows.Next() {
 		return rows.Scan(v)
 	} else {
