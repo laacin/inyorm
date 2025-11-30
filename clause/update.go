@@ -1,34 +1,51 @@
 package clause
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/mapper"
 )
 
-type Update struct {
-	declared bool
-	table    string
-	binder   any
+type Update[Next any] struct {
+	declared  bool
+	table     string
+	reference []any
+	values    any
 }
 
-func (cls *Update) Name() string     { return "UPDATE" }
-func (cls *Update) IsDeclared() bool { return cls != nil && cls.declared }
-func (cls *Update) Build(w core.Writer, cfg *core.Config) error {
-	result, err := mapper.Read(cfg.ColumnTag, cls.binder)
-	if err != nil {
-		return fmt.Errorf("failed to map value: %w", err)
+func (cls *Update[Next]) Name() string     { return "UPDATE" }
+func (cls *Update[Next]) IsDeclared() bool { return cls != nil && cls.declared }
+func (cls *Update[Next]) Build(w core.Writer, cfg *core.Config) error {
+	if len(cls.reference) < 1 {
+		return errors.New("missing reference")
 	}
 
-	var (
-		cols = result.Columns
-		vals = result.Args
-	)
+	ref := cls.reference[0]
+	if len(cls.reference) > 1 {
+		ref = cls.reference
+	}
 
-	upds := make([]update, len(cols))
-	for i := range len(cols) {
-		upds[i] = update{src: cols[i], value: vals[i]}
+	cols, err := mapper.GetColumns(cfg.ColumnTag, ref)
+	if err != nil {
+		return fmt.Errorf("failed to get columns: %w", err)
+	}
+
+	var result *mapper.ReadResult
+	if cls.values != nil {
+		result, err = mapper.Read(cfg.ColumnTag, cols, cls.values)
+		if err != nil {
+			return fmt.Errorf("failed to map value: %w", err)
+		}
+	}
+
+	ph := false
+	if result != nil {
+		if result.Rows > 1 {
+			return errors.New("there should only be one row")
+		}
+		ph = result.Rows == 1
 	}
 
 	w.Write("UPDATE")
@@ -37,33 +54,34 @@ func (cls *Update) Build(w core.Writer, cfg *core.Config) error {
 	w.Char(' ')
 	w.Write("SET")
 	w.Char(' ')
-	for i, u := range upds {
+	for i, col := range cols {
 		if i > 0 {
 			w.Write(", ")
 		}
-		w.Column(cls.table, u.src)
+
+		w.Column(cls.table, col)
 		w.Write(" = ")
-		// TODO: make dinamic param
-		w.Param([]any{u.value})
-		//w.Value(u.value, core.ColTypUnset)
+		if !ph {
+			w.Param([]any{})
+			continue
+		}
+		w.Param([]any{result.Args[i]})
 	}
 	return nil
 }
 
 // -- Methods
 
-func (cls *Update) Update(binder any) {
+func (cls *Update[Next]) Update(reference ...any) Next {
 	cls.declared = true
-	cls.binder = binder
+	cls.reference = reference
+	return any(cls).(Next)
 }
 
-func (cls *Update) To(table string) {
+func (cls *Update[Next]) Values(values any) {
+	cls.values = values
+}
+
+func (cls *Update[Next]) Table(table string) {
 	cls.table = table
-}
-
-// -- internal
-
-type update struct {
-	src   string
-	value any
 }

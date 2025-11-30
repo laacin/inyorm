@@ -25,14 +25,16 @@ type (
 	clsGroupBy = clause.GroupBy
 	clsHaving  = clause.Having[inyorm.Condition, inyorm.ConditionNext]
 	clsOrderBy = clause.OrderBy[inyorm.OrderByNext]
+
+	clsInsertInto = clause.InsertInto[inyorm.Values]
+	clsUpdate     = clause.Update[inyorm.Values]
 )
 
-func New[T any](cls core.Clause, dialect []string) (T, inyorm.ColumnBuilder, runner) {
+func New[T any](cls core.Clause, table string, dialect []string) (T, inyorm.ColumnBuilder, runner) {
 	d := ""
 	if len(dialect) > 0 {
 		d = dialect[0]
 	}
-	tbl := "users"
 
 	q := writer.Query{Config: &core.Config{
 		Dialect:   d,
@@ -41,12 +43,17 @@ func New[T any](cls core.Clause, dialect []string) (T, inyorm.ColumnBuilder, run
 	}}
 
 	q.PreBuild(func(cfg *core.Config) (useAliases bool) {
+		if clause, ok := cls.(interface{ Table(string) }); ok {
+			clause.Table(table)
+		}
+
 		return cls.Name() == "JOIN"
 	})
 
-	c := &colBuilder{Table: tbl}
+	c := &colBuilder{Table: table}
 	run := func(t *testing.T, expect string, vals []any) {
 		q.SetClauses([]core.Clause{cls})
+
 		statement, values, err := q.Build()
 		if err != nil {
 			t.Fatal(err)
@@ -74,25 +81,33 @@ func New[T any](cls core.Clause, dialect []string) (T, inyorm.ColumnBuilder, run
 }
 
 func NewSelect(dialect ...string) (inyorm.Select, inyorm.ColumnBuilder, runner) {
-	return New[inyorm.Select](&clsSelect{}, dialect)
+	return New[inyorm.Select](&clsSelect{}, "", dialect)
 }
 
 func NewJoin(dialect ...string) (inyorm.Join, inyorm.ColumnBuilder, runner) {
-	return New[inyorm.Join](&clsJoin{}, dialect)
+	return New[inyorm.Join](&clsJoin{}, "", dialect)
 }
 
 func NewWhere(dialect ...string) (inyorm.Where, inyorm.ColumnBuilder, runner) {
-	return New[inyorm.Where](&clsWhere{}, dialect)
+	return New[inyorm.Where](&clsWhere{}, "", dialect)
 }
 
 func NewGroupBy(dialect ...string) (inyorm.GroupBy, inyorm.ColumnBuilder, runner) {
-	return New[inyorm.GroupBy](&clsGroupBy{}, dialect)
+	return New[inyorm.GroupBy](&clsGroupBy{}, "", dialect)
 }
 
 func NewHaving(dialect ...string) (inyorm.Having, inyorm.ColumnBuilder, runner) {
-	return New[inyorm.Having](&clsHaving{}, dialect)
+	return New[inyorm.Having](&clsHaving{}, "", dialect)
 }
 
 func NewOrderBy(dialect ...string) (inyorm.OrderBy, inyorm.ColumnBuilder, runner) {
-	return New[inyorm.OrderBy](&clsOrderBy{}, dialect)
+	return New[inyorm.OrderBy](&clsOrderBy{}, "", dialect)
+}
+
+func NewInsert(table string, dialect ...string) (inyorm.Insert, inyorm.ColumnBuilder, runner) {
+	return New[inyorm.Insert](&clsInsertInto{}, table, dialect)
+}
+
+func NewUpdate(table string, dialect ...string) (inyorm.Update, inyorm.ColumnBuilder, runner) {
+	return New[inyorm.Update](&clsUpdate{}, table, dialect)
 }

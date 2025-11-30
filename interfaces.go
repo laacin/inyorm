@@ -24,8 +24,8 @@ type (
 	clsLimit   = clause.Limit
 	clsOffset  = clause.Offset
 
-	clsInsert = clause.InsertInto
-	clsUpdate = clause.Update
+	clsInsert = clause.InsertInto[Values]
+	clsUpdate = clause.Update[Values]
 	clsDelete = clause.Delete
 
 	executor = exec.Executor[Prepare]
@@ -501,7 +501,7 @@ type Insert interface {
 	// or any Binder-compatible type.
 	//
 	// @SQL: INSERT INTO `table` (`columns`) VALUES (`values`)
-	Insert(value Binder)
+	Insert(reference ...Value) Values
 }
 
 // Update represents the UPDATE clause,
@@ -512,7 +512,11 @@ type Update interface {
 	// The value must be a struct or any Binder-compatible type.
 	//
 	// @SQL: UPDATE `table` SET `column` = `value`
-	Update(value Binder)
+	Update(reference ...Value) Values
+}
+
+type Values interface {
+	Values(values Value)
 }
 
 // ----- Statements -----

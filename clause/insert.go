@@ -1,31 +1,57 @@
 package clause
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/mapper"
 )
 
-type InsertInto struct {
-	declared bool
-	table    string
-	binder   any
+type InsertInto[Next any] struct {
+	declared  bool
+	table     string
+	reference []any
+	values    any
 }
 
-func (cls *InsertInto) Name() string     { return "INSERT INTO" }
-func (cls *InsertInto) IsDeclared() bool { return cls != nil && cls.declared }
-func (cls *InsertInto) Build(w core.Writer, cfg *core.Config) error {
-	result, err := mapper.Read(cfg.ColumnTag, cls.binder)
+func (cls *InsertInto[Next]) Name() string     { return "INSERT INTO" }
+func (cls *InsertInto[Next]) IsDeclared() bool { return cls != nil && cls.declared }
+func (cls *InsertInto[Next]) Build(w core.Writer, cfg *core.Config) error {
+	if len(cls.reference) < 1 {
+		return errors.New("missing reference")
+	}
+
+	ref := cls.reference[0]
+	if len(cls.reference) > 1 {
+		ref = cls.reference
+	}
+
+	cols, err := mapper.GetColumns(cfg.ColumnTag, ref)
 	if err != nil {
-		return fmt.Errorf("failed to map value: %w", err)
+		return fmt.Errorf("failed to get columns: %w", err)
+	}
+
+	var result *mapper.ReadResult
+	if cls.values != nil {
+		result, err = mapper.Read(cfg.ColumnTag, cols, cls.values)
+		if err != nil {
+			return fmt.Errorf("failed to map value: %w", err)
+		}
 	}
 
 	var (
-		rows = result.Rows
-		cols = result.Columns
-		vals = result.Args
+		ph   = false
+		rows = 1
 	)
+
+	if result != nil {
+		if result.Rows == 0 {
+			return errors.New("there should be at least one row")
+		}
+		ph = true
+		rows = result.Rows
+	}
 
 	w.Write("INSERT INTO")
 	w.Char(' ')
@@ -48,26 +74,36 @@ func (cls *InsertInto) Build(w core.Writer, cfg *core.Config) error {
 		}
 
 		w.Char('(')
-		for _, val := range vals {
-			if i > 0 {
+		for ci := range cols {
+			if ci > 0 {
 				w.Write(", ")
 			}
-			w.Param([]any{val})
+
+			if !ph {
+				w.Param([]any{})
+			} else {
+				w.Param([]any{result.Args[i]})
+			}
+
 			i++
 		}
 		w.Char(')')
-		i = 0
 	}
 	return nil
 }
 
 // -- Methods
 
-func (cls *InsertInto) Insert(binder any) {
+func (cls *InsertInto[Next]) Insert(reference ...any) Next {
 	cls.declared = true
-	cls.binder = binder
+	cls.reference = reference
+	return any(cls).(Next)
 }
 
-func (cls *InsertInto) Into(table string) {
+func (cls *InsertInto[Next]) Values(values any) {
+	cls.values = values
+}
+
+func (cls *InsertInto[Next]) Table(table string) {
 	cls.table = table
 }
