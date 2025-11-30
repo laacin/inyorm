@@ -89,7 +89,7 @@ func newInsert(ctx context.Context, cfg *core.Config, db *sql.DB, table string) 
 	})
 
 	q.PreBuild(func(cfg *core.Config) (useAliases bool) {
-		stmt.Into(table)
+		stmt.Table(table)
 		return false
 	})
 
@@ -107,7 +107,7 @@ func newUpdate(ctx context.Context, cfg *core.Config, db *sql.DB, table string) 
 	})
 
 	q.PreBuild(func(cfg *core.Config) (useAliases bool) {
-		stmt.To(table)
+		stmt.Table(table)
 		return false
 	})
 
