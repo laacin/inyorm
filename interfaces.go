@@ -32,10 +32,9 @@ type (
 )
 
 type (
-	Builder    = core.Builder
-	Value      = any
-	Identifier = any
-	Binder     = any
+	Builder = core.Builder
+	Value   = any
+	Scanner = any
 )
 
 // ---- Column
@@ -225,12 +224,12 @@ type ConditionNext interface {
 	// And links the next condition with AND
 	//
 	// @SQL: [Condition] ... AND `ident` ... [Condition]
-	And(ident Identifier) Condition
+	And(ident Value) Condition
 
 	// Or links the next condition with OR
 	//
 	// @SQL: [Condition] ... OR `ident` ... [Condition]
-	Or(ident Identifier) Condition
+	Or(ident Value) Condition
 }
 
 // ----- Case -----
@@ -286,12 +285,12 @@ type ColumnBuilder interface {
 	// Cond starts a condition block with the given identifier
 	//
 	// @SQL: `ident` ... [Condition]
-	Cond(ident Identifier) Condition
+	Cond(ident Value) Condition
 
 	// Concat writes CONCAT(...)
 	//
 	// @SQL: CONCAT(val1, val2, ...)
-	Concat(v ...Identifier) Column
+	Concat(v ...Value) Column
 
 	// Switch writes a simple CASE expression for this column.
 	//
@@ -304,7 +303,7 @@ type ColumnBuilder interface {
 	//    WHEN comparation2 THEN ...
 	//    ELSE ...
 	//  END
-	Switch(cond Identifier, fn func(cs Case)) Column
+	Switch(cond Value, fn func(cs Case)) Column
 
 	// Search writes a searched CASE expression for this column.
 	//
@@ -334,7 +333,7 @@ type Select interface {
 	// Select writes the SELECT clause values
 	//
 	// @SQL: SELECT `DISTINCT?` `sel1`, `sel2`, `sel3` ... [SelectNext]
-	Select(sel ...Identifier)
+	Select(sel ...Value)
 }
 
 // SelectNext represents additional chained SELECT values
@@ -343,7 +342,7 @@ type SelectNext interface {
 	// Select writes the SELECT clause values
 	//
 	// @SQL: SELECT `DISTINCT?` `sel1`, `sel2`, `sel3` ... [SelectNext]
-	Select(sel ...Identifier)
+	Select(sel ...Value)
 }
 
 // ----- FROM
@@ -399,14 +398,14 @@ type JoinNext interface {
 	// On writes the join condition
 	//
 	// @SQL: [join] ... ON `on` ... [Condition]
-	On(on Identifier) Condition
+	On(on Value) Condition
 }
 
 type JoinEnd interface {
 	// On writes the join condition
 	//
 	// @SQL: [join] ... ON `on` ... [Condition]
-	On(on Identifier) Condition
+	On(on Value) Condition
 }
 
 // ----- WHERE
@@ -421,7 +420,7 @@ type Where interface {
 	// e.g: (cond1) AND (cond2) AND (cond3) ...
 	//
 	// @SQL: WHERE `ident` ... [Condition]
-	Where(ident Identifier) Condition
+	Where(ident Value) Condition
 }
 
 // ----- GROUP BY
@@ -432,7 +431,7 @@ type GroupBy interface {
 	// GroupBy writes the GROUP BY clause
 	//
 	// @SQL: GROUP BY `group1`, `group2`, `group3` ...
-	GroupBy(group ...Identifier)
+	GroupBy(group ...Value)
 }
 
 // ----- HAVING
@@ -456,7 +455,7 @@ type OrderBy interface {
 	// # Can be called multiple times for multiple orderings
 	//
 	// @SQL: ORDER BY `order` ... [OrderByNext]
-	OrderBy(order Identifier) OrderByNext
+	OrderBy(order Value) OrderByNext
 }
 
 // OrderByNext represents ordering modifiers,
@@ -492,30 +491,40 @@ type Offset interface {
 	Offset(offset int)
 }
 
-// Insert represents the INSERT INTO clause,
-// defining the data that will be inserted into a table.
+// Insert represents the INSERT INTO clause, defining data to insert into a table.
 type Insert interface {
-	// Insert writes the INSERT INTO clause values.
+	// Insert specifies the columns to insert and returns a Values handler.
 	//
-	// The value must be a struct, slice of structs,
-	// or any Binder-compatible type.
+	// The argument can be:
+	//   - a struct
+	//   - a map[string]any
+	//   - individual columns
+	//   - any type where columns can be read dynamically
 	//
-	// @SQL: INSERT INTO `table` (`columns`) VALUES (`values`)
+	// Example SQL: INSERT INTO `table` (`columns`) VALUES (...)
 	Insert(reference ...Value) Values
 }
 
-// Update represents the UPDATE clause,
-// defining the data that will be updated in a table.
+// Update represents the UPDATE clause, defining data to update in a table.
 type Update interface {
-	// Update writes the UPDATE clause values.
+	// Update specifies the columns to update and returns a Values handler.
 	//
-	// The value must be a struct or any Binder-compatible type.
+	// The argument can be:
+	//   - a struct
+	//   - a map[string]any
+	//   - individual columns
+	//   - any type where columns can be read dynamically
 	//
-	// @SQL: UPDATE `table` SET `column` = `value`
+	// Example SQL: UPDATE `table` SET `column` = ...
 	Update(reference ...Value) Values
 }
 
+// Values represents the VALUES clause for INSERT or the assignment values for UPDATE.
 type Values interface {
+	// Values sets the actual values to insert or update.
+	//
+	// Always provide the raw values; placeholders ("?") are handled internally.
+	// You can omit this call if using prepared columns without values.
 	Values(values Value)
 }
 
@@ -557,11 +566,11 @@ type DeleteStmt interface {
 
 // ----- Executor -----
 
-type Prepare interface {
-	Run(args []Value, binder ...Binder) error
+type Executor interface {
+	Run(binder ...Scanner) error
+	Prepare(fn func(exec Prepare) error) error
 }
 
-type Executor interface {
-	Run(binder ...Binder) error
-	Prepare(fn func(exec Prepare) error) error
+type Prepare interface {
+	Run(args []Value, scanner ...Scanner) error
 }
