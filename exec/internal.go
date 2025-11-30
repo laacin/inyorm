@@ -32,13 +32,14 @@ func scan(
 	tag string,
 	query string,
 	args []any,
-	binder any,
+	scan any,
 ) error {
 	rows, err := db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return errSQL(err)
 	}
-	return mapper.Scan(rows, tag, binder)
+
+	return mapper.Scan(rows, tag, scan)
 }
 
 func runPrep(
@@ -58,13 +59,14 @@ func scanPrep(
 	stmt *sql.Stmt,
 	tag string,
 	vals []any,
-	binder any,
+	scan any,
 ) error {
 	rows, err := stmt.QueryContext(ctx, vals...)
 	if err != nil {
 		return errSQL(err)
 	}
-	return mapper.Scan(rows, tag, binder)
+
+	return mapper.Scan(rows, tag, scan)
 }
 
 func errSQL(err error) error {
