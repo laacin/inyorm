@@ -11,12 +11,7 @@ type RowScanner interface {
 	Scan(...any) error
 }
 
-func Scan(rows RowScanner, tag string, columns, v any) error {
-	cols, err := GetColumns(tag, columns)
-	if err != nil {
-		return err
-	}
-
+func Scan(rows RowScanner, tag string, cols []string, v any) error {
 	s, err := getSchema(tag, v)
 	if err != nil {
 		return err

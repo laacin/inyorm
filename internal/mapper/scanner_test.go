@@ -35,8 +35,12 @@ func (m *MockRows) Scan(dest ...any) error {
 	return nil
 }
 
-func newScanner(t *testing.T, rows *MockRows, schm, v any) func(expect any, expErr ...error) {
-	err := mapper.Scan(rows, "inyorm", schm, v)
+func newScanner(t *testing.T, rows *MockRows, reference, v any) func(expect any, expErr ...error) {
+	cols, err := mapper.GetColumns("inyorm", reference)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = mapper.Scan(rows, "inyorm", cols, v)
 
 	return func(expect any, expErr ...error) {
 		if err != nil && len(expErr) > 0 && expErr[0] != nil {
