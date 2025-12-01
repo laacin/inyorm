@@ -4,35 +4,13 @@
 
 ##### Inyorm is a fully declarative ORM for Go, designed for clarity, type safety, and predictable SQL generation.
 
-## Overview
-
 - SQL-like declarative API
 - Strong typing
 - Fast mapping with minimal reflection
-- Lightweight, explicit, and fast
+- Lightweight, explicit, and predictable
 - Highly customizable
 
-```go
-q, c := qe.NewSelect(ctx, "users")
-
-var (
-    id = c.Col("id")
-    fk = c.Col("user_id", "posts")
-    postNum = c.Col("id", "posts").Count()
-)
-
-q.Select(c.All(), postNum)
-q.Join("posts").On(fk).Equal(id)
-q.Where(id).Equal(c.Param(43))
-q.Limit(1)
-
-u := &User{}
-if err := q.Run(u); err != nil {
-    log.Fatal(err)
-}
-```
-
-## Getting started
+## Minimal setup
 
 ### Install
 
@@ -40,10 +18,8 @@ if err := q.Run(u); err != nil {
 go get -u github.com/laacin/inyorm
 ```
 
-### Minimal setup
-
-Inyorm is at its core a query builder and object mapper. It doesn’t manage connections or drivers,
-so you remain fully in control of the database layer.
+Inyorm is just a query builder and object mapper. It doesn’t manage connections or drivers,
+so you stay fully in control of the database layer.
 
 ```go
 package main
@@ -72,7 +48,145 @@ func main() {
 }
 ```
 
-### Guides
+## Why inyorm?
+
+Inyorm is a fully declarative, explicit, and strongly typed ORM,
+letting you write complex queries without falling back to raw SQL.
+
+### Examples:
+
+<details>
+<summary>Simple example</summary>
+
+```go
+q, c := qe.NewSelect(ctx, "users")
+
+var (
+	id    = c.Col("id")
+	fk    = c.Col("user_id", "posts")
+	posts = c.Col("id", "posts").Count()
+)
+
+q.Select(c.All(), posts)
+q.Join("posts").On(fk).Equal(id)
+q.Where(id).Equal(c.Param("uuid"))
+q.Limit(1)
+```
+
+SQL:
+
+```sql
+SELECT a.*, COUNT(b.id)
+FROM users a
+INNER JOIN posts b ON (b.user_id = a.id)
+WHERE (a.id = ?)
+LIMIT 1
+```
+
+</details>
+
+<details>
+<summary>Complex example</summary>
+
+```go
+q, c := qe.NewSelect(context.Background(), "users")
+
+// helper
+isNull := func(cond inyorm.Column, then, els any) inyorm.Column {
+	return c.Search(func(cs inyorm.Case) {
+		cond := c.Cond(cond).IsNull()
+		cs.When(cond).Then(then)
+		cs.Else(els)
+	})
+}
+
+var (
+	// base columns
+	fname     = c.Col("firstname")
+	lname     = c.Col("lastname")
+	lastLogin = c.Col("last_login")
+	banned    = c.Col("banned")
+	roleName  = c.Col("name", "roles")
+	age       = c.Col("age")
+	active    = c.Col("active")
+
+	// summary columns
+	posts    = c.Col("id", "posts").Count()
+	comments = c.Col("id", "comments").Count()
+	role     = isNull(roleName, "No role", roleName)
+	lastLog  = isNull(lastLogin, "Never", lastLogin)
+	status   = isNull(banned, "Active", c.Concat("Banned at: ", banned))
+
+	// join keys
+	userId        = c.Col("id")
+	roleId        = c.Col("id", "roles")
+	postUserFk    = c.Col("user_id", "posts")
+	commentUserFk = c.Col("user_id", "comments")
+
+	interUserFk = c.Col("user_id", "user_roles")
+	interRoleFk = c.Col("role_id", "user_roles")
+
+	// select columns
+	totalPost    = c.Col("id", "posts").Count(true).As("total_posts")
+	totalComment = c.Col("id", "comments").Count(true).As("total_comments")
+	lastPost     = c.Col("created_at", "posts").Max().As("last_post_date")
+	summary      = c.Concat(
+		"User: ", fname, " ", lname, " | ",
+		"Role: ", role, " | ",
+		"Posts: ", posts, " | ",
+		"Comments: ", comments, " | ",
+		"Last login: ", lastLog, " | ",
+		status,
+	).As("user_summary")
+)
+
+// statement building
+q.Select(summary, totalPost, totalComment, lastPost)
+
+q.Join("user_roles").Left().On(interUserFk).Equal(userId)
+q.Join("roles").Left().On(roleId).Equal(interRoleFk)
+q.Join("posts").Left().On(postUserFk).Equal(userId)
+q.Join("comments").Left().On(commentUserFk).Equal(userId)
+
+q.Where(age).Between(18, 60).And(active).Equal(true)
+
+q.GroupBy(userId, fname, lname, lastLogin, banned, roleName)
+q.Having(posts).Greater(5)
+
+q.OrderBy(totalPost).Desc()
+q.OrderBy(age)
+q.Limit(50)
+```
+
+SQL:
+
+```sql
+SELECT CONCAT(
+        'User: ', a.firstname, ' ', a.lastname, ' | ',
+        'Role: ', CASE WHEN (b.name IS NULL) THEN 'No role' ELSE b.name END, ' | ',
+        'Posts: ', COUNT(c.id), ' | ',
+        'Comments: ', COUNT(d.id), ' | ',
+        'Last login: ', CASE WHEN (a.last_login IS NULL) THEN 'Never' ELSE a.last_login END, ' | ',
+        CASE WHEN (a.banned IS NULL) THEN 'Active' ELSE CONCAT('Banned at: ', a.banned) END
+    ) AS user_summary,
+    COUNT(DISTINCT c.id) AS total_posts,
+    COUNT(DISTINCT d.id) AS total_comments,
+    MAX(c.created_at) AS last_post_date
+FROM users a
+LEFT JOIN user_roles e ON (e.user_id = a.id)
+LEFT JOIN roles b ON (b.id = e.role_id)
+LEFT JOIN posts c ON (c.user_id = a.id)
+LEFT JOIN comments d ON (d.user_id = a.id)
+WHERE (a.age BETWEEN 18 AND 60 AND a.active = 1)
+GROUP BY a.id, a.firstname, a.lastname, a.last_login, a.banned, b.name
+HAVING (COUNT(c.id) > 5)
+ORDER BY total_posts DESC, a.age
+LIMIT 50;
+```
+
+</details>
+
+## Guides
 
 <details>
 <summary>Column builder</summary>
@@ -85,10 +199,10 @@ _, c := qe.NewSelect(ctx, "table")
 // ----- Col -----
 
 // Col is the most common method. It references a table column
-// and accepts two parameters: the first is the main table’s column name.
+// and accepts two parameters: the first is column name of the main table.
 c.Col("id")
 
-// To reference another table, pass a second parameter.
+// To reference another table, pass a second parameter with the table name.
 c.Col("id", "posts")
 
 // ----- All -----
@@ -97,21 +211,20 @@ c.Col("id", "posts")
 // In a joined query, the default All() references the main table.
 c.All()
 
-// To reference another table, pass a parameter.
+// To reference another table, pass a parameter with the table name.
 c.All("posts")
 
 // ----- Param -----
 
 // Param writes a placeholder.
-// In Inyorm you MUST write explicit parameters each time.
+// In Inyorm you should write explicit parameters (except in explicit values clause).
+// such as Insert().Values() and Update().Values()
 c.Param("id")
 
 // You can also skip parameters for lazy values, useful for prepared statements.
 c.Param()
 
 // ----- Concat -----
-
-// Now it's time for complex columns.
 
 // Concat writes a CONCAT() in SQL.
 // You can include any value.
