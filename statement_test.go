@@ -21,8 +21,6 @@ func run(t *testing.T, stmt any, exp string, vals []any) {
 	if !reflect.DeepEqual(values, vals) {
 		t.Errorf("mismatch values:\nExpect:\n%#v\nHave:\n%#v", vals, values)
 	}
-
-	t.Logf("STATEMENT %s: %s\n", t.Name(), query)
 }
 
 func TestSelect(t *testing.T) {
@@ -130,6 +128,100 @@ func TestSelect(t *testing.T) {
 		vals := []any{17, 30}
 
 		run(t, q, exp, vals)
+	})
+
+	t.Run("complex_with_helper", func(t *testing.T) {
+		q, c := qe.NewSelect(context.Background(), "users")
+
+		// helper
+		isNull := func(cond inyorm.Column, then, els any) inyorm.Column {
+			return c.Search(func(cs inyorm.Case) {
+				cond := c.Cond(cond).IsNull()
+				cs.When(cond).Then(then)
+				cs.Else(els)
+			})
+		}
+
+		var (
+			// base columns
+			fname     = c.Col("firstname")
+			lname     = c.Col("lastname")
+			lastLogin = c.Col("last_login")
+			banned    = c.Col("banned")
+			roleName  = c.Col("name", "roles")
+			age       = c.Col("age")
+			active    = c.Col("active")
+
+			// summary columns
+			posts    = c.Col("id", "posts").Count()
+			comments = c.Col("id", "comments").Count()
+			role     = isNull(roleName, "No role", roleName)
+			lastLog  = isNull(lastLogin, "Never", lastLogin)
+			status   = isNull(banned, "Active", c.Concat("Banned at: ", banned))
+
+			// join keys
+			userId        = c.Col("id")
+			roleId        = c.Col("id", "roles")
+			postUserFk    = c.Col("user_id", "posts")
+			commentUserFk = c.Col("user_id", "comments")
+
+			interUserFk = c.Col("user_id", "user_roles")
+			interRoleFk = c.Col("role_id", "user_roles")
+
+			// select columns
+			totalPost    = c.Col("id", "posts").Count(true).As("total_posts")
+			totalComment = c.Col("id", "comments").Count(true).As("total_comments")
+			lastPost     = c.Col("created_at", "posts").Max().As("last_post_date")
+			summary      = c.Concat(
+				"User: ", fname, " ", lname, " | ",
+				"Role: ", role, " | ",
+				"Posts: ", posts, " | ",
+				"Comments: ", comments, " | ",
+				"Last login: ", lastLog, " | ",
+				status,
+			).As("user_summary")
+		)
+
+		// statement building
+		q.Select(summary, totalPost, totalComment, lastPost)
+
+		q.Join("user_roles").Left().On(interUserFk).Equal(userId)
+		q.Join("roles").Left().On(roleId).Equal(interRoleFk)
+		q.Join("posts").Left().On(postUserFk).Equal(userId)
+		q.Join("comments").Left().On(commentUserFk).Equal(userId)
+
+		q.Where(age).Between(18, 60).And(active).Equal(true)
+
+		q.GroupBy(userId, fname, lname, lastLogin, banned, roleName)
+		q.Having(posts).Greater(5)
+
+		q.OrderBy(totalPost).Desc()
+		q.OrderBy(age)
+		q.Limit(50)
+
+		exp := "SELECT CONCAT("
+		exp += "'User: ', a.firstname, ' ', a.lastname, ' | ', "
+		exp += "'Role: ', CASE WHEN (b.name IS NULL) THEN 'No role' ELSE b.name END, ' | ', "
+		exp += "'Posts: ', COUNT(c.id), ' | ', "
+		exp += "'Comments: ', COUNT(d.id), ' | ', "
+		exp += "'Last login: ', CASE WHEN (a.last_login IS NULL) THEN 'Never' ELSE a.last_login END, ' | ', "
+		exp += "CASE WHEN (a.banned IS NULL) THEN 'Active' ELSE CONCAT('Banned at: ', a.banned) END"
+		exp += ") AS user_summary, "
+		exp += "COUNT(DISTINCT c.id) AS total_posts, "
+		exp += "COUNT(DISTINCT d.id) AS total_comments, "
+		exp += "MAX(c.created_at) AS last_post_date "
+		exp += "FROM users a "
+		exp += "LEFT JOIN user_roles e ON (e.user_id = a.id) "
+		exp += "LEFT JOIN roles b ON (b.id = e.role_id) "
+		exp += "LEFT JOIN posts c ON (c.user_id = a.id) "
+		exp += "LEFT JOIN comments d ON (d.user_id = a.id) "
+		exp += "WHERE (a.age BETWEEN 18 AND 60 AND a.active = 1) "
+		exp += "GROUP BY a.id, a.firstname, a.lastname, a.last_login, a.banned, b.name "
+		exp += "HAVING (COUNT(c.id) > 5) "
+		exp += "ORDER BY total_posts DESC, a.age "
+		exp += "LIMIT 50"
+
+		run(t, q, exp, nil)
 	})
 }
 
