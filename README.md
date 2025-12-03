@@ -32,14 +32,14 @@ import (
 )
 
 func main() {
+    ctx := context.Background()
+
     db, err := sql.Open("sqlite3", "./data.db")
     if err != nil {
         log.Fatal(err)
     }
 
     qe := inyorm.New("sqlite3", db, &inyorm.Options{})
-
-    ctx := context.Background()
 
     q, c := qe.NewSelect(ctx, "table")
     // q, c := qe.NewInsert(ctx, "table")
@@ -56,7 +56,7 @@ letting you write complex queries without falling back to raw SQL.
 ### Examples:
 
 <details>
-<summary>Simple example</summary>
+<summary>Simple</summary>
 
 ```go
 q, c := qe.NewSelect(ctx, "users")
@@ -80,13 +80,13 @@ SELECT a.*, COUNT(b.id)
 FROM users a
 INNER JOIN posts b ON (b.user_id = a.id)
 WHERE (a.id = ?)
-LIMIT 1
+LIMIT 1;
 ```
 
 </details>
 
 <details>
-<summary>Complex example</summary>
+<summary>Complex</summary>
 
 ```go
 q, c := qe.NewSelect(context.Background(), "users")
@@ -343,7 +343,7 @@ age.Def()   // COUNT(age) AS avg_age
 </details>
 
 <details>
-<summary>Select statement</summary>
+<summary>Select</summary>
 
 ```go
 // Start a new SELECT statement.
@@ -433,6 +433,62 @@ q.OrderBy(id)
 // Pass an integer to set the limit or offset.
 q.Limit(10)
 q.Offset(5)
+```
+
+</details>
+
+<details>
+<summary>Insert & Update</summary>
+
+```go
+
+// ----- Insert & Update -----
+
+// Both share the same logic.
+// I would use Insert() for the examples, but both are the same.
+
+type User struct {
+	Email    string `col:"account"`
+	Password string `col:"password"`
+	Age      int    `col:"age"`
+}
+
+// We have Insert() and Update(). Both share the same purpose, which is
+// to receive an example of which columns will be affected.
+// Both methods return another method, Values(),
+// where the real values are provided. You can ignore this method for prepared statements.
+q.Insert().Values()
+q.Update().Values()
+
+// For Insert/Update you can pass different values:
+
+// A struct – it will read the tags and use each one.
+// In this case, EACH field that has the correct tag will be read,
+// even if it doesn't have values.
+q.Insert(User{}).Values(User{
+	Email:    "example@email.com",
+	Password: "1234",
+	Age:      34,
+})
+
+// Columns –
+// Only the specified ones will be inserted/updated, even if the struct/map has more fields.
+// This is the best way to limit the columns.
+// In this case:
+// - password and age will be inserted/updated and email ignored.
+q.Insert(c.Col("password"), c.Col("age")).Values(User{
+	Email:    "example@email.com",
+	Password: "1234",
+	Age:      34,
+})
+
+// Map, in which EVERY key of the map will be one column.
+m := map[string]any{
+	"email":    "example@email.com",
+	"password": "1234",
+	"age":      34,
+}
+q.Insert(m).Values(m)
 ```
 
 </details>
