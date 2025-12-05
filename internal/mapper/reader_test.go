@@ -8,7 +8,7 @@ import (
 )
 
 func newTest(t *testing.T, reference, v any) func(rows int, cols []string, vals []any) {
-	cols, err := mapper.GetColumns("inyorm", reference)
+	cols, err := mapper.GetColumns("inyorm", []any{reference})
 	if err != nil {
 		t.Fatal(err)
 	}

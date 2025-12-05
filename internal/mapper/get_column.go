@@ -6,35 +6,42 @@ import (
 	"github.com/laacin/inyorm/internal/core"
 )
 
-func GetColumns(tag string, v any) ([]string, error) {
-	s := getSchema(tag, v)
-
+func GetColumns(tag string, vals []any) ([]string, error) {
 	var cols []string
-	switch s.Type {
 
-	case typeAny, typeColumn:
-		cols = colsFromCol(v, s.Ptr, s.Slc)
+	for _, v := range vals {
+		s := getSchema(tag, v)
 
-	case typeStruct:
-		cols = colsFromStruct(s.Index)
-
-	case typeMap:
 		if s.Slc {
 			return nil, ErrInvalidSchema
 		}
-		cols = colsFromMap(v, s.Ptr)
 
-	default:
-		return nil, ErrInvalidSchema
-	}
+		switch s.Type {
 
-	if len(cols) == 0 {
-		return nil, ErrNoColumns
-	}
+		case typeAny, typeColumn:
+			colsFromCol(&cols, v)
 
-	for _, col := range cols {
-		if col == "" || col == "*" {
-			return nil, ErrInvalidColumn
+		case typeStruct:
+			colsFromStruct(&cols, s.Index)
+
+		case typeMap:
+			if s.Slc {
+				return nil, ErrInvalidSchema
+			}
+			colsFromMap(&cols, v, s.Ptr)
+
+		default:
+			return nil, ErrInvalidSchema
+		}
+
+		if len(cols) == 0 {
+			return nil, ErrNoColumns
+		}
+
+		for _, col := range cols {
+			if col == "" || col == "*" {
+				return nil, ErrInvalidColumn
+			}
 		}
 	}
 
@@ -44,42 +51,19 @@ func GetColumns(tag string, v any) ([]string, error) {
 
 // -- internal
 
-func colsFromCol(v any, ptr, slc bool) []string {
-	if !slc {
-		if col, ok := v.(core.Column); ok {
-			return []string{col.RawBase()}
-		}
-		return nil
+func colsFromCol(cols *[]string, v any) {
+	if col, ok := v.(core.Column); ok {
+		*cols = append(*cols, col.RawBase())
 	}
-
-	var s []any
-	if ptr {
-		s = *v.(*[]any)
-	} else {
-		s = v.([]any)
-	}
-
-	cols := make([]string, len(s))
-	for i, elem := range s {
-		col, ok := elem.(core.Column)
-		if !ok {
-			continue
-		}
-		cols[i] = col.RawBase()
-	}
-
-	return cols
 }
 
-func colsFromStruct(fieldInfo []fieldInfo) []string {
-	cols := make([]string, len(fieldInfo))
-	for i, col := range fieldInfo {
-		cols[i] = col.name
+func colsFromStruct(cols *[]string, fieldInfo []fieldInfo) {
+	for _, col := range fieldInfo {
+		*cols = append(*cols, col.name)
 	}
-	return cols
 }
 
-func colsFromMap(v any, ptr bool) []string {
+func colsFromMap(cols *[]string, v any, ptr bool) {
 	var m map[string]any
 	if ptr {
 		m = *v.(*map[string]any)
@@ -87,10 +71,7 @@ func colsFromMap(v any, ptr bool) []string {
 		m = v.(map[string]any)
 	}
 
-	cols := make([]string, 0, len(m))
 	for k := range m {
-		cols = append(cols, k)
+		*cols = append(*cols, k)
 	}
-
-	return cols
 }

@@ -22,12 +22,7 @@ func (cls *InsertInto[Next]) Build(w core.Writer, cfg *core.Config) error {
 		return errors.New("missing reference")
 	}
 
-	ref := cls.reference[0]
-	if len(cls.reference) > 1 {
-		ref = cls.reference
-	}
-
-	cols, err := mapper.GetColumns(cfg.ColumnTag, ref)
+	cols, err := mapper.GetColumns(cfg.ColumnTag, cls.reference)
 	if err != nil {
 		return fmt.Errorf("failed to get columns: %w", err)
 	}
