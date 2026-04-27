@@ -79,7 +79,8 @@ const (
 	typeAny
 )
 
-var columnIface = reflect.TypeOf((*core.Column)(nil)).Elem()
+// var columnIface = reflect.TypeOf((*core.Column)(nil)).Elem()
+var columnIface = reflect.TypeFor[core.Column]()
 
 func whichIs(t reflect.Type) int {
 	knd := t.Kind()
@@ -132,9 +133,7 @@ type fieldInfo struct {
 
 func indexField(tag string, t reflect.Type) []fieldInfo {
 	var fields []fieldInfo
-	for i := range t.NumField() {
-		f := t.Field(i)
-
+	for f := range t.Fields() {
 		if f.Anonymous && f.Type.Kind() == reflect.Struct {
 			nested := indexField(tag, f.Type)
 			for _, nf := range nested {
