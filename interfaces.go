@@ -503,6 +503,10 @@ type Insert interface {
 	//
 	// Example SQL: INSERT INTO `table` (`columns`) VALUES (...)
 	Insert(reference ...Value) Values
+
+	// InsertIgnore behaves like Insert, but ignores specified columns from the reference.
+	//
+	// Useful when passing a struct with many fields and excluding some of them.
 	InsertIgnore(reference Value, ignores ...Value) Values
 }
 
@@ -518,6 +522,10 @@ type Update interface {
 	//
 	// Example SQL: UPDATE `table` SET `column` = ...
 	Update(reference ...Value) Values
+
+	// UpdateIgnore behaves like Update, but ignores specified columns from the reference.
+	//
+	// Useful when passing a struct with many fields and excluding some of them.
 	UpdateIgnore(reference Value, ignores ...Value) Values
 }
 
