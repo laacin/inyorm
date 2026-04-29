@@ -255,4 +255,21 @@ func TestInsert(t *testing.T) {
 		exp := "INSERT INTO users (account, active, age, country, extra, score) VALUES (?, ?, ?, ?, ?, ?)"
 		run(t, exp, []any{"acc1", true, 26, "AR", "X", 200})
 	})
+
+	t.Run("reference_with_ignore", func(t *testing.T) {
+		type Example struct {
+			Field1 string `col:"field1"`
+			Field2 string `col:"field2"`
+			Field3 string `col:"field3"`
+		}
+
+		cls, c, run := NewInsert("example")
+		cls.InsertIgnore(Example{}, c.Col("field3")).Values(Example{
+			Field1: "value1",
+			Field2: "value2",
+		})
+
+		exp := "INSERT INTO example (field1, field2) VALUES (?, ?)"
+		run(t, exp, []any{"value1", "value2"})
+	})
 }

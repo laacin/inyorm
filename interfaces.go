@@ -503,6 +503,7 @@ type Insert interface {
 	//
 	// Example SQL: INSERT INTO `table` (`columns`) VALUES (...)
 	Insert(reference ...Value) Values
+	InsertIgnore(reference Value, ignores ...Value) Values
 }
 
 // Update represents the UPDATE clause, defining data to update in a table.
@@ -517,6 +518,7 @@ type Update interface {
 	//
 	// Example SQL: UPDATE `table` SET `column` = ...
 	Update(reference ...Value) Values
+	UpdateIgnore(reference Value, ignores ...Value) Values
 }
 
 // Values represents the VALUES clause for INSERT or the assignment values for UPDATE.

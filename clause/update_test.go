@@ -80,4 +80,21 @@ func TestUpdate(t *testing.T) {
 		vals := []any{"US"}
 		run(t, exp, vals)
 	})
+
+	t.Run("reference_with_ignore", func(t *testing.T) {
+		type Example struct {
+			Field1 string `col:"field1"`
+			Field2 string `col:"field2"`
+			Field3 string `col:"field3"`
+		}
+
+		cls, c, run := NewUpdate("example")
+		cls.UpdateIgnore(Example{}, c.Col("field3")).Values(Example{
+			Field1: "value1",
+			Field2: "value2",
+		})
+
+		exp := "UPDATE example SET field1 = ?, field2 = ?"
+		run(t, exp, []any{"value1", "value2"})
+	})
 }

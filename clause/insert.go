@@ -3,6 +3,7 @@ package clause
 import (
 	"errors"
 	"fmt"
+	"slices"
 
 	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/mapper"
@@ -12,6 +13,7 @@ type InsertInto[Next any] struct {
 	declared  bool
 	table     string
 	reference []any
+	ignores   []any
 	values    any
 }
 
@@ -26,6 +28,15 @@ func (cls *InsertInto[Next]) Build(w core.Writer, cfg *core.Config) error {
 	if err != nil {
 		return fmt.Errorf("failed to get columns: %w", err)
 	}
+
+	ignores, err := mapper.GetColumns(cfg.ColumnTag, cls.ignores)
+	if err != nil {
+		return fmt.Errorf("failed to get columns: %w", err)
+	}
+
+	cols = slices.DeleteFunc(cols, func(col string) bool {
+		return slices.Contains(ignores, col)
+	})
 
 	var result *mapper.ReadResult
 	if cls.values != nil {
@@ -92,6 +103,13 @@ func (cls *InsertInto[Next]) Build(w core.Writer, cfg *core.Config) error {
 func (cls *InsertInto[Next]) Insert(reference ...any) Next {
 	cls.declared = true
 	cls.reference = reference
+	return any(cls).(Next)
+}
+
+func (cls *InsertInto[Next]) InsertIgnore(reference any, ignores ...any) Next {
+	cls.declared = true
+	cls.reference = []any{reference}
+	cls.ignores = ignores
 	return any(cls).(Next)
 }
 
