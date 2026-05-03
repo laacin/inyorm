@@ -4,8 +4,10 @@ package dialect
 type ClauseName int
 
 const (
+	ClauseNameNone ClauseName = iota
+
 	// Insert Statement
-	ClauseNameInsertInto ClauseName = iota
+	ClauseNameInsertInto
 
 	// Select Statement
 	ClauseNameSelect
@@ -35,25 +37,6 @@ const (
 	JoinFull
 	JoinCross
 )
-
-// Writing configuration
-type ClauseWritingConfig struct {
-	InsertInto WritingMode
-
-	Select  WritingMode
-	From    WritingMode
-	Join    WritingMode
-	Where   WritingMode
-	GroupBy WritingMode
-	Having  WritingMode
-	OrderBy WritingMode
-	Limit   WritingMode
-	Offset  WritingMode
-
-	Update WritingMode
-
-	Delete WritingMode
-}
 
 // ----- Clause building tools
 
