@@ -1,8 +1,10 @@
 package dialect
 
+// --- Main Dialect interface
 type Dialect interface {
-	ValueWriter
-	ColumnWriter
+	ValueBuilder
+	ColumnBuilder
+	ClauseBuilder
 }
 
 // Writer used by dialect
@@ -18,7 +20,7 @@ type Writer interface {
 }
 
 // Dialect essentials
-type ValueWriter interface {
+type ValueBuilder interface {
 	String(Writer, string)
 	Number(Writer, int)
 	Float(Writer, float64)
@@ -29,7 +31,7 @@ type ValueWriter interface {
 	Cond(Writer, Cond) // must be wrapped
 }
 
-type ColumnWriter interface {
+type ColumnBuilder interface {
 	Table(w Writer, table Table, def bool)
 	ColDef(Writer, Column)
 	ColAlias(Writer, Column)
@@ -37,7 +39,7 @@ type ColumnWriter interface {
 	ColBase(Writer, Column)
 }
 
-type ClauseWriter interface {
+type ClauseBuilder interface {
 	ClsInsertInto(Writer, InsertIntoTools)
 
 	ClsSelect(Writer, SelectTools)
