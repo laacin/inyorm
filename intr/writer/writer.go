@@ -15,7 +15,7 @@ type Writer struct {
 	ColumnWritingModes dialect.ClauseWritingConfig
 	TableWritingModes  dialect.ClauseWritingConfig
 	dial               Dialect
-	ph                 *Placeholder
+	params             *ParamStore
 }
 
 func (w *Writer) Write(str string) {
@@ -29,38 +29,38 @@ func (w *Writer) Char(char byte) {
 func (w *Writer) Value(v any, ctx dialect.ClauseName) {
 	switch v := Normalize(v).(type) {
 	case dialect.Param:
-		w.ph.Store(v)
-		w.sb.WriteString(w.dial.Param(w.ph.GetCount()))
+		w.params.Store(v)
+		w.dial.Placeholder(w, w.params.GetCount())
 
 	case dialect.Table:
 		isDef := obtainWriteMode(ctx, &w.TableWritingModes) == dialect.WriteDef
-		w.sb.WriteString(w.dial.Table(v, isDef))
+		w.dial.Table(w, v, isDef)
 
 	case dialect.Column:
 		switch obtainWriteMode(ctx, &w.ColumnWritingModes) {
 		case dialect.WriteBase:
-			w.sb.WriteString(w.dial.ColBase(v))
+			w.dial.ColBase(w, v)
 		case dialect.WriteExpr:
-			w.sb.WriteString(w.dial.ColExpr(v))
+			w.dial.ColExpr(w, v)
 		case dialect.WriteAlias:
-			w.sb.WriteString(w.dial.ColAlias(v))
+			w.dial.ColAlias(w, v)
 		case dialect.WriteDef:
-			w.sb.WriteString(w.dial.ColDef(v))
+			w.dial.ColDef(w, v)
 		default:
-			w.sb.WriteString(w.dial.Null())
+			w.dial.Null(w)
 		}
 
 	case string:
-		w.sb.WriteString(w.dial.String(v))
+		w.dial.String(w, v)
 
 	case int:
-		w.sb.WriteString(w.dial.Number(v))
+		w.dial.Number(w, v)
 
 	case bool:
-		w.sb.WriteString(w.dial.Bool(v))
+		w.dial.Bool(w, v)
 
 	default:
-		w.sb.WriteString(w.dial.Null())
+		w.dial.Null(w)
 	}
 }
 

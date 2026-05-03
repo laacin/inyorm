@@ -9,19 +9,19 @@ type Writer interface {
 
 // Writer escentials
 type ValueWriter interface {
-	String(string) string
-	Number(int) string
-	Float(float64) string
-	Bool(bool) string
-	Null() string
-	Param(num int) string
+	String(Writer, string)
+	Number(Writer, int)
+	Float(Writer, float64)
+	Bool(Writer, bool)
+	Null(Writer)
+	Placeholder(w Writer, num int)
 
-	Table(table Table, def bool) string
+	Table(w Writer, table Table, def bool)
 
-	ColDef(Column) string
-	ColAlias(Column) string
-	ColExpr(Column) string
-	ColBase(Column) string
+	ColDef(Writer, Column)
+	ColAlias(Writer, Column)
+	ColExpr(Writer, Column)
+	ColBase(Writer, Column)
 
-	Cond(Cond) string // must be wrapped
+	Cond(Writer, Cond) // must be wrapped
 }
