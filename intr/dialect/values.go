@@ -65,7 +65,7 @@ type Table struct {
 
 type Column struct {
 	Name  string // Column base name
-	Ref   string // Table reference
+	Ref   *byte  // Table reference
 	Alias string // Explicit alias
 	Value string // Column expression
 }

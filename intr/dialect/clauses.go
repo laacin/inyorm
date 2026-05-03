@@ -61,6 +61,11 @@ type JoinTools struct {
 	Cond  Cond
 } // Can be []JoinTools for multiple joins
 
+type WhereTools struct {
+	Identifier any
+	Conds      []Cond
+}
+
 type GroupByTools struct {
 	Values []any
 }
