@@ -6,15 +6,12 @@ import (
 	"github.com/laacin/inyorm/intr/dialect"
 )
 
-type Dialect interface {
-	dialect.ValueWriter
-}
-
 type Writer struct {
 	sb                 strings.Builder
-	ColumnWritingModes dialect.ClauseWritingConfig
-	TableWritingModes  dialect.ClauseWritingConfig
-	dial               Dialect
+	ColumnWritingModes dialect.WritingModeConfig
+	TableWritingModes  dialect.WritingModeConfig
+	aliases            *AliasStore
+	dial               dialect.Dialect
 	params             *ParamStore
 }
 
@@ -64,8 +61,20 @@ func (w *Writer) Value(v any, ctx dialect.ClauseName) {
 	}
 }
 
+func (w *Writer) GetTableRef(tbl string) (ref byte, shouldBeUsed bool) {
+	if w.aliases == nil {
+		return 'a', false
+	}
+
+	return w.aliases.Get(tbl), true
+}
+
 func (w *Writer) Result() string {
 	return w.sb.String()
+}
+
+func (w *Writer) Reset() {
+	w.sb.Reset()
 }
 
 // -- Helpers
