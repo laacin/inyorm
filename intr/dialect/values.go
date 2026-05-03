@@ -17,8 +17,7 @@ const (
 	ValueExpr
 )
 
-// --- SQL Types
+// --- Types
 
-type Param struct {
-	Value any // will be saved and write dialect parameter instead
-}
+// Param represents a value that will be stored and written as a dialect placeholder
+type Param struct{ Value any }

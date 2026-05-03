@@ -1,14 +1,11 @@
 package dialect
 
 // --- Main types
-type Table struct {
-	Name string // Table name
-	Ref  byte   // Alias reference (Table ref)
-}
+type Table struct{ Name string }
 
 type Column struct {
 	Name  string // Column base name
-	Ref   *byte  // Table reference
+	Table string // Table reference
 	Alias string // Explicit alias
 	Value string // Column expression
 }

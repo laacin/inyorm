@@ -14,6 +14,7 @@ type Writer interface {
 
 	// Writes any value based on clause context
 	Value(v any, ctx ClauseName)
+	GetTableRef(string) (ref byte, shouldBeUsed bool)
 
 	Result() string
 	Reset()
@@ -36,6 +37,7 @@ type ValueBuilder interface {
 
 type ColumnBuilder interface {
 	Table(Writer, Table, bool)
+
 	ColDef(Writer, Column)
 	ColAlias(Writer, Column)
 	ColExpr(Writer, Column)
