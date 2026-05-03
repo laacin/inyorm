@@ -58,12 +58,11 @@ type FromTools struct {
 type JoinTools struct {
 	Type  JoinType
 	Table string
-	Cond  Cond
+	Cond  *Cond
 } // Can be []JoinTools for multiple joins
 
 type WhereTools struct {
-	Identifier any
-	Conds      []Cond
+	Conds []Cond
 }
 
 type GroupByTools struct {

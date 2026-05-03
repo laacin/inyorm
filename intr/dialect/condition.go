@@ -24,6 +24,7 @@ type Expr struct {
 	Identifier any
 	Operator   ExprOperator
 	Values     []any
+	Closed     bool // Guard for incomplete expressions
 }
 
 type Cond struct {
