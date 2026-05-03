@@ -7,12 +7,12 @@ type Dialect interface {
 	ClauseBuilder
 }
 
-// Writer used by dialect
+// Writer used by a dialect
 type Writer interface {
 	Write(string)
 	Char(byte)
 
-	// Column(Column, WritingMode)
+	// Writes any value based on clause context
 	Value(v any, ctx ClauseName)
 
 	Result() string
@@ -27,12 +27,15 @@ type ValueBuilder interface {
 	Bool(Writer, bool)
 	Null(Writer)
 
-	Placeholder(w Writer, num int)
-	Cond(Writer, Cond) // must be wrapped
+	// Writes a placeholder based on position
+	Placeholder(Writer, int)
+
+	// Writes a condition (must be wrapped)
+	Cond(Writer, Cond)
 }
 
 type ColumnBuilder interface {
-	Table(w Writer, table Table, def bool)
+	Table(Writer, Table, bool)
 	ColDef(Writer, Column)
 	ColAlias(Writer, Column)
 	ColExpr(Writer, Column)
@@ -40,8 +43,10 @@ type ColumnBuilder interface {
 }
 
 type ClauseBuilder interface {
+	// Insert Statement
 	ClsInsertInto(Writer, InsertIntoTools)
 
+	// Select Statement
 	ClsSelect(Writer, SelectTools)
 	ClsFrom(Writer, FromTools)
 	ClsJoin(Writer, []JoinTools)
@@ -52,11 +57,14 @@ type ClauseBuilder interface {
 	ClsLimit(Writer, LimitTools)
 	ClsOffset(Writer, OffsetTools)
 
+	// Update Statement
 	ClsUpdate(Writer, UpdateTools)
-	ClsDelete(WhereTools, DeleteTools)
+
+	// Delete Statement
+	ClsDelete(Writer, DeleteTools)
 }
 
-// Writing Mode
+// Writing modes
 type WritingMode int
 
 const (
@@ -67,7 +75,7 @@ const (
 )
 
 type WritingModeConfig struct {
-	None WritingMode
+	Default WritingMode
 
 	InsertInto WritingMode
 
