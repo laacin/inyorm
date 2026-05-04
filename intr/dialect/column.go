@@ -4,10 +4,13 @@ package dialect
 type Table struct{ Name string }
 
 type Column struct {
-	Name  string // Column base name
-	Table string // Table reference
-	Alias string // Explicit alias
-	Value string // Column expression
+	Name    string // Column base name
+	Table   string // Table reference
+	Alias   string // Explicit alias
+	Value   string // Column expression
+	Complex WriterFunc
+	Exprs   []ColExpr
+	Aggr    *ColExpr
 }
 
 type ColKindExpr int
@@ -39,9 +42,9 @@ const (
 // --- Column essentials
 
 type ColExpr struct {
-	Current string
-	Kind    ColKindExpr
-	Value   any // exists if is required. otherwise is nil
+	// Current string
+	Kind  ColKindExpr
+	Value any // exists if is required. otherwise is nil
 }
 
 type CaseExpr struct {
@@ -52,8 +55,4 @@ type CaseExpr struct {
 type CaseCond struct {
 	Exprs []CaseExpr
 	Els   any
-}
-
-type ColumnEssentials interface {
-	EssColExpr(Writer, ColExpr) (string, error)
 }

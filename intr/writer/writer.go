@@ -25,7 +25,8 @@ func (w *Writer) Value(v any, mode dialect.WritingMode) {
 	switch v := Normalize(v).(type) {
 	case dialect.Param:
 		w.params.Store(v)
-		w.dial.Placeholder(w, w.params.GetCount())
+		ph := w.dial.Placeholder(w.params.GetCount())
+		w.Write(ph)
 
 	case dialect.Table:
 		w.dial.Table(w, v)
@@ -33,33 +34,41 @@ func (w *Writer) Value(v any, mode dialect.WritingMode) {
 	case dialect.Column:
 		switch mode {
 		case dialect.WriteBase:
-			w.dial.ColBase(w, v)
+			w.dial.ColWriteBase(w, v)
 
 		case dialect.WriteExpr:
-			w.dial.ColExpr(w, v)
+			w.dial.ColWriteExpr(w, v)
 
 		case dialect.WriteAlias:
-			w.dial.ColAlias(w, v)
+			w.dial.ColWriteAlias(w, v)
 
 		case dialect.WriteDef:
-			w.dial.ColDef(w, v)
+			w.dial.ColWriteDef(w, v)
 
 		default:
-			w.dial.ColExpr(w, v)
+			w.dial.ColWriteExpr(w, v)
 		}
 
 	case string:
-		w.dial.String(w, v)
+		r := w.dial.String(v)
+		w.Write(r)
 
 	case int:
-		w.dial.Number(w, v)
+		r := w.dial.Number(v)
+		w.Write(r)
 
 	case bool:
-		w.dial.Bool(w, v)
+		r := w.dial.Bool(v)
+		w.Write(r)
 
 	default:
-		w.dial.Null(w)
+		r := w.dial.Null()
+		w.Write(r)
 	}
+}
+
+func (w *Writer) New() dialect.Writer {
+	return &Writer{dial: w.dial}
 }
 
 func (w *Writer) GetTableRef(tbl string) (ref byte, shouldBeUsed bool) {

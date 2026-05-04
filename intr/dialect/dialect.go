@@ -16,9 +16,11 @@ type Writer interface {
 	Value(v any, mode WritingMode) // writing mode used if is required
 	GetTableRef(string) (ref byte, shouldBeUsed bool)
 
+	New() Writer
 	Result() string
 	Reset()
 }
+type WriterFunc = func(Writer)
 
 // Dialect essentials (Builders)
 type InternalBuilder interface {
@@ -27,30 +29,30 @@ type InternalBuilder interface {
 }
 
 type ValueBuilder interface {
-	String(Writer, string)
-	Number(Writer, int)
-	Float(Writer, float64)
-	Bool(Writer, bool)
-	Null(Writer)
+	String(string) string
+	Number(int) string
+	Float(float64) string
+	Bool(bool) string
+	Null() string
 
 	// Writes a placeholder based on position
-	Placeholder(Writer, int)
+	Placeholder(number int) string
+	Wildcard() string
 }
 
 type ColumnBuilder interface {
 	Table(Writer, Table)
 
 	// Writing modes
-	ColDef(Writer, Column)
-	ColAlias(Writer, Column)
-	ColExpr(Writer, Column)
-	ColBase(Writer, Column)
+	ColWriteDef(Writer, Column)
+	ColWriteAlias(Writer, Column)
+	ColWriteExpr(Writer, Column)
+	ColWriteBase(Writer, Column)
 
 	// Specials columns
-	ColWildcard(Writer, Table)
-	ColConcat(Writer, []any)
-	ColSwitch(w Writer, cond any, cas CaseCond)
-	ColSearch(Writer, CaseCond) // Case identifier must be a Cond
+	ColConcat([]any) WriterFunc
+	ColSwitch(cond any, cas CaseCond) WriterFunc
+	ColSearch(CaseCond) WriterFunc // Case identifier must be a Cond
 }
 
 type ClauseBuilder interface {
@@ -81,26 +83,6 @@ type WritingMode int
 const (
 	WriteDef WritingMode = iota
 	WriteBase
-	WriteAlias // Column only
-	WriteExpr  // Column only
+	WriteAlias
+	WriteExpr
 )
-
-type WritingModeConfig struct {
-	Default WritingMode
-
-	InsertInto WritingMode
-
-	Select  WritingMode
-	From    WritingMode
-	Join    WritingMode
-	Where   WritingMode
-	GroupBy WritingMode
-	Having  WritingMode
-	OrderBy WritingMode
-	Limit   WritingMode
-	Offset  WritingMode
-
-	Update WritingMode
-
-	Delete WritingMode
-}
