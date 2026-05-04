@@ -2,10 +2,11 @@ package standard
 
 import "github.com/laacin/inyorm/intr/dialect"
 
-func (dial *DialectStandard) Cond(w dialect.Writer, cond dialect.Cond, ctx dialect.ClauseName) {
+func (dial *DialectStandard) Cond(w dialect.Writer, cond dialect.Cond, mode dialect.WritingMode) {
 	w.Char('(')
 	for i, expr := range cond.Exprs {
 		if !expr.Closed {
+			// TODO: avoid only write '()'
 			continue
 		}
 
@@ -15,7 +16,7 @@ func (dial *DialectStandard) Cond(w dialect.Writer, cond dialect.Cond, ctx diale
 			w.Char(' ')
 		}
 
-		w.Value(expr.Identifier, ctx)
+		w.Value(expr.Identifier, mode)
 		w.Char(' ')
 		w.Write(getOp(expr.Operator, expr.Negated))
 
@@ -24,9 +25,9 @@ func (dial *DialectStandard) Cond(w dialect.Writer, cond dialect.Cond, ctx diale
 
 		case dialect.ExprBetween:
 			w.Char(' ')
-			w.Value(expr.Values[0], ctx)
+			w.Value(expr.Values[0], mode)
 			w.Write(" AND ")
-			w.Value(expr.Values[1], ctx)
+			w.Value(expr.Values[1], mode)
 
 		case dialect.ExprIn:
 			w.Char(' ')
@@ -36,13 +37,13 @@ func (dial *DialectStandard) Cond(w dialect.Writer, cond dialect.Cond, ctx diale
 				if i > 0 {
 					w.Write(", ")
 				}
-				w.Value(v, ctx)
+				w.Value(v, mode)
 			}
 			w.Char(')')
 
 		default:
 			w.Char(' ')
-			w.Value(expr.Values[0], ctx)
+			w.Value(expr.Values[0], mode)
 		}
 		w.Char(')')
 	}
