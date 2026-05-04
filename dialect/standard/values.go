@@ -1,38 +1,34 @@
 package standard
 
-import (
-	"strconv"
+import "strconv"
 
-	"github.com/laacin/inyorm/intr/dialect"
-)
-
-func (dial *DialectStandard) String(w dialect.Writer, v string) {
-	w.Write("'")
-	w.Write(v)
-	w.Write("'")
+func (dial *DialectStandard) String(v string) string {
+	return "'" + v + "'"
 }
 
-func (dial *DialectStandard) Number(w dialect.Writer, v int) {
-	w.Write(strconv.Itoa(v))
+func (dial *DialectStandard) Number(v int) string {
+	return strconv.Itoa(v)
 }
 
-func (dial *DialectStandard) Float(w dialect.Writer, v float64) {
-	r := strconv.FormatFloat(float64(v), 'f', -1, 32)
-	w.Write(r)
+func (dial *DialectStandard) Float(v float64) string {
+	return strconv.FormatFloat(float64(v), 'f', -1, 32)
 }
 
-func (dial *DialectStandard) Bool(w dialect.Writer, v bool) {
+func (dial *DialectStandard) Bool(v bool) string {
 	if v {
-		w.Char('1')
-	} else {
-		w.Char('0')
+		return "1"
 	}
+	return "0"
 }
 
-func (dial *DialectStandard) Null(w dialect.Writer) {
-	w.Write("NULL")
+func (dial *DialectStandard) Null() string {
+	return "NULL"
 }
 
-func (dial *DialectStandard) Placeholder(w dialect.Writer, num int) {
-	w.Char('?')
+func (dial *DialectStandard) Placeholder(number int) string {
+	return "?"
+}
+
+func (dial *DialectStandard) Wildcard() string {
+	return "*"
 }

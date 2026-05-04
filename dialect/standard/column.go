@@ -1,11 +1,6 @@
 package standard
 
-import (
-	"errors"
-
-	"github.com/laacin/inyorm/intr/dialect"
-	"github.com/laacin/inyorm/intr/writer"
-)
+import "github.com/laacin/inyorm/intr/dialect"
 
 func (dial *DialectStandard) Table(w dialect.Writer, tbl dialect.Table) {
 	w.Write(tbl.Name)
@@ -15,7 +10,7 @@ func (dial *DialectStandard) Table(w dialect.Writer, tbl dialect.Table) {
 	}
 }
 
-func (dial *DialectStandard) ColBase(w dialect.Writer, col dialect.Column) {
+func (dial *DialectStandard) ColWriteBase(w dialect.Writer, col dialect.Column) {
 	if col.Table != "" {
 		if ref, shouldBeUsed := w.GetTableRef(col.Table); shouldBeUsed {
 			w.Char(ref)
@@ -25,36 +20,42 @@ func (dial *DialectStandard) ColBase(w dialect.Writer, col dialect.Column) {
 	w.Write(col.Name)
 }
 
-func (dial *DialectStandard) ColExpr(w dialect.Writer, col dialect.Column) {
+func (dial *DialectStandard) ColWriteExpr(w dialect.Writer, col dialect.Column) {
+	dial.BuildCol(w.New(), &col)
+
 	if col.Value == "" {
-		dial.ColBase(w, col)
+		dial.ColWriteBase(w, col)
 		return
 	}
 
 	w.Write(col.Value)
 }
 
-func (dial *DialectStandard) ColAlias(w dialect.Writer, col dialect.Column) {
+func (dial *DialectStandard) ColWriteAlias(w dialect.Writer, col dialect.Column) {
+	dial.BuildCol(w.New(), &col)
+
 	if col.Alias != "" {
 		w.Write(col.Alias)
 		return
 	}
 
 	if col.Value != "" {
-		dial.ColExpr(w, col)
+		dial.ColWriteExpr(w, col)
 		return
 	}
 
-	dial.ColBase(w, col)
+	dial.ColWriteBase(w, col)
 }
 
-func (dial *DialectStandard) ColDef(w dialect.Writer, col dialect.Column) {
+func (dial *DialectStandard) ColWriteDef(w dialect.Writer, col dialect.Column) {
+	dial.BuildCol(w.New(), &col)
+
 	if col.Value == "" {
-		dial.ColBase(w, col)
+		dial.ColWriteBase(w, col)
 		return
 	}
 
-	dial.ColExpr(w, col)
+	dial.ColWriteExpr(w, col)
 	if col.Alias != "" {
 		w.Write(" AS ")
 		w.Write(col.Alias)
@@ -62,136 +63,121 @@ func (dial *DialectStandard) ColDef(w dialect.Writer, col dialect.Column) {
 }
 
 // -- Custom columns
-func (dial *DialectStandard) ColWildcard(w dialect.Writer, tbl dialect.Table) {
-	if tbl.Name != "" {
-		if ref, shouldBeUsed := w.GetTableRef(tbl.Name); shouldBeUsed {
-			w.Char(ref)
-			w.Char('.')
+func (dial *DialectStandard) ColConcat(values []any) dialect.WriterFunc {
+	return func(w dialect.Writer) {
+		w.Write("CONCAT")
+		w.Char('(')
+		for i, val := range values {
+			if i > 0 {
+				w.Write(", ")
+			}
+			w.Value(val, dialect.WriteExpr)
 		}
+		w.Char(')')
 	}
-	w.Char('*')
 }
 
-func (dial *DialectStandard) ColConcat(w dialect.Writer, values []any) {
-	w.Write("CONCAT")
-	w.Char('(')
-	for i, val := range values {
-		if i > 0 {
-			w.Write(", ")
-		}
-		w.Value(val, dialect.WriteExpr)
-	}
-	w.Char(')')
-}
-
-func (dial *DialectStandard) ColSwitch(w dialect.Writer, cond any, cas dialect.CaseCond) {
-	w.Write("CASE")
-	w.Char(' ')
-	w.Value(cond, dialect.WriteExpr)
-
-	for _, expr := range cas.Exprs {
-		w.Write(" WHEN ")
-		w.Value(expr.Identifier, dialect.WriteExpr)
-
-		w.Write(" THEN ")
-		w.Value(expr.Argument, dialect.WriteExpr)
+func (dial *DialectStandard) ColSwitch(cond any, cas dialect.CaseCond) dialect.WriterFunc {
+	return func(w dialect.Writer) {
+		w.Write("CASE")
 		w.Char(' ')
-	}
+		w.Value(cond, dialect.WriteExpr)
 
-	if cas.Els != nil {
-		w.Write("ELSE")
-		w.Char(' ')
-		w.Value(cas.Els, dialect.WriteExpr)
-		w.Char(' ')
-	}
+		for _, expr := range cas.Exprs {
+			w.Write(" WHEN ")
+			w.Value(expr.Identifier, dialect.WriteExpr)
 
-	w.Write("END")
-}
-
-func (dial *DialectStandard) ColSearch(w dialect.Writer, cas dialect.CaseCond) {
-	w.Write("CASE WHEN")
-	w.Char(' ')
-
-	for _, arg := range cas.Exprs {
-		dial.Cond(w, arg.Identifier.(dialect.Cond), dialect.WriteExpr) // NOTE: fragile
-		w.Write(" THEN ")
-		w.Value(arg.Argument, dialect.WriteExpr)
-		w.Char(' ')
-	}
-
-	if cas.Els != nil {
-		w.Write("ELSE")
-		w.Char(' ')
-		w.Value(cas.Els, dialect.WriteExpr)
-		w.Char(' ')
-	}
-
-	w.Write("END")
-}
-
-// -- Essentials
-func (dial *DialectStandard) BuildColExpr(exprs []dialect.ColExpr) (string, error) {
-	w := writer.Writer{}
-
-	var (
-		current  string
-		lastAggr string
-	)
-
-	for _, expr := range exprs {
-		if aggr, exists := aggrMap[expr.Kind]; exists {
-			lastAggr = aggr
-			continue
+			w.Write(" THEN ")
+			w.Value(expr.Argument, dialect.WriteExpr)
+			w.Char(' ')
 		}
 
-		if scalar, exists := scalarMap[expr.Kind]; exists {
-			w.Write(scalar)
-			w.Char('(')
-			w.Write(expr.Current)
-			w.Char(')')
-
-			current = w.Result()
-			w.Reset()
-			continue
+		if cas.Els != nil {
+			w.Write("ELSE")
+			w.Char(' ')
+			w.Value(cas.Els, dialect.WriteExpr)
+			w.Char(' ')
 		}
 
-		if op, exists := arithMap[expr.Kind]; exists {
-			if expr.Value == nil {
-				return "", errors.New("arithmetical operation with nil value")
+		w.Write("END")
+	}
+}
+
+func (dial *DialectStandard) ColSearch(cas dialect.CaseCond) dialect.WriterFunc {
+	return func(w dialect.Writer) {
+		w.Write("CASE WHEN")
+		w.Char(' ')
+
+		for _, arg := range cas.Exprs {
+			dial.Cond(w, arg.Identifier.(dialect.Cond), dialect.WriteExpr) // NOTE: fragile
+			w.Write(" THEN ")
+			w.Value(arg.Argument, dialect.WriteExpr)
+			w.Char(' ')
+		}
+
+		if cas.Els != nil {
+			w.Write("ELSE")
+			w.Char(' ')
+			w.Value(cas.Els, dialect.WriteExpr)
+			w.Char(' ')
+		}
+
+		w.Write("END")
+	}
+}
+
+// --- Helpers
+func (dial *DialectStandard) BuildCol(w dialect.Writer, col *dialect.Column) {
+	if (col == nil) || (col.Exprs == nil && col.Aggr == nil && col.Complex == nil) {
+		return
+	}
+
+	if col.Exprs != nil || col.Aggr != nil {
+		func() {
+			if col.Complex == nil && col.Value == "" {
+				dial.ColWriteBase(w, *col)
+				return
 			}
 
-			w.Write(expr.Current)
-			w.Char(' ')
-			w.Char(op)
-			w.Value(expr.Value, dialect.WriteExpr)
+			if col.Value != "" {
+				w.Write(col.Value)
+				return
+			}
 
-			current = w.Result()
-			w.Reset()
-			continue
-		}
-
-		if expr.Kind == dialect.ColArithWrap {
-			w.Char('(')
-			w.Write(expr.Current)
-			w.Char(')')
-
-			current = w.Result()
-			w.Reset()
-			continue
-		}
-
-		return "", errors.New("unknown column expression kind")
+			if col.Complex != nil {
+				col.Complex(w)
+			}
+		}()
 	}
 
-	if lastAggr != "" {
-		w.Write(lastAggr)
-		w.Char('(')
-		w.Write(current)
-		w.Char(')')
+	if col.Exprs != nil {
+		for _, expr := range col.Exprs {
+			if scalar, ok := scalarMap[expr.Kind]; ok {
+				wScalar(scalar)(w)
+				continue
+			}
 
-		return w.Result(), nil
+			if arith, ok := arithMap[expr.Kind]; ok {
+				wArith(arith, expr.Value)(w)
+				continue
+			}
+
+			if expr.Kind == dialect.ColArithWrap {
+				wWrap()(w)
+				continue
+			}
+		}
+		col.Exprs = nil
 	}
-	return current, nil
+
+	if col.Aggr != nil {
+		if aggr, ok := aggrMap[col.Aggr.Kind]; ok {
+			wAggr(col.Aggr.Value, aggr)(w)
+		}
+		col.Aggr = nil
+	}
+
+	col.Value = w.Result()
 }
 
 // maps
@@ -217,4 +203,56 @@ var arithMap = map[dialect.ColKindExpr]byte{
 	dialect.ColArithMul: '*',
 	dialect.ColArithDiv: '/',
 	dialect.ColArithMod: '%',
+}
+
+func wArith(arg byte, value any) dialect.WriterFunc {
+	return func(w dialect.Writer) {
+		prev := w.Result()
+		w.Reset()
+
+		w.Write(prev)
+		w.Char(' ')
+		w.Char(arg)
+		w.Char(' ')
+		w.Value(value, dialect.WriteExpr)
+	}
+}
+
+func wScalar(arg string) dialect.WriterFunc {
+	return func(w dialect.Writer) {
+		prev := w.Result()
+		w.Reset()
+
+		w.Write(arg)
+		w.Char('(')
+		w.Write(prev)
+		w.Char(')')
+	}
+}
+
+func wWrap() dialect.WriterFunc {
+	return func(w dialect.Writer) {
+		prev := w.Result()
+		w.Reset()
+
+		w.Char('(')
+		w.Write(prev)
+		w.Char(')')
+	}
+}
+
+func wAggr(distinct any, aggr string) dialect.WriterFunc {
+	return func(w dialect.Writer) {
+		prev := w.Result()
+		w.Reset()
+
+		w.Write(aggr)
+		w.Char('(')
+		if _, ok := distinct.(bool); ok {
+			w.Write("DISTINCT")
+			w.Char(' ')
+		}
+		w.Write(prev)
+		w.Char(')')
+	}
 }
