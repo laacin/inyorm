@@ -63,6 +63,29 @@ func (dial *DialectStandard) ColDef(w dialect.Writer, col dialect.Column) {
 	}
 }
 
+// -- Custom columns
+func (dial *DialectStandard) Wildcard(w dialect.Writer, col dialect.Column) {
+	if col.Table != "" {
+		if ref, shouldBeUsed := w.GetTableRef(col.Table); shouldBeUsed {
+			w.Char(ref)
+			w.Char('.')
+		}
+	}
+	w.Char('*')
+}
+
+func (dial *DialectStandard) Concat(w dialect.Writer, values []any) {
+	w.Write("CONCAT")
+	w.Char('(')
+	for i, val := range values {
+		if i > 0 {
+			w.Write(", ")
+		}
+		w.Value(val, dialect.WriteExpr)
+	}
+	w.Char(')')
+}
+
 // -- Essentials
 func (dial *DialectStandard) BuildColExpr(exprs []dialect.ColExpr) (string, error) {
 	w := writer.Writer{}
@@ -126,6 +149,51 @@ func (dial *DialectStandard) BuildColExpr(exprs []dialect.ColExpr) (string, erro
 		return w.Result(), nil
 	}
 	return current, nil
+}
+
+func (dial *DialectStandard) Switch(w dialect.Writer, cond any, cas *dialect.CaseCond) {
+	w.Write("CASE")
+	w.Char(' ')
+	w.Value(cond, dialect.WriteExpr)
+
+	for _, expr := range cas.Exprs {
+		w.Write(" WHEN ")
+		w.Value(expr.Identifier, dialect.WriteExpr)
+
+		w.Write(" THEN ")
+		w.Value(expr.Argument, dialect.WriteExpr)
+		w.Char(' ')
+	}
+
+	if cas.Els != nil {
+		w.Write("ELSE")
+		w.Char(' ')
+		w.Value(cas.Els, dialect.WriteExpr)
+		w.Char(' ')
+	}
+
+	w.Write("END")
+}
+
+func (dial *DialectStandard) Search(w dialect.Writer, cas dialect.CaseCond) {
+	w.Write("CASE WHEN")
+	w.Char(' ')
+
+	for _, arg := range cas.Exprs {
+		dial.Cond(w, arg.Identifier.(dialect.Cond), dialect.WriteExpr) // NOTE: fragile
+		w.Write(" THEN ")
+		w.Value(arg.Argument, dialect.WriteExpr)
+		w.Char(' ')
+	}
+
+	if cas.Els != nil {
+		w.Write("ELSE")
+		w.Char(' ')
+		w.Value(cas.Els, dialect.WriteExpr)
+		w.Char(' ')
+	}
+
+	w.Write("END")
 }
 
 // maps
