@@ -6,7 +6,7 @@ func (dial *DialectStandard) ClsInsertInto(w dialect.Writer, tools dialect.Inser
 	w.Write("INSERT INTO")
 	w.Char(' ')
 
-	dial.Table(w, dialect.Table{Name: tools.Table}, false)
+	w.Write(tools.Table)
 	w.Char(' ')
 
 	w.Char('(')
@@ -14,7 +14,7 @@ func (dial *DialectStandard) ClsInsertInto(w dialect.Writer, tools dialect.Inser
 		if i > 0 {
 			w.Write(", ")
 		}
-		dial.ColBase(w, dialect.Column{Name: col, Table: tools.Table})
+		w.Write(col)
 	}
 	w.Char(')')
 
@@ -48,7 +48,7 @@ func (dial *DialectStandard) ClsSelect(w dialect.Writer, tools dialect.SelectToo
 		if i > 0 {
 			w.Write(", ")
 		}
-		w.Value(val, dialect.ClauseNameSelect)
+		w.Value(val, dialect.WriteDef)
 	}
 }
 
@@ -84,7 +84,7 @@ func (dial *DialectStandard) ClsJoin(w dialect.Writer, tools []dialect.JoinTools
 
 		if join.Cond != nil {
 			w.Write(" ON ")
-			dial.Cond(w, *join.Cond, dialect.ClauseNameJoin)
+			dial.Cond(w, *join.Cond, dialect.WriteBase)
 		}
 	}
 }
@@ -97,7 +97,7 @@ func (dial *DialectStandard) ClsWhere(w dialect.Writer, tools dialect.WhereTools
 		if i > 0 {
 			w.Write(" AND ")
 		}
-		dial.Cond(w, cond, dialect.ClauseNameWhere)
+		dial.Cond(w, cond, dialect.WriteExpr)
 	}
 }
 
@@ -109,14 +109,14 @@ func (dial *DialectStandard) ClsGroupBy(w dialect.Writer, tools dialect.GroupByT
 		if i > 0 {
 			w.Write(", ")
 		}
-		w.Value(group, dialect.ClauseNameGroupBy)
+		w.Value(group, dialect.WriteExpr)
 	}
 }
 
 func (dial *DialectStandard) ClsHaving(w dialect.Writer, tools dialect.HavingTools) {
 	w.Write("HAVING")
 	w.Char(' ')
-	dial.Cond(w, tools.Cond, dialect.ClauseNameHaving)
+	dial.Cond(w, tools.Cond, dialect.WriteExpr)
 }
 
 func (dial *DialectStandard) ClsOrderBy(w dialect.Writer, tools []dialect.OrderByTools) {
@@ -128,7 +128,7 @@ func (dial *DialectStandard) ClsOrderBy(w dialect.Writer, tools []dialect.OrderB
 			w.Write(", ")
 		}
 
-		w.Value(ord.Value, dialect.ClauseNameOrderBy)
+		w.Value(ord.Value, dialect.WriteAlias)
 		if ord.Descending {
 			w.Char(' ')
 			w.Write("DESC")
@@ -139,20 +139,20 @@ func (dial *DialectStandard) ClsOrderBy(w dialect.Writer, tools []dialect.OrderB
 func (dial *DialectStandard) ClsLimit(w dialect.Writer, tools dialect.LimitTools) {
 	w.Write("LIMIT")
 	w.Char(' ')
-	w.Value(tools.ValueNumber, dialect.ClauseNameLimit)
+	w.Value(tools.ValueNumber, dialect.WriteBase)
 }
 
 func (dial *DialectStandard) ClsOffset(w dialect.Writer, tools dialect.OffsetTools) {
 	w.Write("OFFSET")
 	w.Char(' ')
-	w.Value(tools.ValueNumber, dialect.ClauseNameOffset)
+	w.Value(tools.ValueNumber, dialect.WriteBase)
 }
 
 func (dial *DialectStandard) ClsUpdate(w dialect.Writer, tools dialect.UpdateTools) {
 	w.Write("UPDATE")
 	w.Char(' ')
 
-	dial.Table(w, dialect.Table{Name: tools.Table}, false)
+	w.Write(tools.Table)
 	w.Write(" SET ")
 
 	for i, col := range tools.Columns {
@@ -160,7 +160,7 @@ func (dial *DialectStandard) ClsUpdate(w dialect.Writer, tools dialect.UpdateToo
 			w.Write(", ")
 		}
 
-		dial.ColBase(w, dialect.Column{Name: col, Table: tools.Table})
+		w.Write(col)
 		w.Write(" = ")
 		w.Char('?')
 	}
