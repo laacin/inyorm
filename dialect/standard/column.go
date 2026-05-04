@@ -7,13 +7,11 @@ import (
 	"github.com/laacin/inyorm/intr/writer"
 )
 
-func (dial *DialectStandard) Table(w dialect.Writer, tbl dialect.Table, def bool) {
+func (dial *DialectStandard) Table(w dialect.Writer, tbl dialect.Table) {
 	w.Write(tbl.Name)
-	if def {
-		if ref, shouldBeUsed := w.GetTableRef(tbl.Name); shouldBeUsed {
-			w.Char(' ')
-			w.Char(ref)
-		}
+	if ref, shouldBeUsed := w.GetTableRef(tbl.Name); shouldBeUsed {
+		w.Char(' ')
+		w.Char(ref)
 	}
 }
 
@@ -86,6 +84,51 @@ func (dial *DialectStandard) Concat(w dialect.Writer, values []any) {
 	w.Char(')')
 }
 
+func (dial *DialectStandard) Switch(w dialect.Writer, cond any, cas *dialect.CaseCond) {
+	w.Write("CASE")
+	w.Char(' ')
+	w.Value(cond, dialect.WriteExpr)
+
+	for _, expr := range cas.Exprs {
+		w.Write(" WHEN ")
+		w.Value(expr.Identifier, dialect.WriteExpr)
+
+		w.Write(" THEN ")
+		w.Value(expr.Argument, dialect.WriteExpr)
+		w.Char(' ')
+	}
+
+	if cas.Els != nil {
+		w.Write("ELSE")
+		w.Char(' ')
+		w.Value(cas.Els, dialect.WriteExpr)
+		w.Char(' ')
+	}
+
+	w.Write("END")
+}
+
+func (dial *DialectStandard) Search(w dialect.Writer, cas dialect.CaseCond) {
+	w.Write("CASE WHEN")
+	w.Char(' ')
+
+	for _, arg := range cas.Exprs {
+		dial.Cond(w, arg.Identifier.(dialect.Cond), dialect.WriteExpr) // NOTE: fragile
+		w.Write(" THEN ")
+		w.Value(arg.Argument, dialect.WriteExpr)
+		w.Char(' ')
+	}
+
+	if cas.Els != nil {
+		w.Write("ELSE")
+		w.Char(' ')
+		w.Value(cas.Els, dialect.WriteExpr)
+		w.Char(' ')
+	}
+
+	w.Write("END")
+}
+
 // -- Essentials
 func (dial *DialectStandard) BuildColExpr(exprs []dialect.ColExpr) (string, error) {
 	w := writer.Writer{}
@@ -149,51 +192,6 @@ func (dial *DialectStandard) BuildColExpr(exprs []dialect.ColExpr) (string, erro
 		return w.Result(), nil
 	}
 	return current, nil
-}
-
-func (dial *DialectStandard) Switch(w dialect.Writer, cond any, cas *dialect.CaseCond) {
-	w.Write("CASE")
-	w.Char(' ')
-	w.Value(cond, dialect.WriteExpr)
-
-	for _, expr := range cas.Exprs {
-		w.Write(" WHEN ")
-		w.Value(expr.Identifier, dialect.WriteExpr)
-
-		w.Write(" THEN ")
-		w.Value(expr.Argument, dialect.WriteExpr)
-		w.Char(' ')
-	}
-
-	if cas.Els != nil {
-		w.Write("ELSE")
-		w.Char(' ')
-		w.Value(cas.Els, dialect.WriteExpr)
-		w.Char(' ')
-	}
-
-	w.Write("END")
-}
-
-func (dial *DialectStandard) Search(w dialect.Writer, cas dialect.CaseCond) {
-	w.Write("CASE WHEN")
-	w.Char(' ')
-
-	for _, arg := range cas.Exprs {
-		dial.Cond(w, arg.Identifier.(dialect.Cond), dialect.WriteExpr) // NOTE: fragile
-		w.Write(" THEN ")
-		w.Value(arg.Argument, dialect.WriteExpr)
-		w.Char(' ')
-	}
-
-	if cas.Els != nil {
-		w.Write("ELSE")
-		w.Char(' ')
-		w.Value(cas.Els, dialect.WriteExpr)
-		w.Char(' ')
-	}
-
-	w.Write("END")
 }
 
 // maps
