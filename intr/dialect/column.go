@@ -44,6 +44,16 @@ type ColExpr struct {
 	Value   any // exists if is required. otherwise is nil
 }
 
+type CaseExpr struct {
+	Identifier any
+	Argument   any
+}
+
+type CaseCond struct {
+	Exprs []CaseExpr
+	Els   any
+}
+
 type ColumnEssentials interface {
-	BuildColExpr(Writer, ColExpr) (string, error)
+	EssColExpr(Writer, ColExpr) (string, error)
 }

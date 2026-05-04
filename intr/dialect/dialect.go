@@ -13,14 +13,19 @@ type Writer interface {
 	Char(byte)
 
 	// Writes any value based on clause context
-	Value(v any, ctx ClauseName)
+	Value(v any, mode WritingMode) // writing mode used if is required
 	GetTableRef(string) (ref byte, shouldBeUsed bool)
 
 	Result() string
 	Reset()
 }
 
-// Dialect essentials
+// Dialect essentials (Builders)
+type InternalBuilder interface {
+	// Writes a condition (must be wrapped)
+	Cond(Writer, Cond)
+}
+
 type ValueBuilder interface {
 	String(Writer, string)
 	Number(Writer, int)
@@ -30,18 +35,22 @@ type ValueBuilder interface {
 
 	// Writes a placeholder based on position
 	Placeholder(Writer, int)
-
-	// Writes a condition (must be wrapped)
-	Cond(Writer, Cond)
 }
 
 type ColumnBuilder interface {
-	Table(Writer, Table, bool)
+	Table(Writer, Table)
 
+	// Writing modes
 	ColDef(Writer, Column)
 	ColAlias(Writer, Column)
 	ColExpr(Writer, Column)
 	ColBase(Writer, Column)
+
+	// Specials columns
+	ColWildcard(Writer, Table)
+	ColConcat(Writer, []any)
+	ColSwitch(w Writer, cond any, cas CaseCond)
+	ColSearch(Writer, CaseCond) // Case identifier must be a Cond
 }
 
 type ClauseBuilder interface {

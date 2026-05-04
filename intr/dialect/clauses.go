@@ -4,10 +4,8 @@ package dialect
 type ClauseName int
 
 const (
-	ClauseNameNone ClauseName = iota
-
 	// Insert Statement
-	ClauseNameInsertInto
+	ClauseNameInsertInto ClauseName = iota
 
 	// Select Statement
 	ClauseNameSelect
