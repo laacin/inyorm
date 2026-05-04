@@ -80,7 +80,7 @@ func (dial *DialectStandard) ClsJoin(w dialect.Writer, tools []dialect.JoinTools
 
 		w.Write(joinTypeMap[join.Type]) // NOTE: could be fragile
 		w.Write(" JOIN ")
-		dial.Table(w, dialect.Table{Name: join.Table}, true)
+		dial.Table(w, dialect.Table{Name: join.Table})
 
 		if join.Cond != nil {
 			w.Write(" ON ")

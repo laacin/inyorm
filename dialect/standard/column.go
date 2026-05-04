@@ -62,9 +62,9 @@ func (dial *DialectStandard) ColDef(w dialect.Writer, col dialect.Column) {
 }
 
 // -- Custom columns
-func (dial *DialectStandard) Wildcard(w dialect.Writer, col dialect.Column) {
-	if col.Table != "" {
-		if ref, shouldBeUsed := w.GetTableRef(col.Table); shouldBeUsed {
+func (dial *DialectStandard) ColWildcard(w dialect.Writer, tbl dialect.Table) {
+	if tbl.Name != "" {
+		if ref, shouldBeUsed := w.GetTableRef(tbl.Name); shouldBeUsed {
 			w.Char(ref)
 			w.Char('.')
 		}
@@ -72,7 +72,7 @@ func (dial *DialectStandard) Wildcard(w dialect.Writer, col dialect.Column) {
 	w.Char('*')
 }
 
-func (dial *DialectStandard) Concat(w dialect.Writer, values []any) {
+func (dial *DialectStandard) ColConcat(w dialect.Writer, values []any) {
 	w.Write("CONCAT")
 	w.Char('(')
 	for i, val := range values {
@@ -84,7 +84,7 @@ func (dial *DialectStandard) Concat(w dialect.Writer, values []any) {
 	w.Char(')')
 }
 
-func (dial *DialectStandard) Switch(w dialect.Writer, cond any, cas *dialect.CaseCond) {
+func (dial *DialectStandard) ColSwitch(w dialect.Writer, cond any, cas dialect.CaseCond) {
 	w.Write("CASE")
 	w.Char(' ')
 	w.Value(cond, dialect.WriteExpr)
@@ -108,7 +108,7 @@ func (dial *DialectStandard) Switch(w dialect.Writer, cond any, cas *dialect.Cas
 	w.Write("END")
 }
 
-func (dial *DialectStandard) Search(w dialect.Writer, cas dialect.CaseCond) {
+func (dial *DialectStandard) ColSearch(w dialect.Writer, cas dialect.CaseCond) {
 	w.Write("CASE WHEN")
 	w.Char(' ')
 
@@ -163,7 +163,7 @@ func (dial *DialectStandard) BuildColExpr(exprs []dialect.ColExpr) (string, erro
 			w.Write(expr.Current)
 			w.Char(' ')
 			w.Char(op)
-			w.Value(expr.Value, dialect.ClauseNameNone)
+			w.Value(expr.Value, dialect.WriteExpr)
 
 			current = w.Result()
 			w.Reset()
