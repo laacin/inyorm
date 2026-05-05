@@ -1,19 +1,21 @@
 package entity
 
 type (
-	String string
-	Number int
-	Float  float64
-	Bool   bool
-	Null   struct{}
+	String   string
+	Number   int
+	Float    float64
+	Bool     bool
+	Null     struct{}
+	Wildcard string
 )
 
 // Kinds
-func (String) Kind() ValueKind { return ValueString }
-func (Number) Kind() ValueKind { return ValueNumber }
-func (Float) Kind() ValueKind  { return ValueFloat }
-func (Bool) Kind() ValueKind   { return ValueBool }
-func (Null) Kind() ValueKind   { return ValueNull }
+func (String) Kind() ValueKind    { return ValueString }
+func (Number) Kind() ValueKind    { return ValueNumber }
+func (Float) Kind() ValueKind     { return ValueFloat }
+func (Bool) Kind() ValueKind      { return ValueBool }
+func (Null) Kind() ValueKind      { return ValueNull }
+func (*Wildcard) Kind() ValueKind { return ValueWildcard }
 
 // Writers
 func (v String) Write(w Writer, dial ValueWriter, mode WritingMode) {
@@ -30,4 +32,7 @@ func (v Bool) Write(w Writer, dial ValueWriter, mode WritingMode) {
 }
 func (Null) Write(w Writer, dial ValueWriter, mode WritingMode) {
 	dial.WriteNull(w)
+}
+func (v *Wildcard) Write(w Writer, dial ValueWriter, mode WritingMode) {
+	w.Write(dial.WriteWildcard())
 }

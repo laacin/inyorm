@@ -39,11 +39,10 @@ type ValueWriter interface {
 	WriteFloat(Writer, float64)
 	WriteBool(Writer, bool)
 	WriteNull(Writer)
-	WriteDate(Writer)
+	WriteWildcard() string
 
 	// Specials
 	WritePlaceholder(Writer)
-	WriteWildcard(Writer)
 	WriteConcat(Writer, *Concat)
 	WriteCondition(Writer, *Condition, WritingMode)
 	WriteCaseSwitch(Writer, *CaseSwitch, WritingMode)

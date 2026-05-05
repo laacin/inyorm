@@ -2,7 +2,6 @@ package entity
 
 type (
 	Parameter struct{ Value any }
-	Wildcard  struct{}
 	Condition struct {
 		Predicates []Predicate
 		Connectors []PredConnector
@@ -21,7 +20,6 @@ type (
 
 // Kinds
 func (*Parameter) Kind() ValueKind  { return ValueParameter }
-func (*Wildcard) Kind() ValueKind   { return ValueWildcard }
 func (*Condition) Kind() ValueKind  { return ValueCondition }
 func (*Concat) Kind() ValueKind     { return ValueConcat }
 func (*CaseSwitch) Kind() ValueKind { return ValueCaseSwitch }
@@ -30,9 +28,6 @@ func (*CaseSearch) Kind() ValueKind { return ValueCaseSearch }
 // Writers
 func (v *Parameter) Write(w Writer, dial ValueWriter, mode WritingMode) {
 	dial.WritePlaceholder(w)
-}
-func (v *Wildcard) Write(w Writer, dial ValueWriter, mode WritingMode) {
-	dial.WriteWildcard(w)
 }
 func (v *Condition) Write(w Writer, dial ValueWriter, mode WritingMode) {
 	dial.WriteCondition(w, v, mode)

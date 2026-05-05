@@ -6,10 +6,6 @@ func (dial *DialectStandard) WritePlaceholder(w entity.Writer) {
 	w.Char('?')
 }
 
-func (dial *DialectStandard) WriteWildcard(w entity.Writer) {
-	w.Char('*')
-}
-
 func (dial *DialectStandard) WriteCondition(w entity.Writer, cond *entity.Condition, mode entity.WritingMode) {
 	w.Char('(')
 	for i, pred := range cond.Predicates {

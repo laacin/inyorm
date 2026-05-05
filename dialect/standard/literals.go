@@ -35,3 +35,7 @@ func (dial *DialectStandard) WriteBool(w entity.Writer, v bool) {
 func (dial *DialectStandard) WriteNull(w entity.Writer) {
 	w.Write("NULL")
 }
+
+func (dial *DialectStandard) WriteWildcard() string {
+	return "*"
+}
