@@ -26,6 +26,12 @@ type Writer interface {
 
 type WriterFunc = func(Writer)
 
+// --- Dialect
+
+type Dialect interface {
+	ValueWriter
+}
+
 type ValueWriter interface {
 	// Literals
 	WriteString(Writer, string)
@@ -33,6 +39,7 @@ type ValueWriter interface {
 	WriteFloat(Writer, float64)
 	WriteBool(Writer, bool)
 	WriteNull(Writer)
+	WriteDate(Writer)
 
 	// Specials
 	WritePlaceholder(Writer)
