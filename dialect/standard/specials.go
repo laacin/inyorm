@@ -79,10 +79,10 @@ func (dial *DialectStandard) WriteCaseSwitch(w entity.Writer, cas *entity.CaseSw
 		w.Char(' ')
 	}
 
-	if cas.Else != nil {
+	if cas.Els != nil {
 		w.Write("ELSE")
 		w.Char(' ')
-		w.Value(cas.Else, entity.WriteExpr)
+		w.Value(cas.Els, entity.WriteExpr)
 		w.Char(' ')
 	}
 
@@ -100,10 +100,10 @@ func (dial *DialectStandard) WriteCaseSearch(w entity.Writer, cas *entity.CaseSe
 		w.Char(' ')
 	}
 
-	if cas.Else != nil {
+	if cas.Els != nil {
 		w.Write("ELSE")
 		w.Char(' ')
-		w.Value(cas.Else, entity.WriteExpr)
+		w.Value(cas.Els, entity.WriteExpr)
 		w.Char(' ')
 	}
 

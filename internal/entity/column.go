@@ -28,13 +28,6 @@ func (c *Column) Write(w Writer, dial ValueWriter, mode WritingMode) {
 }
 
 // --- Tools for building
-
-type ColumnEssentials interface {
-	FromConcat([]any) Column
-	FromSwitch(any, Case) Column
-	FromSearch(Case) Column
-}
-
 type ColKindExpr int
 
 const (

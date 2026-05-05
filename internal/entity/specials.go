@@ -10,11 +10,11 @@ type (
 	CaseSwitch struct {
 		Cond  any
 		Whens []CaseWhen
-		Else  any
+		Els   any
 	}
 	CaseSearch struct {
 		Whens []CaseWhen
-		Else  any
+		Els   any
 	}
 )
 
