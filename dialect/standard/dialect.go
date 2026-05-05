@@ -1,9 +1,9 @@
 package standard
 
-import "github.com/laacin/inyorm/intr/dialect"
+import "github.com/laacin/inyorm/internal/entity"
 
 type DialectStandard struct{}
 
-func LoadStandardDialect() dialect.Dialect {
+func LoadStandardDialect() entity.Dialect {
 	return &DialectStandard{}
 }

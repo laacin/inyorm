@@ -1,0 +1,53 @@
+package entity
+
+// Writing modes
+type WritingMode int
+
+const (
+	WriteDef WritingMode = iota
+	WriteBase
+	WriteAlias
+	WriteExpr
+)
+
+// Writer used by a dialect
+type Writer interface {
+	Write(string)
+	Char(byte)
+
+	Value(v any, mode WritingMode)
+	ValueCount() int
+	GetRef(table string) (byte, bool)
+
+	New() Writer
+	Result() string
+	Reset()
+}
+
+type WriterFunc = func(Writer)
+
+type ValueWriter interface {
+	// Literals
+	WriteString(Writer, string)
+	WriteNumber(Writer, int)
+	WriteFloat(Writer, float64)
+	WriteBool(Writer, bool)
+	WriteNull(Writer)
+
+	// Specials
+	WritePlaceholder(Writer)
+	WriteWildcard(Writer)
+	WriteConcat(Writer, *Concat)
+	WriteCondition(Writer, *Condition, WritingMode)
+	WriteCaseSwitch(Writer, *CaseSwitch, WritingMode)
+	WriteCaseSearch(Writer, *CaseSearch, WritingMode)
+
+	// Table
+	WriteTable(Writer, *Table)
+
+	// Column
+	WriteColBase(Writer, *Column)
+	WriteColExpr(Writer, *Column)
+	WriteColAlias(Writer, *Column)
+	WriteColDef(Writer, *Column)
+}

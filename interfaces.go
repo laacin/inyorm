@@ -43,6 +43,12 @@ type (
 // Provides builders for expressions, aliases, aggregates,
 // arithmetic operations, and transformations.
 type Column interface {
+	// Write(w dialect.Writer, dial dialect.Dialect, mode dialect.WritingMode)
+	// WriteBase(w dialect.Writer, dial dialect.Dialect)
+	// WriteAlias(w dialect.Writer, dial dialect.Dialect)
+	// WriteExpr(w dialect.Writer, dial dialect.Dialect)
+	// WriteDef(w dialect.Writer, dial dialect.Dialect)
+
 	// Def writes the definition of the column
 	//
 	// e.g: if we have this column being built: COUNT(id) AS count:
@@ -52,7 +58,7 @@ type Column interface {
 	//  - Base()  would write: id                  Fallbacks: none
 	//
 	// @SQL: used to build column definitions
-	Def() Builder
+	// Def() Builder
 
 	// Expr writes the expression of the column
 	//
@@ -61,7 +67,7 @@ type Column interface {
 	//  - Expr()  would write: COUNT(id);          Fallbacks: Base()
 	//  - Alias() would write: count;              Fallbacks: Expr() -> Base()
 	//  - Base()  would write: id                  Fallbacks: none
-	Expr() Builder
+	// Expr() Builder
 
 	// Alias writes the column alias
 	//
@@ -70,7 +76,7 @@ type Column interface {
 	//  - Expr()  would write: COUNT(id);          Fallbacks: Base()
 	//  - Alias() would write: count;              Fallbacks: Expr() -> Base()
 	//  - Base()  would write: id                  Fallbacks: none
-	Alias() Builder
+	// Alias() Builder
 
 	// Base writes the intrinsic value of the column
 	//
@@ -83,7 +89,7 @@ type Column interface {
 	//  - Expr()  would write: COUNT(id);          Fallbacks: Base()
 	//  - Alias() would write: count;              Fallbacks: Expr() -> Base()
 	//  - Base()  would write: id                  Fallbacks: none
-	Base() Builder
+	// Base() Builder
 
 	// Count writes COUNT(column) or COUNT(DISTINCT column)
 	//

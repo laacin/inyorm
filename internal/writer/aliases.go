@@ -6,12 +6,12 @@ var abc = [...]byte{
 	'u', 'v', 'w', 'x', 'y', 'z',
 }
 
-type Alias struct {
-	num  int
-	list map[string]byte
+type AliasStore struct {
+	count int
+	list  map[string]byte
 }
 
-func (a *Alias) Get(table string) byte {
+func (a *AliasStore) Get(table string) byte {
 	if a.list == nil {
 		a.list = make(map[string]byte)
 	}
@@ -20,8 +20,8 @@ func (a *Alias) Get(table string) byte {
 		return al
 	}
 
-	val := abc[a.num]
-	a.list[table] = val
-	a.num++
-	return val
+	alias := abc[a.count]
+	a.list[table] = alias
+	a.count++
+	return alias
 }

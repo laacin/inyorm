@@ -22,11 +22,3 @@ func (p *ParamStore) Validate() error {
 	}
 	return nil
 }
-
-func (p *ParamStore) GetCount() int {
-	return p.count
-}
-
-func (p *ParamStore) GetValues() []any {
-	return p.values
-}
