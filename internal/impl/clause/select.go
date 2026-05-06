@@ -18,12 +18,16 @@ func (c *SelectImpl[Next]) Select(values ...any) {
 	c.emb.Values = values
 }
 
-// --- Defer
+// --- Build
 
 func (c *SelectImpl[Next]) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *SelectImpl[Next]) Defer() entity.Clause {
+func (c *SelectImpl[Next]) Kind() entity.ClauseKind {
+	return entity.ClauseSelect
+}
+
+func (c *SelectImpl[Next]) Build() entity.Clause {
 	return &c.emb
 }

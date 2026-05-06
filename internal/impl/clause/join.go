@@ -46,19 +46,22 @@ func (c *JoinImpl[Next, End, Cond, CondNext]) On(ident any) Cond {
 	return cond.Start(ident)
 }
 
-// --- Deref
+// --- Build
 
 func (c *JoinImpl[Next, End, Cond, CondNext]) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *JoinImpl[Next, End, Cond, CondNext]) Defer() entity.Clause {
-	// Defer conditons
+func (c *JoinImpl[Next, End, Cond, CondNext]) Kind() entity.ClauseKind {
+	return entity.ClauseJoin
+}
+
+func (c *JoinImpl[Next, End, Cond, CondNext]) Build() entity.Clause {
 	for i, cond := range c.conds {
 		if cond == nil {
 			c.emb.Joins[i].Cond = nil
 		}
-		c.emb.Joins[i].Cond = cond.Deref().(*entity.Condition)
+		c.emb.Joins[i].Cond = cond.Build().(*entity.Condition)
 	}
 	return &c.emb
 }

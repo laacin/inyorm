@@ -12,12 +12,16 @@ func (c *FromImpl) From(from any) {
 	c.emb.Value = from
 }
 
-// --- Deref
+// --- Build
 
 func (c *FromImpl) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *FromImpl) Defer() entity.Clause {
+func (c *FromImpl) Kind() entity.ClauseKind {
+	return entity.ClauseFrom
+}
+
+func (c *FromImpl) Build() entity.Clause {
 	return &c.emb
 }

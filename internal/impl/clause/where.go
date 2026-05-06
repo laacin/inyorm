@@ -19,15 +19,19 @@ func (c *WhereImpl[Cond, CondNext]) Where(ident any) Cond {
 	return cond.Start(ident)
 }
 
-// --- Defer
+// --- Build
 
 func (c *WhereImpl[Cond, CondNext]) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *WhereImpl[Cond, CondNext]) Defer() entity.Clause {
+func (c *WhereImpl[Cond, CondNext]) Kind() entity.ClauseKind {
+	return entity.ClauseWhere
+}
+
+func (c *WhereImpl[Cond, CondNext]) Build() entity.Clause {
 	for _, cond := range c.conds {
-		c.emb.Conds = append(c.emb.Conds, *cond.Deref().(*entity.Condition))
+		c.emb.Conds = append(c.emb.Conds, *cond.Build().(*entity.Condition))
 	}
 
 	return &c.emb

@@ -72,7 +72,7 @@ func (c *ConditionImpl[Self, Next]) Or(ident any) Self {
 	return c.Start(ident)
 }
 
-// --- Deref
-func (c *ConditionImpl[Self, Next]) Deref() entity.Value {
+// --- Build
+func (c *ConditionImpl[Self, Next]) Build() entity.Value {
 	return &c.Condition
 }

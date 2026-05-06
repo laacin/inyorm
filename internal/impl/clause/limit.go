@@ -14,12 +14,16 @@ func (c *LimitImpl) Limit(value int) {
 	}
 }
 
-// --- Deref
+// --- Build
 
 func (c *LimitImpl) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *LimitImpl) Defer() entity.Clause {
+func (c *LimitImpl) Kind() entity.ClauseKind {
+	return entity.ClauseLimit
+}
+
+func (c *LimitImpl) Build() entity.Clause {
 	return &c.emb
 }

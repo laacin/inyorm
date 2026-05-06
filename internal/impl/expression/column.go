@@ -142,8 +142,8 @@ func (c *ColumnImpl[Self]) As(value string) Self {
 	return any(c).(Self)
 }
 
-// --- Deref
+// --- Build
 
-func (c *ColumnImpl[Self]) Deref() entity.Value {
+func (c *ColumnImpl[Self]) Build() entity.Value {
 	return &c.Column
 }

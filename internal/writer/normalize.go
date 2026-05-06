@@ -11,8 +11,8 @@ func Normalize(value any) entity.Value {
 		return v
 	}
 
-	if v, ok := any(value).(entity.ValueDefer); ok {
-		return v.Defer()
+	if v, ok := any(value).(entity.ValueBuilder); ok {
+		return v.Build()
 	}
 
 	switch v := value.(type) {

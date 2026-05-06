@@ -14,12 +14,16 @@ func (c *OffsetImpl) Offset(value int) {
 	}
 }
 
-// --- Deref
+// --- Build
 
 func (c *OffsetImpl) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *OffsetImpl) Defer() entity.Clause {
+func (c *OffsetImpl) Kind() entity.ClauseKind {
+	return entity.ClauseOffset
+}
+
+func (c *OffsetImpl) Build() entity.Clause {
 	return &c.emb
 }

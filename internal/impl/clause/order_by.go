@@ -21,13 +21,17 @@ func (c *OrderByImpl[Next]) Desc() {
 	c.current.Descending = true
 }
 
-// --- Deref
+// --- Build
 
 func (c *OrderByImpl[Next]) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *OrderByImpl[Next]) Defer() entity.Clause {
+func (c *OrderByImpl[Next]) Kind() entity.ClauseKind {
+	return entity.ClauseOrderBy
+}
+
+func (c *OrderByImpl[Next]) Build() entity.Clause {
 	c.emb.Orders = make([]entity.OrderSegment, len(c.segments))
 	for i, seg := range c.segments {
 		c.emb.Orders[i] = *seg

@@ -12,12 +12,16 @@ func (c *GroupByImpl) GroupBy(values ...any) {
 	c.emb.Values = values
 }
 
-// --- Defer
+// --- Build
 
 func (c *GroupByImpl) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *GroupByImpl) Defer() entity.Clause {
+func (c *GroupByImpl) Kind() entity.ClauseKind {
+	return entity.ClauseGroupBy
+}
+
+func (c *GroupByImpl) Build() entity.Clause {
 	return &c.emb
 }

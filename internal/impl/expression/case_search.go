@@ -22,7 +22,8 @@ func (c *CaseSearchImpl[Self, Next]) Else(els any) {
 	c.Els = els
 }
 
-// --- Deref
-func (c *CaseSearchImpl[Self, Next]) Deref() entity.Value {
+// --- Build
+
+func (c *CaseSearchImpl[Self, Next]) Build() entity.Value {
 	return &c.CaseSearch
 }

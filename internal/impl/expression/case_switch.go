@@ -27,7 +27,8 @@ func (c *CaseSwitchImpl[Self, Next]) Else(els any) {
 	c.Els = els
 }
 
-// --- Deref
-func (c *CaseSwitchImpl[Self, Next]) Deref() entity.Value {
+// --- Build
+
+func (c *CaseSwitchImpl[Self, Next]) Build() entity.Value {
 	return &c.CaseSwitch
 }

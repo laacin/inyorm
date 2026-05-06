@@ -17,13 +17,17 @@ func (c *HavingImpl[Cond, CondNext]) Having(ident any) Cond {
 	return c.cond.Start(ident)
 }
 
-// --- Defer
+// --- Build
 
 func (c *HavingImpl[Cond, CondNext]) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *HavingImpl[Cond, CondNext]) Defer() entity.Clause {
-	c.emb.Cond = *c.cond.Deref().(*entity.Condition)
+func (c *HavingImpl[Cond, CondNext]) Kind() entity.ClauseKind {
+	return entity.ClauseHaving
+}
+
+func (c *HavingImpl[Cond, CondNext]) Build() entity.Clause {
+	c.emb.Cond = *c.cond.Build().(*entity.Condition)
 	return &c.emb
 }

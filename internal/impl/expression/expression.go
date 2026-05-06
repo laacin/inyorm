@@ -54,7 +54,7 @@ func (expr *ExpressionImpl[
 	cs := &CaseSwitchImpl[CaseSwitch, CaseNext]{}
 	fn(any(cs.Start(cond)).(CaseSwitch))
 
-	col := entity.Column{From: cs.Deref()}
+	col := entity.Column{From: cs.Build()}
 	impl := ColumnImpl[Col]{Column: col}
 	return any(impl).(Col)
 }
@@ -65,7 +65,7 @@ func (expr *ExpressionImpl[
 	cs := &CaseSearchImpl[CaseSwitch, CaseNext]{}
 	fn(any(cs).(CaseSearch))
 
-	col := entity.Column{From: cs.Deref()}
+	col := entity.Column{From: cs.Build()}
 	impl := ColumnImpl[Col]{Column: col}
 	return any(impl).(Col)
 
