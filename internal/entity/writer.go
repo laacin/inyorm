@@ -31,6 +31,7 @@ type WriterFunc = func(Writer)
 type Dialect interface {
 	ValueWriter
 	ClauseWriter
+	StatementBuilder
 }
 
 type ValueWriter interface {
@@ -73,4 +74,11 @@ type ClauseWriter interface {
 	WriteInsertInto(Writer, *InsertInto)
 	WriteUpdate(Writer, *Update)
 	WriteDelete(Writer, *Delete)
+}
+
+type StatementBuilder interface {
+	SelectOrder() []ClauseKind
+	InsertOrder() []ClauseKind
+	UpdateOrder() []ClauseKind
+	DeleteOrder() []ClauseKind
 }
