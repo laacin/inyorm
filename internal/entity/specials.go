@@ -1,7 +1,10 @@
 package entity
 
 type (
-	Parameter struct{ Value any }
+	Parameter struct {
+		Value any
+		Store bool
+	}
 	Condition struct {
 		Predicates []Predicate
 		Connectors []PredConnector
