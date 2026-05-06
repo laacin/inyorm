@@ -57,12 +57,13 @@ type Clause interface {
 	Write(Writer, ClauseWriter)
 }
 
-// Wrapper implemetations must implements this
-type ValueDefer interface {
-	Defer() Value
+// Wrapper implementations must implement this
+type ValueBuilder interface {
+	Build() Value
 }
 
-type ClauseDefer interface {
+type ClauseBuilder interface {
 	IsDeclared() bool
-	Defer() Clause
+	Kind() ClauseKind
+	Build() Clause
 }
