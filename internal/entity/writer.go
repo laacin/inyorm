@@ -30,6 +30,7 @@ type WriterFunc = func(Writer)
 
 type Dialect interface {
 	ValueWriter
+	ClauseWriter
 }
 
 type ValueWriter interface {
