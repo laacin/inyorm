@@ -5,7 +5,7 @@ type Column struct {
 	Table string // Table reference
 	Alias string // Explicit alias
 	Value string // Column expression
-	From  WriterFunc
+	From  Value
 	Exprs []ColExpr
 	Aggr  *ColExpr
 }

@@ -39,7 +39,7 @@ type ValueWriter interface {
 	WriteFloat(Writer, float64)
 	WriteBool(Writer, bool)
 	WriteNull(Writer)
-	WriteWildcard() string
+	WriteWildcard(Writer)
 
 	// Specials
 	WritePlaceholder(Writer)

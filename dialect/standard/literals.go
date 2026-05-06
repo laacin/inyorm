@@ -36,6 +36,6 @@ func (dial *DialectStandard) WriteNull(w entity.Writer) {
 	w.Write("NULL")
 }
 
-func (dial *DialectStandard) WriteWildcard() string {
-	return "*"
+func (dial *DialectStandard) WriteWildcard(w entity.Writer) {
+	w.Char('*')
 }

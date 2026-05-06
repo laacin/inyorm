@@ -63,6 +63,8 @@ func (dial *DialectStandard) WriteColDef(w entity.Writer, col *entity.Column) {
 }
 
 // --- Helpers
+
+// FIX: illegible
 func (dial *DialectStandard) BuildCol(w entity.Writer, col *entity.Column) {
 	if (col == nil) || (col.Exprs == nil && col.Aggr == nil && col.From == nil) {
 		return
@@ -72,7 +74,13 @@ func (dial *DialectStandard) BuildCol(w entity.Writer, col *entity.Column) {
 		if col.From == nil && col.Value == "" {
 			dial.WriteColBase(w, col)
 		} else if col.From != nil {
-			col.From(w)
+			if col.Table != "" {
+				if ref, ok := w.GetRef(col.Table); ok {
+					w.Char(ref)
+					w.Char('.')
+				}
+			}
+			col.From.Write(w, dial, entity.WriteExpr)
 		} else {
 			w.Write(col.Value)
 		}

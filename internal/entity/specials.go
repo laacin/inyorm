@@ -32,6 +32,9 @@ func (v *Parameter) Write(w Writer, dial ValueWriter, mode WritingMode) {
 func (v *Condition) Write(w Writer, dial ValueWriter, mode WritingMode) {
 	dial.WriteCondition(w, v, mode)
 }
+func (v *Concat) Write(w Writer, dial ValueWriter, mode WritingMode) {
+	dial.WriteConcat(w, v)
+}
 func (v *CaseSwitch) Write(w Writer, dial ValueWriter, mode WritingMode) {
 	dial.WriteCaseSwitch(w, v, mode)
 }

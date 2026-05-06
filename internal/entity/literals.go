@@ -6,16 +6,16 @@ type (
 	Float    float64
 	Bool     bool
 	Null     struct{}
-	Wildcard string
+	Wildcard struct{}
 )
 
 // Kinds
-func (String) Kind() ValueKind    { return ValueString }
-func (Number) Kind() ValueKind    { return ValueNumber }
-func (Float) Kind() ValueKind     { return ValueFloat }
-func (Bool) Kind() ValueKind      { return ValueBool }
-func (Null) Kind() ValueKind      { return ValueNull }
-func (*Wildcard) Kind() ValueKind { return ValueWildcard }
+func (String) Kind() ValueKind   { return ValueString }
+func (Number) Kind() ValueKind   { return ValueNumber }
+func (Float) Kind() ValueKind    { return ValueFloat }
+func (Bool) Kind() ValueKind     { return ValueBool }
+func (Null) Kind() ValueKind     { return ValueNull }
+func (Wildcard) Kind() ValueKind { return ValueWildcard }
 
 // Writers
 func (v String) Write(w Writer, dial ValueWriter, mode WritingMode) {
@@ -34,5 +34,5 @@ func (Null) Write(w Writer, dial ValueWriter, mode WritingMode) {
 	dial.WriteNull(w)
 }
 func (v *Wildcard) Write(w Writer, dial ValueWriter, mode WritingMode) {
-	w.Write(dial.WriteWildcard())
+	dial.WriteWildcard(w)
 }
