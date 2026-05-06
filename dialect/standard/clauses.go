@@ -1,16 +1,16 @@
 package standard
 
-import "github.com/laacin/inyorm/intr/dialect"
+import "github.com/laacin/inyorm/internal/entity"
 
-func (dial *DialectStandard) ClsInsertInto(w dialect.Writer, tools dialect.InsertIntoTools) {
+func (dial *DialectStandard) WriteInsertInto(w entity.Writer, cls *entity.InsertInto) {
 	w.Write("INSERT INTO")
 	w.Char(' ')
 
-	w.Write(tools.Table)
+	w.Write(cls.Table)
 	w.Char(' ')
 
 	w.Char('(')
-	for i, col := range tools.Columns {
+	for i, col := range cls.Cols {
 		if i > 0 {
 			w.Write(", ")
 		}
@@ -19,44 +19,44 @@ func (dial *DialectStandard) ClsInsertInto(w dialect.Writer, tools dialect.Inser
 	w.Char(')')
 
 	w.Write(" VALUES ")
-	for row := range tools.Rows {
+	for row := range cls.Rows {
 		if row > 0 {
 			w.Write(", ")
 		}
 
 		w.Char('(')
-		for ci := range tools.Columns {
+		for ci := range cls.Cols {
 			if ci > 0 {
 				w.Write(", ")
 			}
-			w.Char('?')
+			dial.WritePlaceholder(w)
 		}
 		w.Char(')')
 	}
 }
 
-func (dial *DialectStandard) ClsSelect(w dialect.Writer, tools dialect.SelectTools) {
+func (dial *DialectStandard) WriteSelect(w entity.Writer, cls *entity.Select) {
 	w.Write("SELECT")
 	w.Char(' ')
 
-	if tools.Distinct {
+	if cls.Distinct {
 		w.Write("DISTINCT")
 		w.Char(' ')
 	}
 
-	for i, val := range tools.Values {
+	for i, val := range cls.Values {
 		if i > 0 {
 			w.Write(", ")
 		}
-		w.Value(val, dialect.WriteDef)
+		w.Value(val, entity.WriteDef)
 	}
 }
 
-func (dial *DialectStandard) ClsFrom(w dialect.Writer, tools dialect.FromTools) {
+func (dial *DialectStandard) WriteFrom(w entity.Writer, cls *entity.From) {
 	w.Write("FROM")
 	w.Char(' ')
 
-	switch tbl := tools.Value.(type) {
+	switch tbl := cls.Value.(type) {
 	case string:
 		w.Write(tbl)
 	default:
@@ -64,71 +64,71 @@ func (dial *DialectStandard) ClsFrom(w dialect.Writer, tools dialect.FromTools) 
 	}
 }
 
-var joinTypeMap = map[dialect.JoinType]string{
-	dialect.JoinInner: "INNER",
-	dialect.JoinLeft:  "LEFT",
-	dialect.JoinRight: "RIGHT",
-	dialect.JoinFull:  "FULL",
-	dialect.JoinCross: "CROSS",
+var joinTypeMap = map[entity.JoinType]string{
+	entity.JoinInner: "INNER",
+	entity.JoinLeft:  "LEFT",
+	entity.JoinRight: "RIGHT",
+	entity.JoinFull:  "FULL",
+	entity.JoinCross: "CROSS",
 }
 
-func (dial *DialectStandard) ClsJoin(w dialect.Writer, tools []dialect.JoinTools) {
-	for i, join := range tools {
+func (dial *DialectStandard) WriteJoin(w entity.Writer, cls *entity.Join) {
+	for i, join := range cls.Joins {
 		if i > 0 {
 			w.Char(' ')
 		}
 
-		w.Write(joinTypeMap[join.Type]) // NOTE: could be fragile
+		w.Write(joinTypeMap[join.Type])
 		w.Write(" JOIN ")
-		dial.Table(w, dialect.Table{Name: join.Table})
+		w.Value(join.Table, entity.WriteDef)
 
 		if join.Cond != nil {
 			w.Write(" ON ")
-			dial.Cond(w, *join.Cond, dialect.WriteBase)
+			w.Value(join.Cond, entity.WriteBase)
 		}
 	}
 }
 
-func (dial *DialectStandard) ClsWhere(w dialect.Writer, tools dialect.WhereTools) {
+func (dial *DialectStandard) WriteWhere(w entity.Writer, cls *entity.Where) {
 	w.Write("WHERE")
 	w.Char(' ')
 
-	for i, cond := range tools.Conds {
+	for i, cond := range cls.Conds {
 		if i > 0 {
 			w.Write(" AND ")
 		}
-		dial.Cond(w, cond, dialect.WriteExpr)
+		w.Value(cond, entity.WriteExpr)
 	}
 }
 
-func (dial *DialectStandard) ClsGroupBy(w dialect.Writer, tools dialect.GroupByTools) {
+func (dial *DialectStandard) WriteGroupBy(w entity.Writer, cls *entity.GroupBy) {
 	w.Write("GROUP BY")
 	w.Char(' ')
 
-	for i, group := range tools.Values {
+	for i, group := range cls.Values {
 		if i > 0 {
 			w.Write(", ")
 		}
-		w.Value(group, dialect.WriteExpr)
+		w.Value(group, entity.WriteExpr)
 	}
 }
 
-func (dial *DialectStandard) ClsHaving(w dialect.Writer, tools dialect.HavingTools) {
+func (dial *DialectStandard) WriteHaving(w entity.Writer, cls *entity.Having) {
 	w.Write("HAVING")
 	w.Char(' ')
-	dial.Cond(w, tools.Cond, dialect.WriteExpr)
+	w.Value(cls.Cond, entity.WriteExpr)
 }
 
-func (dial *DialectStandard) ClsOrderBy(w dialect.Writer, tools []dialect.OrderByTools) {
+func (dial *DialectStandard) WriteOrderBy(w entity.Writer, cls *entity.OrderBy) {
 	w.Write("ORDER BY")
 	w.Char(' ')
 
-	for i, ord := range tools {
+	for i, ord := range cls.Orders {
 		if i > 0 {
 			w.Write(", ")
 		}
 
-		w.Value(ord.Value, dialect.WriteAlias)
+		w.Value(ord.Value, entity.WriteAlias)
 		if ord.Descending {
 			w.Char(' ')
 			w.Write("DESC")
@@ -136,36 +136,36 @@ func (dial *DialectStandard) ClsOrderBy(w dialect.Writer, tools []dialect.OrderB
 	}
 }
 
-func (dial *DialectStandard) ClsLimit(w dialect.Writer, tools dialect.LimitTools) {
+func (dial *DialectStandard) WriteLimit(w entity.Writer, cls *entity.Limit) {
 	w.Write("LIMIT")
 	w.Char(' ')
-	w.Value(tools.ValueNumber, dialect.WriteBase)
+	w.Value(cls.ValueNumber, entity.WriteBase)
 }
 
-func (dial *DialectStandard) ClsOffset(w dialect.Writer, tools dialect.OffsetTools) {
+func (dial *DialectStandard) WriteOffset(w entity.Writer, cls *entity.Offset) {
 	w.Write("OFFSET")
 	w.Char(' ')
-	w.Value(tools.ValueNumber, dialect.WriteBase)
+	w.Value(cls.ValueNumber, entity.WriteBase)
 }
 
-func (dial *DialectStandard) ClsUpdate(w dialect.Writer, tools dialect.UpdateTools) {
+func (dial *DialectStandard) WriteUpdate(w entity.Writer, cls *entity.Update) {
 	w.Write("UPDATE")
 	w.Char(' ')
 
-	w.Write(tools.Table)
+	w.Write(cls.Table)
 	w.Write(" SET ")
 
-	for i, col := range tools.Columns {
+	for i, col := range cls.Cols {
 		if i > 0 {
 			w.Write(", ")
 		}
 
 		w.Write(col)
 		w.Write(" = ")
-		w.Char('?')
+		dial.WritePlaceholder(w)
 	}
 }
 
-func (dial *DialectStandard) ClsDelete(w dialect.Writer, tools dialect.DeleteTools) {
+func (dial *DialectStandard) WriteDelete(w entity.Writer, cls *entity.Delete) {
 	w.Write("DELETE")
 }
