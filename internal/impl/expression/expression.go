@@ -12,7 +12,7 @@ type ExpressionImpl[
 func (expr *ExpressionImpl[
 	Self, Col, Param, Cond, CondNext, CaseSwitch, CaseSearch, CaseNext,
 ]) Col(name string, ref ...string) Col {
-	col := entity.Column{Table: getTbl(expr.MainRef, ref), Name: name}
+	col := entity.Column{Table: getLast(expr.MainRef, ref), Name: name}
 	impl := ColumnImpl[Col]{Column: col}
 	return any(impl).(Col)
 }
@@ -20,7 +20,7 @@ func (expr *ExpressionImpl[
 func (expr *ExpressionImpl[
 	Self, Col, Param, Cond, CondNext, CaseSwitch, CaseSearch, CaseNext,
 ]) All(ref ...string) Col {
-	col := entity.Column{Table: getTbl(expr.MainRef, ref), From: &entity.Wildcard{}}
+	col := entity.Column{Table: getLast(expr.MainRef, ref), From: &entity.Wildcard{}}
 	impl := ColumnImpl[Col]{Column: col}
 	return any(impl).(Col)
 }
@@ -28,13 +28,7 @@ func (expr *ExpressionImpl[
 func (expr *ExpressionImpl[
 	Self, Col, Param, Cond, CondNext, CaseSwitch, CaseSearch, CaseNext,
 ]) Param(value ...any) Param {
-	store := len(value) > 0
-	var v any
-	if store {
-		v = value[0]
-	}
-
-	impl := entity.Parameter{Store: store, Value: v}
+	impl := entity.Parameter{Store: len(value) > 0, Value: getLast(nil, value)}
 	return any(impl).(Param)
 }
 
@@ -78,9 +72,9 @@ func (expr *ExpressionImpl[
 }
 
 // --- Helpers
-func getTbl(mainRef string, candidate []string) string {
+func getLast[T any](prev T, candidate []T) T {
 	if len(candidate) > 0 {
 		return candidate[0]
 	}
-	return mainRef
+	return prev
 }
