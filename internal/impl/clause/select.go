@@ -9,7 +9,7 @@ type SelectImpl[Next any] struct {
 
 func (c *SelectImpl[Next]) Distinct() Next {
 	c.declared = true
-	c.emb.Dist = true
+	c.emb.Distinct = true
 	return any(c).(Next)
 }
 

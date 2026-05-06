@@ -3,8 +3,8 @@ package entity
 // --- Clauses
 
 type Select struct {
-	Dist   bool
-	Values []any
+	Distinct bool
+	Values   []any
 }
 
 type From struct {
