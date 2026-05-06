@@ -47,7 +47,7 @@ type InsertInto struct {
 
 type Update struct {
 	Table string
-	Cols  []any
+	Cols  []string
 }
 
 type Delete struct{}
