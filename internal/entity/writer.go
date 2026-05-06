@@ -57,3 +57,19 @@ type ValueWriter interface {
 	WriteColAlias(Writer, *Column)
 	WriteColDef(Writer, *Column)
 }
+
+type ClauseWriter interface {
+	WriteSelect(Writer, *Select)
+	WriteFrom(Writer, *From)
+	WriteJoin(Writer, *Join)
+	WriteWhere(Writer, *Where)
+	WriteGroupBy(Writer, *GroupBy)
+	WriteHaving(Writer, *Having)
+	WriteOrderBy(Writer, *OrderBy)
+	WriteLimit(Writer, *Limit)
+	WriteOffset(Writer, *Offset)
+
+	WriteInsertInto(Writer, *InsertInto)
+	WriteUpdate(Writer, *Update)
+	WriteDelete(Writer, *Delete)
+}
