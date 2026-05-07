@@ -16,6 +16,7 @@ type Writer interface {
 	Char(byte)
 
 	Value(v any, mode WritingMode)
+	StoreValue(v any)
 	ValueCount() int
 	GetRef(table string) (byte, bool)
 

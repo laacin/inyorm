@@ -1,38 +1,6 @@
 package inyorm
 
-import (
-	"github.com/laacin/inyorm/clause"
-	"github.com/laacin/inyorm/exec"
-	"github.com/laacin/inyorm/internal/column"
-	"github.com/laacin/inyorm/internal/core"
-)
-
-// ---- internal
 type (
-	colBuilder = column.ColBuilder[
-		Column, Condition, ConditionNext,
-		Case, CaseNext,
-	]
-
-	clsSelect  = clause.Select[SelectNext]
-	clsFrom    = clause.From
-	clsJoin    = clause.Join[JoinNext, JoinEnd, Condition, ConditionNext]
-	clsWhere   = clause.Where[Condition, ConditionNext]
-	clsGroupBy = clause.GroupBy
-	clsHaving  = clause.Having[Condition, ConditionNext]
-	clsOrderBy = clause.OrderBy[OrderByNext]
-	clsLimit   = clause.Limit
-	clsOffset  = clause.Offset
-
-	clsInsert = clause.InsertInto[Values]
-	clsUpdate = clause.Update[Values]
-	clsDelete = clause.Delete
-
-	executor = exec.Executor[Prepare]
-)
-
-type (
-	Builder = core.Builder
 	Value   = any
 	Scanner = any
 )
@@ -43,53 +11,6 @@ type (
 // Provides builders for expressions, aliases, aggregates,
 // arithmetic operations, and transformations.
 type Column interface {
-	// Write(w dialect.Writer, dial dialect.Dialect, mode dialect.WritingMode)
-	// WriteBase(w dialect.Writer, dial dialect.Dialect)
-	// WriteAlias(w dialect.Writer, dial dialect.Dialect)
-	// WriteExpr(w dialect.Writer, dial dialect.Dialect)
-	// WriteDef(w dialect.Writer, dial dialect.Dialect)
-
-	// Def writes the definition of the column
-	//
-	// e.g: if we have this column being built: COUNT(id) AS count:
-	//  - Def()   would write: COUNT(id) AS count; Fallbacks: Expr() -> Base()
-	//  - Expr()  would write: COUNT(id);          Fallbacks: Base()
-	//  - Alias() would write: count;              Fallbacks: Expr() -> Base()
-	//  - Base()  would write: id                  Fallbacks: none
-	//
-	// @SQL: used to build column definitions
-	// Def() Builder
-
-	// Expr writes the expression of the column
-	//
-	// e.g: if we have this column being built: COUNT(id) AS count:
-	//  - Def()   would write: COUNT(id) AS count; Fallbacks: Expr() -> Base()
-	//  - Expr()  would write: COUNT(id);          Fallbacks: Base()
-	//  - Alias() would write: count;              Fallbacks: Expr() -> Base()
-	//  - Base()  would write: id                  Fallbacks: none
-	// Expr() Builder
-
-	// Alias writes the column alias
-	//
-	// e.g: if we have this column being built: COUNT(id) AS count:
-	//  - Def()   would write: COUNT(id) AS count; Fallbacks: Expr() -> Base()
-	//  - Expr()  would write: COUNT(id);          Fallbacks: Base()
-	//  - Alias() would write: count;              Fallbacks: Expr() -> Base()
-	//  - Base()  would write: id                  Fallbacks: none
-	// Alias() Builder
-
-	// Base writes the intrinsic value of the column
-	//
-	// If this column was generated using a complex builder
-	// such as Concat() or Search(), this method does nothing,
-	// and that may break the statement.
-	//
-	// e.g: if we have this column being built: COUNT(id) AS count:
-	//  - Def()   would write: COUNT(id) AS count; Fallbacks: Expr() -> Base()
-	//  - Expr()  would write: COUNT(id);          Fallbacks: Base()
-	//  - Alias() would write: count;              Fallbacks: Expr() -> Base()
-	//  - Base()  would write: id                  Fallbacks: none
-	// Base() Builder
 
 	// Count writes COUNT(column) or COUNT(DISTINCT column)
 	//
@@ -176,6 +97,10 @@ type Column interface {
 	// @SQL: [SELF] AS `name`
 	As(name string) Column
 }
+
+// ---- Param ----
+
+type Param = any
 
 // ----- Condition -----
 
@@ -265,9 +190,9 @@ type CaseNext interface {
 
 // ----- Column Builder -----
 
-// ColumnBuilder provides constructors for columns, placeholders,
+// ExprBuilder provides constructors for columns, placeholders,
 // conditions, concatenations, and CASE-based expressions.
-type ColumnBuilder interface {
+type ExprBuilder interface {
 	// Col creates a new column reference
 	//
 	// @SQL: `internal_alias`.`col`
@@ -286,7 +211,7 @@ type ColumnBuilder interface {
 	// You can omit the value for lazy parameters, useful in prepared statements.
 	//
 	// @SQL: ? / $[number]
-	Param(value ...Value) Builder
+	Param(value ...Value) Param
 
 	// Cond starts a condition block with the given identifier
 	//
@@ -362,7 +287,7 @@ type From interface {
 	// Only use it for complex FROM clauses (such as subqueries)
 	//
 	// @SQL: FROM `table`
-	From(table string)
+	From(table Value)
 }
 
 // ----- JOIN
@@ -548,7 +473,7 @@ type Values interface {
 
 // SelectStmt represents a full SELECT statement
 type SelectStmt interface {
-	Executor
+	// Executor
 	Select
 	From
 	Join

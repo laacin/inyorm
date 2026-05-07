@@ -23,7 +23,6 @@ func (dial *DialectStandard) WriteCondition(w entity.Writer, cond *entity.Condit
 		w.Value(pred.Identifier, mode)
 		w.Char(' ')
 		w.Write(getOp(pred.Operator, pred.Negated))
-
 		switch pred.Operator {
 		case entity.PredIsNull:
 
@@ -49,8 +48,8 @@ func (dial *DialectStandard) WriteCondition(w entity.Writer, cond *entity.Condit
 			w.Char(' ')
 			w.Value(pred.Values[0], mode)
 		}
-		w.Char(')')
 	}
+	w.Char(')')
 }
 
 func (dial *DialectStandard) WriteConcat(w entity.Writer, con *entity.Concat) {

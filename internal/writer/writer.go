@@ -13,6 +13,19 @@ type WriterImpl struct {
 	params  *ParamStore
 }
 
+func New(dial entity.Dialect, useAliases bool) *WriterImpl {
+	w := &WriterImpl{
+		vw:     dial,
+		params: &ParamStore{},
+	}
+
+	if useAliases {
+		w.aliases = &AliasStore{}
+	}
+
+	return w
+}
+
 func (w *WriterImpl) Write(v string) {
 	w.sb.WriteString(v)
 }
@@ -23,6 +36,10 @@ func (w *WriterImpl) Char(v byte) {
 
 func (w *WriterImpl) Value(v any, mode entity.WritingMode) {
 	Normalize(v).Write(w, w.vw, mode)
+}
+
+func (w *WriterImpl) StoreValue(v any) {
+	w.params.Store(v)
 }
 
 func (w *WriterImpl) ValueCount() int {
@@ -46,4 +63,15 @@ func (w *WriterImpl) Result() string {
 
 func (w *WriterImpl) Reset() {
 	w.sb.Reset()
+}
+
+func (w *WriterImpl) GetValues() ([]any, error) {
+	if err := w.params.Validate(); err != nil {
+		return nil, err
+	}
+	return w.params.values, nil
+}
+
+func (w *WriterImpl) DefaultAlias(tbl string) {
+	w.aliases.Get(tbl)
 }

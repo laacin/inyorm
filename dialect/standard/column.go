@@ -63,6 +63,25 @@ func (dial *DialectStandard) WriteColDef(w entity.Writer, col *entity.Column) {
 }
 
 // --- Helpers
+func (dial *DialectStandard) BuildFirst(w entity.Writer, col *entity.Column) {
+	if col.From != nil {
+		if col.Table != "" && col.From.Kind() == entity.ValueWildcard {
+			if ref, ok := w.GetRef(col.Table); ok {
+				w.Char(ref)
+				w.Char('.')
+			}
+		}
+		col.From.Write(w, dial, entity.WriteExpr)
+		return
+	}
+
+	if col.Value != "" {
+		w.Write(col.Value)
+		return
+	}
+
+	dial.WriteColBase(w, col)
+}
 
 // FIX: illegible
 func (dial *DialectStandard) BuildCol(w entity.Writer, col *entity.Column) {
@@ -70,22 +89,7 @@ func (dial *DialectStandard) BuildCol(w entity.Writer, col *entity.Column) {
 		return
 	}
 
-	if col.Exprs != nil || col.Aggr != nil || col.From != nil {
-		if col.From == nil && col.Value == "" {
-			dial.WriteColBase(w, col)
-		} else if col.From != nil {
-			if col.Table != "" {
-				if ref, ok := w.GetRef(col.Table); ok {
-					w.Char(ref)
-					w.Char('.')
-				}
-			}
-			col.From.Write(w, dial, entity.WriteExpr)
-		} else {
-			w.Write(col.Value)
-		}
-	}
-
+	dial.BuildFirst(w, col)
 	if col.Exprs != nil {
 		for _, expr := range col.Exprs {
 			if scalar, ok := scalarMap[expr.Kind]; ok {

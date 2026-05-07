@@ -4,7 +4,7 @@ import "github.com/laacin/inyorm/internal/entity"
 
 type OffsetImpl struct {
 	declared bool
-	emb      entity.Limit
+	emb      entity.Offset
 }
 
 func (c *OffsetImpl) Offset(value int) {

@@ -47,6 +47,15 @@ const (
 	ClauseDelete
 )
 
+type StatementKind int
+
+const (
+	StatementSelect StatementKind = iota
+	StatementInsert
+	StatementUpdate
+	StatementDelete
+)
+
 type Value interface {
 	Kind() ValueKind
 	Write(Writer, ValueWriter, WritingMode)

@@ -28,6 +28,7 @@ func (dial *DialectStandard) WriteFloat(w entity.Writer, v float64) {
 func (dial *DialectStandard) WriteBool(w entity.Writer, v bool) {
 	if v {
 		w.Char('1')
+		return
 	}
 	w.Char('0')
 }

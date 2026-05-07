@@ -30,6 +30,9 @@ func (*CaseSearch) Kind() ValueKind { return ValueCaseSearch }
 
 // Writers
 func (v *Parameter) Write(w Writer, dial ValueWriter, mode WritingMode) {
+	if v.Store {
+		w.StoreValue(v.Value)
+	}
 	dial.WritePlaceholder(w)
 }
 func (v *Condition) Write(w Writer, dial ValueWriter, mode WritingMode) {
