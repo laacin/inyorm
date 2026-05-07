@@ -4,7 +4,8 @@ type Table struct{ Value string }
 
 func (*Table) Kind() ValueKind { return ValueTable }
 
-func (t *Table) Write(w Writer, dial ValueWriter, mode WritingMode) {
+func (t *Table) Write(w InternalWriter, dial ValueSyntax, mode WritingMode) {
+	w.SetRef(t.Value)
 	dial.WriteTable(w, t)
 }
 
@@ -20,7 +21,9 @@ type Column struct {
 
 func (c *Column) Kind() ValueKind { return ValueColumn }
 
-func (c *Column) Write(w Writer, dial ValueWriter, mode WritingMode) {
+func (c *Column) Write(w InternalWriter, dial ValueSyntax, mode WritingMode) {
+	w.SetRef(c.Ref)
+
 	switch mode {
 	case WriteBase:
 		dial.WriteColBase(w, c)

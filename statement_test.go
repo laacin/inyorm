@@ -7,21 +7,22 @@ import (
 
 	"github.com/laacin/inyorm"
 	"github.com/laacin/inyorm/dialect/standard"
+	"github.com/laacin/inyorm/internal/entity"
 	"github.com/laacin/inyorm/internal/entity/api"
 )
 
 func run(t *testing.T, stmt any, exp string, vals []any) {
-	query, values, err := stmt.(interface{ Test() (string, []any, error) }).Test()
-	if err != nil {
+	query := stmt.(interface{ Build() *entity.Query }).Build()
+	if err := query.FirstErr(); err != nil {
 		t.Fatal(err)
 	}
 
-	if query != exp {
-		t.Errorf("mismatch query:\nExpect:\n%s\nHave:\n%s", exp, query)
+	if query.Statement != exp {
+		t.Errorf("mismatch query:\nExpect:\n%s\nHave:\n%s", exp, query.Statement)
 	}
 
-	if !reflect.DeepEqual(values, vals) {
-		t.Errorf("mismatch values:\nExpect:\n%#v\nHave:\n%#v", vals, values)
+	if !reflect.DeepEqual(query.Values, vals) {
+		t.Errorf("mismatch values:\nExpect:\n%#v\nHave:\n%#v", vals, query.Values)
 	}
 }
 
@@ -104,10 +105,10 @@ func TestSelect(t *testing.T) {
 		q.Select(result)
 		q.From(c.Table("users"))
 		q.Join(c.Table("posts")).On(postsFk).Equal(id)
-		q.Join("user_roles").On(interUser).Equal(id)
-		q.Join("roles").On(roleId).Equal(interRole)
+		q.Join(c.Table("user_roles")).On(interUser).Equal(id)
+		q.Join(c.Table("roles")).On(roleId).Equal(interRole)
 		q.Where(age).Greater(c.Param(17)).And(age).Less(c.Param(30))
-		q.GroupBy(postNum) // Must be base building
+		q.GroupBy(c.Col("id", "posts"))
 		q.Having(postNum).Greater(10)
 		q.OrderBy(age).Desc()
 		q.Limit(100)

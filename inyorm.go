@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/laacin/inyorm/internal/impl/expression"
+	"github.com/laacin/inyorm/internal/impl/statement"
 )
 
 type Engine struct{ dialect Dialect }
@@ -13,7 +14,7 @@ func New(dialect Dialect) *Engine {
 }
 
 func (eng *Engine) NewSelect(ctx context.Context, table string) (SelectStatement, ExprBuilder) {
-	stmt := newSelect(ctx, eng.dialect, table)
-	exprBuilder := &expression.ExpressionImpl{Dialect: eng.dialect, MainRef: table}
+	stmt := &statement.SelectStmtImpl{Dialect: eng.dialect, DefaultRef: table}
+	exprBuilder := &expression.ExprBuilderImpl{DefaultRef: table}
 	return stmt, exprBuilder
 }

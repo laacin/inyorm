@@ -11,17 +11,32 @@ type AliasStore struct {
 	list  map[string]byte
 }
 
-func (a *AliasStore) Get(table string) byte {
+func (a *AliasStore) Get(ref string) (byte, bool) {
+	if a == nil || a.list == nil {
+		return 0, false
+	}
+
+	if al, exists := a.list[ref]; exists {
+		return al, true
+	}
+
+	return 0, false
+}
+
+func (a *AliasStore) Set(ref string) {
+	if a == nil {
+		return
+	}
+
 	if a.list == nil {
 		a.list = make(map[string]byte)
 	}
 
-	if al, exists := a.list[table]; exists {
-		return al
+	if _, exists := a.list[ref]; exists {
+		return
 	}
 
 	alias := abc[a.count]
-	a.list[table] = alias
+	a.list[ref] = alias
 	a.count++
-	return alias
 }

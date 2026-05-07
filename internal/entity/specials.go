@@ -29,22 +29,23 @@ func (*CaseSwitch) Kind() ValueKind { return ValueCaseSwitch }
 func (*CaseSearch) Kind() ValueKind { return ValueCaseSearch }
 
 // Writers
-func (v *Parameter) Write(w Writer, dial ValueWriter, mode WritingMode) {
+func (v *Parameter) Write(w InternalWriter, dial ValueSyntax, mode WritingMode) {
 	if v.Store {
-		w.StoreValue(v.Value)
+		w.PushValue(v.Value)
 	}
+	w.IncValueCount()
 	dial.WritePlaceholder(w)
 }
-func (v *Condition) Write(w Writer, dial ValueWriter, mode WritingMode) {
+func (v *Condition) Write(w InternalWriter, dial ValueSyntax, mode WritingMode) {
 	dial.WriteCondition(w, v, mode)
 }
-func (v *Concat) Write(w Writer, dial ValueWriter, mode WritingMode) {
+func (v *Concat) Write(w InternalWriter, dial ValueSyntax, mode WritingMode) {
 	dial.WriteConcat(w, v)
 }
-func (v *CaseSwitch) Write(w Writer, dial ValueWriter, mode WritingMode) {
+func (v *CaseSwitch) Write(w InternalWriter, dial ValueSyntax, mode WritingMode) {
 	dial.WriteCaseSwitch(w, v, mode)
 }
-func (v *CaseSearch) Write(w Writer, dial ValueWriter, mode WritingMode) {
+func (v *CaseSearch) Write(w InternalWriter, dial ValueSyntax, mode WritingMode) {
 	dial.WriteCaseSearch(w, v, mode)
 }
 

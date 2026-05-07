@@ -69,18 +69,18 @@ func (c *Delete) Kind() ClauseKind     { return ClauseDelete }
 
 // --- Writes
 
-func (c *Select) Write(w Writer, dial ClauseWriter)     { dial.WriteSelect(w, c) }
-func (c *From) Write(w Writer, dial ClauseWriter)       { dial.WriteFrom(w, c) }
-func (c *Join) Write(w Writer, dial ClauseWriter)       { dial.WriteJoin(w, c) }
-func (c *Where) Write(w Writer, dial ClauseWriter)      { dial.WriteWhere(w, c) }
-func (c *GroupBy) Write(w Writer, dial ClauseWriter)    { dial.WriteGroupBy(w, c) }
-func (c *Having) Write(w Writer, dial ClauseWriter)     { dial.WriteHaving(w, c) }
-func (c *OrderBy) Write(w Writer, dial ClauseWriter)    { dial.WriteOrderBy(w, c) }
-func (c *Limit) Write(w Writer, dial ClauseWriter)      { dial.WriteLimit(w, c) }
-func (c *Offset) Write(w Writer, dial ClauseWriter)     { dial.WriteOffset(w, c) }
-func (c *InsertInto) Write(w Writer, dial ClauseWriter) { dial.WriteInsertInto(w, c) }
-func (c *Update) Write(w Writer, dial ClauseWriter)     { dial.WriteUpdate(w, c) }
-func (c *Delete) Write(w Writer, dial ClauseWriter)     { dial.WriteDelete(w, c) }
+func (c *Select) Write(w InternalWriter, dial ClauseSyntax)     { dial.WriteSelect(w, c) }
+func (c *From) Write(w InternalWriter, dial ClauseSyntax)       { dial.WriteFrom(w, c) }
+func (c *Join) Write(w InternalWriter, dial ClauseSyntax)       { dial.WriteJoin(w, c) }
+func (c *Where) Write(w InternalWriter, dial ClauseSyntax)      { dial.WriteWhere(w, c) }
+func (c *GroupBy) Write(w InternalWriter, dial ClauseSyntax)    { dial.WriteGroupBy(w, c) }
+func (c *Having) Write(w InternalWriter, dial ClauseSyntax)     { dial.WriteHaving(w, c) }
+func (c *OrderBy) Write(w InternalWriter, dial ClauseSyntax)    { dial.WriteOrderBy(w, c) }
+func (c *Limit) Write(w InternalWriter, dial ClauseSyntax)      { dial.WriteLimit(w, c) }
+func (c *Offset) Write(w InternalWriter, dial ClauseSyntax)     { dial.WriteOffset(w, c) }
+func (c *InsertInto) Write(w InternalWriter, dial ClauseSyntax) { dial.WriteInsertInto(w, c) }
+func (c *Update) Write(w InternalWriter, dial ClauseSyntax)     { dial.WriteUpdate(w, c) }
+func (c *Delete) Write(w InternalWriter, dial ClauseSyntax)     { dial.WriteDelete(w, c) }
 
 // --- Utilities
 

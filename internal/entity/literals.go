@@ -18,21 +18,21 @@ func (Null) Kind() ValueKind     { return ValueNull }
 func (Wildcard) Kind() ValueKind { return ValueWildcard }
 
 // Writers
-func (v String) Write(w Writer, dial ValueWriter, mode WritingMode) {
+func (v String) Write(w InternalWriter, dial ValueSyntax, mode WritingMode) {
 	dial.WriteString(w, string(v))
 }
-func (v Number) Write(w Writer, dial ValueWriter, mode WritingMode) {
+func (v Number) Write(w InternalWriter, dial ValueSyntax, mode WritingMode) {
 	dial.WriteNumber(w, int(v))
 }
-func (v Float) Write(w Writer, dial ValueWriter, mode WritingMode) {
+func (v Float) Write(w InternalWriter, dial ValueSyntax, mode WritingMode) {
 	dial.WriteFloat(w, float64(v))
 }
-func (v Bool) Write(w Writer, dial ValueWriter, mode WritingMode) {
+func (v Bool) Write(w InternalWriter, dial ValueSyntax, mode WritingMode) {
 	dial.WriteBool(w, bool(v))
 }
-func (Null) Write(w Writer, dial ValueWriter, mode WritingMode) {
+func (Null) Write(w InternalWriter, dial ValueSyntax, mode WritingMode) {
 	dial.WriteNull(w)
 }
-func (v *Wildcard) Write(w Writer, dial ValueWriter, mode WritingMode) {
+func (v *Wildcard) Write(w InternalWriter, dial ValueSyntax, mode WritingMode) {
 	dial.WriteWildcard(w)
 }

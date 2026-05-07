@@ -24,7 +24,7 @@ type (
 	Executor = api.Executor
 	Prepare  = api.Prepare
 
-	// Expression
+	// Expression Builder
 	ExprBuilder = api.ExprBuilder[Case]
 
 	// Clauses

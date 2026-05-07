@@ -58,12 +58,12 @@ const (
 
 type Value interface {
 	Kind() ValueKind
-	Write(Writer, ValueWriter, WritingMode)
+	Write(InternalWriter, ValueSyntax, WritingMode)
 }
 
 type Clause interface {
 	Kind() ClauseKind
-	Write(Writer, ClauseWriter)
+	Write(InternalWriter, ClauseSyntax)
 }
 
 // Wrapper implementations must implement this
@@ -75,4 +75,9 @@ type ClauseBuilder interface {
 	IsDeclared() bool
 	Kind() ClauseKind
 	Build() Clause
+}
+
+type StatementBuilder interface {
+	Kind() StatementKind
+	Build() *Query
 }

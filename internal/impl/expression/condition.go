@@ -58,12 +58,12 @@ func (c *ConditionImpl) IsNull() api.ConditionNext {
 // --- Next
 func (c *ConditionImpl) And(ident any) api.Condition {
 	c.Connectors = append(c.Connectors, entity.PredAnd)
-	return c
+	return c.Start(ident)
 }
 
 func (c *ConditionImpl) Or(ident any) api.Condition {
 	c.Connectors = append(c.Connectors, entity.PredOr)
-	return c
+	return c.Start(ident)
 }
 
 // --- Build

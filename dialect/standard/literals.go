@@ -6,10 +6,10 @@ import (
 	"github.com/laacin/inyorm/internal/entity"
 )
 
+var quote byte = "'"[0]
+
 // --- Literals
 func (dial *DialectStandard) WriteString(w entity.Writer, v string) {
-	quote := "'"[0]
-
 	w.Char(quote)
 	w.Write(v)
 	w.Char(quote)

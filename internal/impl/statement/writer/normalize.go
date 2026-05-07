@@ -7,11 +7,11 @@ func Normalize(value any) entity.Value {
 		return &entity.Null{}
 	}
 
-	if v, ok := any(value).(entity.Value); ok {
+	if v, ok := value.(entity.Value); ok {
 		return v
 	}
 
-	if v, ok := any(value).(entity.ValueBuilder); ok {
+	if v, ok := value.(entity.ValueBuilder); ok {
 		return v.Build()
 	}
 

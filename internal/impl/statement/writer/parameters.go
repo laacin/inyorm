@@ -9,11 +9,14 @@ type ParamStore struct {
 
 func (p *ParamStore) Store(v any) {
 	p.values = append(p.values, v)
-	p.count++
 }
 
 func (p *ParamStore) JustCount() {
 	p.count++
+}
+
+func (p *ParamStore) Values() []any {
+	return p.values
 }
 
 func (p *ParamStore) Validate() error {
