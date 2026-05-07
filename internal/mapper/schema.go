@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/laacin/inyorm/internal/core"
+	"github.com/laacin/inyorm/internal/entity/api"
 )
 
 type schema struct {
@@ -80,7 +80,7 @@ const (
 )
 
 // var columnIface = reflect.TypeOf((*core.Column)(nil)).Elem()
-var columnIface = reflect.TypeFor[core.Column]()
+var columnIface = reflect.TypeFor[api.Column]()
 
 func whichIs(t reflect.Type) int {
 	knd := t.Kind()

@@ -3,7 +3,7 @@ package mapper
 import (
 	"slices"
 
-	"github.com/laacin/inyorm/internal/core"
+	"github.com/laacin/inyorm/internal/impl/expression"
 )
 
 func GetColumns(tag string, vals []any) ([]string, error) {
@@ -52,8 +52,8 @@ func GetColumns(tag string, vals []any) ([]string, error) {
 // -- internal
 
 func colsFromCol(cols *[]string, v any) {
-	if col, ok := v.(core.Column); ok {
-		*cols = append(*cols, col.RawBase())
+	if col, ok := v.(*expression.ColumnImpl); ok {
+		*cols = append(*cols, col.Name)
 	}
 }
 
