@@ -1,72 +1,57 @@
 package expression
 
-import "github.com/laacin/inyorm/internal/entity"
+import (
+	"github.com/laacin/inyorm/internal/entity"
+	"github.com/laacin/inyorm/internal/entity/api"
+)
 
-type ExpressionImpl[
-	Col, Param, Cond, CondNext, Case, CaseNext any,
-] struct {
+type ExpressionImpl struct {
 	MainRef string
 	Dialect entity.ValueWriter
 }
 
-func (expr *ExpressionImpl[
-	Col, Param, Cond, CondNext, Case, CaseNext,
-]) Col(name string, ref ...string) Col {
-	col := entity.Column{Table: getLast(expr.MainRef, ref), Name: name}
-	impl := &ColumnImpl[Col]{Column: col}
-	return any(impl).(Col)
+func (expr *ExpressionImpl) Table(name string) api.Table {
+	return &entity.Table{Value: name}
 }
 
-func (expr *ExpressionImpl[
-	Col, Param, Cond, CondNext, Case, CaseNext,
-]) All(ref ...string) Col {
-	col := entity.Column{Table: getLast(expr.MainRef, ref), From: &entity.Wildcard{}}
-	impl := &ColumnImpl[Col]{Column: col}
-	return any(impl).(Col)
+func (expr *ExpressionImpl) Col(name string, ref ...string) api.Column {
+	col := entity.Column{Ref: getLast(expr.MainRef, ref), Name: name}
+	return &ColumnImpl{Column: col}
 }
 
-func (expr *ExpressionImpl[
-	Col, Param, Cond, CondNext, Case, CaseNext,
-]) Param(value ...any) Param {
-	impl := &entity.Parameter{Store: len(value) > 0, Value: getLast(nil, value)}
-	return any(impl).(Param)
+func (expr *ExpressionImpl) All(ref ...string) api.Column {
+	col := entity.Column{Ref: getLast(expr.MainRef, ref), From: &entity.Wildcard{}}
+	return &ColumnImpl{Column: col}
 }
 
-func (expr *ExpressionImpl[
-	Col, Param, Cond, CondNext, Case, CaseNext,
-]) Cond(ident any) Cond {
-	cond := &ConditionImpl[Cond, CondNext]{}
+func (expr *ExpressionImpl) Param(value ...any) api.Parameter {
+	return &entity.Parameter{Store: len(value) > 0, Value: getLast(nil, value)}
+}
+
+func (expr *ExpressionImpl) Cond(ident any) api.Condition {
+	cond := &ConditionImpl{}
 	return cond.Start(ident)
 }
 
-func (expr *ExpressionImpl[
-	Col, Param, Cond, CondNext, Case, CaseNext,
-]) Concat(values ...any) Col {
+func (expr *ExpressionImpl) Concat(values ...any) api.Column {
 	col := entity.Column{From: &entity.Concat{Values: values}}
-	impl := &ColumnImpl[Col]{Column: col}
-	return any(impl).(Col)
+	return &ColumnImpl{Column: col}
 }
 
-func (expr *ExpressionImpl[
-	Col, Param, Cond, CondNext, Case, CaseNext,
-]) Switch(cond any, fn func(Case)) Col {
-	cs := &CaseSwitchImpl[Case, CaseNext]{}
-	fn(any(cs.Start(cond)).(Case))
+func (expr *ExpressionImpl) Switch(cond any, fn func(api.Case)) api.Column {
+	cs := &CaseSwitchImpl{}
+	fn(cs)
 
 	col := entity.Column{From: cs.Build()}
-	impl := &ColumnImpl[Col]{Column: col}
-	return any(impl).(Col)
+	return &ColumnImpl{Column: col}
 }
 
-func (expr *ExpressionImpl[
-	Col, Param, Cond, CondNext, Case, CaseNext,
-]) Search(fn func(Case)) Col {
-	cs := &CaseSearchImpl[Case, CaseNext]{}
-	fn(any(cs).(Case))
+func (expr *ExpressionImpl) Search(fn func(api.Case)) api.Column {
+	cs := &CaseSearchImpl{}
+	fn(cs)
 
 	col := entity.Column{From: cs.Build()}
-	impl := &ColumnImpl[Col]{Column: col}
-	return any(impl).(Col)
+	return &ColumnImpl{Column: col}
 
 }
 

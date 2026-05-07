@@ -1,149 +1,152 @@
 package expression
 
-import "github.com/laacin/inyorm/internal/entity"
+import (
+	"github.com/laacin/inyorm/internal/entity"
+	"github.com/laacin/inyorm/internal/entity/api"
+)
 
-type ColumnImpl[Self any] struct{ entity.Column }
+type ColumnImpl struct{ entity.Column }
 
-func (c *ColumnImpl[Self]) Count(distinct ...bool) Self {
+func (c *ColumnImpl) Count(distinct ...bool) api.Column {
 	dist := len(distinct) > 0 && distinct[0]
 	c.Aggr = &entity.ColExpr{
 		Kind:  entity.ColAggrCount,
 		Value: dist,
 	}
-	return any(c).(Self)
+	return c
 }
 
-func (c *ColumnImpl[Self]) Sum(distinct ...bool) Self {
+func (c *ColumnImpl) Sum(distinct ...bool) api.Column {
 	dist := len(distinct) > 0 && distinct[0]
 	c.Aggr = &entity.ColExpr{
 		Kind:  entity.ColAggrSum,
 		Value: dist,
 	}
-	return any(c).(Self)
+	return c
 }
 
-func (c *ColumnImpl[Self]) Min(distinct ...bool) Self {
+func (c *ColumnImpl) Min(distinct ...bool) api.Column {
 	dist := len(distinct) > 0 && distinct[0]
 	c.Aggr = &entity.ColExpr{
 		Kind:  entity.ColAggrMin,
 		Value: dist,
 	}
-	return any(c).(Self)
+	return c
 }
 
-func (c *ColumnImpl[Self]) Max(distinct ...bool) Self {
+func (c *ColumnImpl) Max(distinct ...bool) api.Column {
 	dist := len(distinct) > 0 && distinct[0]
 	c.Aggr = &entity.ColExpr{
 		Kind:  entity.ColAggrMax,
 		Value: dist,
 	}
-	return any(c).(Self)
+	return c
 }
 
-func (c *ColumnImpl[Self]) Avg(distinct ...bool) Self {
+func (c *ColumnImpl) Avg(distinct ...bool) api.Column {
 	dist := len(distinct) > 0 && distinct[0]
 	c.Aggr = &entity.ColExpr{
 		Kind:  entity.ColAggrAvg,
 		Value: dist,
 	}
-	return any(c).(Self)
+	return c
 }
 
 // --- Arith
 
-func (c *ColumnImpl[Self]) Add(v any) Self {
+func (c *ColumnImpl) Add(v any) api.Column {
 	c.Exprs = append(c.Exprs, entity.ColExpr{
 		Kind:  entity.ColArithAdd,
 		Value: v,
 	})
-	return any(c).(Self)
+	return c
 }
 
-func (c *ColumnImpl[Self]) Sub(v any) Self {
+func (c *ColumnImpl) Sub(v any) api.Column {
 	c.Exprs = append(c.Exprs, entity.ColExpr{
 		Kind:  entity.ColArithSub,
 		Value: v,
 	})
-	return any(c).(Self)
+	return c
 }
 
-func (c *ColumnImpl[Self]) Mul(v any) Self {
+func (c *ColumnImpl) Mul(v any) api.Column {
 	c.Exprs = append(c.Exprs, entity.ColExpr{
 		Kind:  entity.ColArithMul,
 		Value: v,
 	})
-	return any(c).(Self)
+	return c
 }
 
-func (c *ColumnImpl[Self]) Div(v any) Self {
+func (c *ColumnImpl) Div(v any) api.Column {
 	c.Exprs = append(c.Exprs, entity.ColExpr{
 		Kind:  entity.ColArithDiv,
 		Value: v,
 	})
-	return any(c).(Self)
+	return c
 }
 
-func (c *ColumnImpl[Self]) Mod(v any) Self {
+func (c *ColumnImpl) Mod(v any) api.Column {
 	c.Exprs = append(c.Exprs, entity.ColExpr{
 		Kind:  entity.ColArithMod,
 		Value: v,
 	})
-	return any(c).(Self)
+	return c
 }
 
-func (c *ColumnImpl[Self]) Wrap() Self {
+func (c *ColumnImpl) Wrap() api.Column {
 	c.Exprs = append(c.Exprs, entity.ColExpr{
 		Kind: entity.ColArithWrap,
 	})
-	return any(c).(Self)
+	return c
 }
 
 // --- Scalar
 
-func (c *ColumnImpl[Self]) Lower() Self {
+func (c *ColumnImpl) Lower() api.Column {
 	c.Exprs = append(c.Exprs, entity.ColExpr{
 		Kind: entity.ColScalarLower,
 	})
-	return any(c).(Self)
+	return c
 }
 
-func (c *ColumnImpl[Self]) Upper() Self {
+func (c *ColumnImpl) Upper() api.Column {
 	c.Exprs = append(c.Exprs, entity.ColExpr{
 		Kind: entity.ColScalarUpper,
 	})
-	return any(c).(Self)
+	return c
 }
 
-func (c *ColumnImpl[Self]) Trim() Self {
+func (c *ColumnImpl) Trim() api.Column {
 	c.Exprs = append(c.Exprs, entity.ColExpr{
 		Kind: entity.ColScalarTrim,
 	})
-	return any(c).(Self)
+	return c
 }
 
-func (c *ColumnImpl[Self]) Round() Self {
+func (c *ColumnImpl) Round() api.Column {
 	c.Exprs = append(c.Exprs, entity.ColExpr{
 		Kind: entity.ColScalarRound,
 	})
-	return any(c).(Self)
+	return c
 }
 
-func (c *ColumnImpl[Self]) Abs() Self {
+func (c *ColumnImpl) Abs() api.Column {
 	c.Exprs = append(c.Exprs, entity.ColExpr{
 		Kind: entity.ColScalarAbs,
 	})
-	return any(c).(Self)
+	return c
 }
 
 // --- Alias
 
-func (c *ColumnImpl[Self]) As(value string) Self {
+func (c *ColumnImpl) As(value string) api.Column {
 	c.Alias = value
-	return any(c).(Self)
+	return c
 }
 
 // --- Build
 
-func (c *ColumnImpl[Self]) Build() entity.Value {
+func (c *ColumnImpl) Build() entity.Value {
 	return &c.Column
 }

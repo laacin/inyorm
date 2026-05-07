@@ -11,8 +11,8 @@ func (dial *DialectStandard) WriteTable(w entity.Writer, tbl *entity.Table) {
 }
 
 func (dial *DialectStandard) WriteColBase(w entity.Writer, col *entity.Column) {
-	if col.Table != "" {
-		if ref, ok := w.GetRef(col.Table); ok {
+	if col.Ref != "" {
+		if ref, ok := w.GetRef(col.Ref); ok {
 			w.Char(ref)
 			w.Char('.')
 		}
@@ -64,9 +64,11 @@ func (dial *DialectStandard) WriteColDef(w entity.Writer, col *entity.Column) {
 
 // --- Helpers
 func (dial *DialectStandard) BuildFirst(w entity.Writer, col *entity.Column) {
+	wRef(w, col)
+
 	if col.From != nil {
-		if col.Table != "" && col.From.Kind() == entity.ValueWildcard {
-			if ref, ok := w.GetRef(col.Table); ok {
+		if col.Ref != "" && col.From.Kind() == entity.ValueWildcard {
+			if ref, ok := w.GetRef(col.Ref); ok {
 				w.Char(ref)
 				w.Char('.')
 			}
@@ -93,17 +95,17 @@ func (dial *DialectStandard) BuildCol(w entity.Writer, col *entity.Column) {
 	if col.Exprs != nil {
 		for _, expr := range col.Exprs {
 			if scalar, ok := scalarMap[expr.Kind]; ok {
-				wScalar(scalar)(w)
+				wScalar(w, scalar)
 				continue
 			}
 
 			if arith, ok := arithMap[expr.Kind]; ok {
-				wArith(arith, expr.Value)(w)
+				wArith(w, arith, expr.Value)
 				continue
 			}
 
 			if expr.Kind == entity.ColArithWrap {
-				wWrap()(w)
+				wWrap(w)
 				continue
 			}
 		}
@@ -112,7 +114,7 @@ func (dial *DialectStandard) BuildCol(w entity.Writer, col *entity.Column) {
 
 	if col.Aggr != nil {
 		if aggr, ok := aggrMap[col.Aggr.Kind]; ok {
-			wAggr(col.Aggr.Value, aggr)(w)
+			wAggr(w, col.Aggr.Value, aggr)
 		}
 		col.Aggr = nil
 	}
@@ -145,50 +147,51 @@ var arithMap = map[entity.ColKindExpr]byte{
 	entity.ColArithMod: '%',
 }
 
-func wArith(arg byte, value any) entity.WriterFunc {
-	return func(w entity.Writer) {
-		w.Char(' ')
-		w.Char(arg)
-		w.Char(' ')
-		w.Value(value, entity.WriteExpr)
-	}
-}
-
-func wScalar(arg string) entity.WriterFunc {
-	return func(w entity.Writer) {
-		prev := w.Result()
-		w.Reset()
-
-		w.Write(arg)
-		w.Char('(')
-		w.Write(prev)
-		w.Char(')')
-	}
-}
-
-func wWrap() entity.WriterFunc {
-	return func(w entity.Writer) {
-		prev := w.Result()
-		w.Reset()
-
-		w.Char('(')
-		w.Write(prev)
-		w.Char(')')
-	}
-}
-
-func wAggr(distinct any, aggr string) entity.WriterFunc {
-	return func(w entity.Writer) {
-		prev := w.Result()
-		w.Reset()
-
-		w.Write(aggr)
-		w.Char('(')
-		if dist, ok := distinct.(bool); ok && dist {
-			w.Write("DISTINCT")
-			w.Char(' ')
+func wRef(w entity.Writer, col *entity.Column) {
+	if col.Ref != "" {
+		if ref, ok := w.GetRef(col.Ref); ok {
+			w.Char(ref)
+			w.Char('.')
 		}
-		w.Write(prev)
-		w.Char(')')
 	}
+}
+
+func wArith(w entity.Writer, arg byte, value any) {
+	w.Char(' ')
+	w.Char(arg)
+	w.Char(' ')
+	w.Value(value, entity.WriteExpr)
+}
+
+func wScalar(w entity.Writer, arg string) {
+	prev := w.Result()
+	w.Reset()
+
+	w.Write(arg)
+	w.Char('(')
+	w.Write(prev)
+	w.Char(')')
+}
+
+func wWrap(w entity.Writer) {
+	prev := w.Result()
+	w.Reset()
+
+	w.Char('(')
+	w.Write(prev)
+	w.Char(')')
+}
+
+func wAggr(w entity.Writer, distinct any, aggr string) {
+	prev := w.Result()
+	w.Reset()
+
+	w.Write(aggr)
+	w.Char('(')
+	if dist, ok := distinct.(bool); ok && dist {
+		w.Write("DISTINCT")
+		w.Char(' ')
+	}
+	w.Write(prev)
+	w.Char(')')
 }

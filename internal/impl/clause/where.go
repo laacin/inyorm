@@ -2,36 +2,37 @@ package clause
 
 import (
 	"github.com/laacin/inyorm/internal/entity"
+	"github.com/laacin/inyorm/internal/entity/api"
 	"github.com/laacin/inyorm/internal/impl/expression"
 )
 
-type WhereImpl[Cond, CondNext any] struct {
+type WhereImpl struct {
 	declared bool
 	emb      entity.Where
-	conds    []*expression.ConditionImpl[Cond, CondNext]
-	current  *expression.ConditionImpl[Cond, CondNext]
+	conds    []*expression.ConditionImpl
+	current  *expression.ConditionImpl
 }
 
-func (c *WhereImpl[Cond, CondNext]) Where(ident any) Cond {
+func (c *WhereImpl) Where(ident any) api.Condition {
 	c.declared = true
-	cond := &expression.ConditionImpl[Cond, CondNext]{}
+	cond := &expression.ConditionImpl{}
 	c.conds = append(c.conds, cond)
 	return cond.Start(ident)
 }
 
 // --- Build
 
-func (c *WhereImpl[Cond, CondNext]) IsDeclared() bool {
+func (c *WhereImpl) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *WhereImpl[Cond, CondNext]) Kind() entity.ClauseKind {
+func (c *WhereImpl) Kind() entity.ClauseKind {
 	return entity.ClauseWhere
 }
 
-func (c *WhereImpl[Cond, CondNext]) Build() entity.Clause {
+func (c *WhereImpl) Build() entity.Clause {
 	for _, cond := range c.conds {
-		c.emb.Conds = append(c.emb.Conds, *cond.Build().(*entity.Condition))
+		c.emb.Conds = append(c.emb.Conds, cond.Build().(*entity.Condition))
 	}
 
 	return &c.emb

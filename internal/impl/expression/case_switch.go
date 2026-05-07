@@ -1,34 +1,37 @@
 package expression
 
-import "github.com/laacin/inyorm/internal/entity"
+import (
+	"github.com/laacin/inyorm/internal/entity"
+	"github.com/laacin/inyorm/internal/entity/api"
+)
 
-type CaseSwitchImpl[Self, Next any] struct {
+type CaseSwitchImpl struct {
 	entity.CaseSwitch
 	current *entity.CaseWhen
 }
 
-func (c *CaseSwitchImpl[Self, Next]) Start(cond any) Self {
+func (c *CaseSwitchImpl) Start(cond any) api.Case {
 	c.Cond = cond
-	return any(c).(Self)
+	return c
 }
 
-func (c *CaseSwitchImpl[Self, Next]) When(when any) Next {
+func (c *CaseSwitchImpl) When(when any) api.CaseNext {
 	c.current = &entity.CaseWhen{When: when}
-	return any(c).(Next)
+	return c
 }
 
-func (c *CaseSwitchImpl[Self, Next]) Then(then any) Self {
+func (c *CaseSwitchImpl) Then(then any) api.Case {
 	c.current.Then = then
 	c.Whens = append(c.Whens, *c.current)
-	return any(c).(Self)
+	return c
 }
 
-func (c *CaseSwitchImpl[Self, Next]) Else(els any) {
+func (c *CaseSwitchImpl) Else(els any) {
 	c.Els = els
 }
 
 // --- Build
 
-func (c *CaseSwitchImpl[Self, Next]) Build() entity.Value {
+func (c *CaseSwitchImpl) Build() entity.Value {
 	return &c.CaseSwitch
 }

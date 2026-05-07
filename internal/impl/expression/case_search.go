@@ -1,29 +1,32 @@
 package expression
 
-import "github.com/laacin/inyorm/internal/entity"
+import (
+	"github.com/laacin/inyorm/internal/entity"
+	"github.com/laacin/inyorm/internal/entity/api"
+)
 
-type CaseSearchImpl[Self, Next any] struct {
+type CaseSearchImpl struct {
 	entity.CaseSearch
 	current *entity.CaseWhen
 }
 
-func (c *CaseSearchImpl[Self, Next]) When(when any) Next {
+func (c *CaseSearchImpl) When(when any) api.CaseNext {
 	c.current = &entity.CaseWhen{When: when}
-	return any(c).(Next)
+	return c
 }
 
-func (c *CaseSearchImpl[Self, Next]) Then(then any) Self {
+func (c *CaseSearchImpl) Then(then any) api.Case {
 	c.current.Then = then
 	c.Whens = append(c.Whens, *c.current)
-	return any(c).(Self)
+	return c
 }
 
-func (c *CaseSearchImpl[Self, Next]) Else(els any) {
+func (c *CaseSearchImpl) Else(els any) {
 	c.Els = els
 }
 
 // --- Build
 
-func (c *CaseSearchImpl[Self, Next]) Build() entity.Value {
+func (c *CaseSearchImpl) Build() entity.Value {
 	return &c.CaseSearch
 }

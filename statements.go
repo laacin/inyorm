@@ -5,6 +5,7 @@ import (
 
 	"github.com/laacin/inyorm/internal"
 	"github.com/laacin/inyorm/internal/entity"
+	"github.com/laacin/inyorm/internal/impl/clause"
 	"github.com/laacin/inyorm/internal/writer"
 )
 
@@ -12,15 +13,25 @@ type selectStmt struct {
 	stmt *internal.Statement
 	dial entity.Dialect
 
-	clsSelect
-	clsFrom
-	clsJoin
-	clsWhere
-	clsGroupBy
-	clsHaving
-	clsOrderBy
-	clsLimit
-	clsOffset
+	clause.SelectImpl
+	clause.FromImpl
+	clause.JoinImpl
+	clause.WhereImpl
+	clause.GroupByImpl
+	clause.HavingImpl
+	clause.OrderByImpl
+	clause.LimitImpl
+	clause.OffsetImpl
+
+	// clsSelect
+	// clsFrom
+	// clsJoin
+	// clsWhere
+	// clsGroupBy
+	// clsHaving
+	// clsOrderBy
+	// clsLimit
+	// clsOffset
 }
 
 func newSelect(ctx context.Context, dial entity.Dialect, table string) *selectStmt {
@@ -31,23 +42,23 @@ func newSelect(ctx context.Context, dial entity.Dialect, table string) *selectSt
 	}
 
 	stmt.LoadClauses([]entity.ClauseBuilder{
-		&instance.clsSelect,
-		&instance.clsFrom,
-		&instance.clsJoin,
-		&instance.clsWhere,
-		&instance.clsGroupBy,
-		&instance.clsHaving,
-		&instance.clsOrderBy,
-		&instance.clsLimit,
-		&instance.clsOffset,
+		&instance.SelectImpl,
+		&instance.FromImpl,
+		&instance.JoinImpl,
+		&instance.WhereImpl,
+		&instance.GroupByImpl,
+		&instance.HavingImpl,
+		&instance.OrderByImpl,
+		&instance.LimitImpl,
+		&instance.OffsetImpl,
 	})
 
 	stmt.PreBuild(func(w *writer.WriterImpl) {
-		if !instance.clsFrom.IsDeclared() && table != "" {
-			instance.From(table)
+		if !instance.FromImpl.IsDeclared() && table != "" {
+			instance.From(&entity.Table{Value: table})
 		}
 
-		if instance.clsJoin.IsDeclared() && table != "" {
+		if instance.JoinImpl.IsDeclared() && table != "" {
 			w.DefaultAlias(table)
 		}
 	})

@@ -7,6 +7,7 @@ import (
 
 	"github.com/laacin/inyorm"
 	"github.com/laacin/inyorm/dialect/standard"
+	"github.com/laacin/inyorm/internal/entity/api"
 )
 
 func run(t *testing.T, stmt any, exp string, vals []any) {
@@ -51,8 +52,8 @@ func TestSelect(t *testing.T) {
 		)
 
 		q.Select(c.All())
-		q.From("users")
-		q.Join("posts").On(foreign).Equal(id)
+		q.From(c.Table("users"))
+		q.Join(c.Table("posts")).On(foreign).Equal(id)
 		q.Where(banned).IsNull().And(age).Greater(c.Param(17))
 		q.OrderBy(age).Desc()
 		q.Limit(100)
@@ -93,7 +94,7 @@ func TestSelect(t *testing.T) {
 			" his last login was: ", lastLog,
 		)
 
-		info := c.Search(func(cs inyorm.Case) {
+		info := c.Search(func(cs api.Case) {
 			cs.When(c.Cond(banned).IsNull().And(banned)).Then(success)
 			cs.Else(c.Concat("was banned at: ", banned))
 		})
@@ -101,8 +102,8 @@ func TestSelect(t *testing.T) {
 		result := c.Concat("User: ", fname, " ", lname, " ", info).As("user_info")
 
 		q.Select(result)
-		q.From("users")
-		q.Join("posts").On(postsFk).Equal(id)
+		q.From(c.Table("users"))
+		q.Join(c.Table("posts")).On(postsFk).Equal(id)
 		q.Join("user_roles").On(interUser).Equal(id)
 		q.Join("roles").On(roleId).Equal(interRole)
 		q.Where(age).Greater(c.Param(17)).And(age).Less(c.Param(30))
@@ -187,10 +188,10 @@ func TestSelect(t *testing.T) {
 		// statement building
 		q.Select(summary, totalPost, totalComment, lastPost)
 
-		q.Join("user_roles").Left().On(interUserFk).Equal(userId)
-		q.Join("roles").Left().On(roleId).Equal(interRoleFk)
-		q.Join("posts").Left().On(postUserFk).Equal(userId)
-		q.Join("comments").Left().On(commentUserFk).Equal(userId)
+		q.Join(c.Table("user_roles")).Left().On(interUserFk).Equal(userId)
+		q.Join(c.Table("roles")).Left().On(roleId).Equal(interRoleFk)
+		q.Join(c.Table("posts")).Left().On(postUserFk).Equal(userId)
+		q.Join(c.Table("comments")).Left().On(commentUserFk).Equal(userId)
 
 		q.Where(age).Between(18, 60).And(active).Equal(true)
 

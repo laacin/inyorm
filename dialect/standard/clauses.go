@@ -55,13 +55,7 @@ func (dial *DialectStandard) WriteSelect(w entity.Writer, cls *entity.Select) {
 func (dial *DialectStandard) WriteFrom(w entity.Writer, cls *entity.From) {
 	w.Write("FROM")
 	w.Char(' ')
-
-	switch tbl := cls.Value.(type) {
-	case string:
-		w.Value(&entity.Table{Value: tbl}, entity.WriteExpr)
-	default:
-		panic("") // TODO: support sub-queries
-	}
+	w.Value(cls.Value, entity.WriteDef)
 }
 
 var joinTypeMap = map[entity.JoinType]string{
@@ -80,7 +74,7 @@ func (dial *DialectStandard) WriteJoin(w entity.Writer, cls *entity.Join) {
 
 		w.Write(joinTypeMap[join.Type])
 		w.Write(" JOIN ")
-		w.Value(&join.Table, entity.WriteDef)
+		w.Value(join.Table, entity.WriteDef)
 
 		if join.Cond != nil {
 			w.Write(" ON ")
@@ -97,7 +91,7 @@ func (dial *DialectStandard) WriteWhere(w entity.Writer, cls *entity.Where) {
 		if i > 0 {
 			w.Write(" AND ")
 		}
-		w.Value(&cond, entity.WriteExpr)
+		w.Value(cond, entity.WriteExpr)
 	}
 }
 
@@ -116,7 +110,7 @@ func (dial *DialectStandard) WriteGroupBy(w entity.Writer, cls *entity.GroupBy) 
 func (dial *DialectStandard) WriteHaving(w entity.Writer, cls *entity.Having) {
 	w.Write("HAVING")
 	w.Char(' ')
-	w.Value(&cls.Cond, entity.WriteExpr)
+	w.Value(cls.Cond, entity.WriteExpr)
 }
 
 func (dial *DialectStandard) WriteOrderBy(w entity.Writer, cls *entity.OrderBy) {

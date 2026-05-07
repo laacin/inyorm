@@ -1,33 +1,36 @@
 package clause
 
-import "github.com/laacin/inyorm/internal/entity"
+import (
+	"github.com/laacin/inyorm/internal/entity"
+	"github.com/laacin/inyorm/internal/entity/api"
+)
 
-type SelectImpl[Next any] struct {
+type SelectImpl struct {
 	declared bool
 	emb      entity.Select
 }
 
-func (c *SelectImpl[Next]) Distinct() Next {
+func (c *SelectImpl) Distinct() api.SelectNext {
 	c.declared = true
 	c.emb.Distinct = true
-	return any(c).(Next)
+	return c
 }
 
-func (c *SelectImpl[Next]) Select(values ...any) {
+func (c *SelectImpl) Select(values ...any) {
 	c.declared = true
 	c.emb.Values = values
 }
 
 // --- Build
 
-func (c *SelectImpl[Next]) IsDeclared() bool {
+func (c *SelectImpl) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *SelectImpl[Next]) Kind() entity.ClauseKind {
+func (c *SelectImpl) Kind() entity.ClauseKind {
 	return entity.ClauseSelect
 }
 
-func (c *SelectImpl[Next]) Build() entity.Clause {
+func (c *SelectImpl) Build() entity.Clause {
 	return &c.emb
 }

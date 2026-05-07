@@ -2,32 +2,33 @@ package clause
 
 import (
 	"github.com/laacin/inyorm/internal/entity"
+	"github.com/laacin/inyorm/internal/entity/api"
 	"github.com/laacin/inyorm/internal/impl/expression"
 )
 
-type HavingImpl[Cond, CondNext any] struct {
+type HavingImpl struct {
 	declared bool
 	emb      entity.Having
-	cond     *expression.ConditionImpl[Cond, CondNext]
+	cond     *expression.ConditionImpl
 }
 
-func (c *HavingImpl[Cond, CondNext]) Having(ident any) Cond {
+func (c *HavingImpl) Having(ident any) api.Condition {
 	c.declared = true
-	c.cond = &expression.ConditionImpl[Cond, CondNext]{}
+	c.cond = &expression.ConditionImpl{}
 	return c.cond.Start(ident)
 }
 
 // --- Build
 
-func (c *HavingImpl[Cond, CondNext]) IsDeclared() bool {
+func (c *HavingImpl) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *HavingImpl[Cond, CondNext]) Kind() entity.ClauseKind {
+func (c *HavingImpl) Kind() entity.ClauseKind {
 	return entity.ClauseHaving
 }
 
-func (c *HavingImpl[Cond, CondNext]) Build() entity.Clause {
-	c.emb.Cond = *c.cond.Build().(*entity.Condition)
+func (c *HavingImpl) Build() entity.Clause {
+	c.emb.Cond = c.cond.Build().(*entity.Condition)
 	return &c.emb
 }

@@ -2,45 +2,46 @@ package clause
 
 import (
 	"github.com/laacin/inyorm/internal/entity"
+	"github.com/laacin/inyorm/internal/entity/api"
 	"github.com/laacin/inyorm/internal/impl/expression"
 )
 
-type JoinImpl[Next, End, Cond, CondNext any] struct {
+type JoinImpl struct {
 	declared bool
 	emb      entity.Join
 	current  *entity.JoinSegment
-	conds    []*expression.ConditionImpl[Cond, CondNext]
+	conds    []*expression.ConditionImpl
 }
 
-func (c *JoinImpl[Next, End, Cond, CondNext]) Join(table string) Next {
+func (c *JoinImpl) Join(table any) api.JoinNext {
 	c.declared = true
 	c.current = &entity.JoinSegment{
 		Type:  entity.JoinInner,
-		Table: entity.Table{Value: table},
+		Table: table,
 	}
-	return any(c).(Next)
+	return c
 }
 
-func (c *JoinImpl[Next, End, Cond, CondNext]) Left() End {
+func (c *JoinImpl) Left() api.JoinEnd {
 	c.current.Type = entity.JoinLeft
-	return any(c).(End)
+	return c
 }
-func (c *JoinImpl[Next, End, Cond, CondNext]) Right() End {
+func (c *JoinImpl) Right() api.JoinEnd {
 	c.current.Type = entity.JoinRight
-	return any(c).(End)
+	return c
 }
-func (c *JoinImpl[Next, End, Cond, CondNext]) Full() End {
+func (c *JoinImpl) Full() api.JoinEnd {
 	c.current.Type = entity.JoinFull
-	return any(c).(End)
+	return c
 }
-func (c *JoinImpl[Next, End, Cond, CondNext]) Cross() {
+func (c *JoinImpl) Cross() {
 	c.current.Type = entity.JoinCross
 	c.emb.Joins = append(c.emb.Joins, *c.current)
 	c.conds = append(c.conds, nil)
 }
 
-func (c *JoinImpl[Next, End, Cond, CondNext]) On(ident any) Cond {
-	cond := &expression.ConditionImpl[Cond, CondNext]{}
+func (c *JoinImpl) On(ident any) api.Condition {
+	cond := &expression.ConditionImpl{}
 	c.emb.Joins = append(c.emb.Joins, *c.current)
 	c.conds = append(c.conds, cond)
 	return cond.Start(ident)
@@ -48,15 +49,15 @@ func (c *JoinImpl[Next, End, Cond, CondNext]) On(ident any) Cond {
 
 // --- Build
 
-func (c *JoinImpl[Next, End, Cond, CondNext]) IsDeclared() bool {
+func (c *JoinImpl) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *JoinImpl[Next, End, Cond, CondNext]) Kind() entity.ClauseKind {
+func (c *JoinImpl) Kind() entity.ClauseKind {
 	return entity.ClauseJoin
 }
 
-func (c *JoinImpl[Next, End, Cond, CondNext]) Build() entity.Clause {
+func (c *JoinImpl) Build() entity.Clause {
 	for i, cond := range c.conds {
 		if cond == nil {
 			c.emb.Joins[i].Cond = nil
