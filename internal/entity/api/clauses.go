@@ -5,24 +5,19 @@ package api
 // Select represents the SELECT clause of a statement,
 // supporting DISTINCT and selectable identifiers.
 type Select interface {
-	// Distinct writes DISTINCT in the SELECT clause
-	//
-	// @SQL: SELECT `DISTINCT` ...
-	Distinct() SelectNext
-
 	// Select writes the SELECT clause values
 	//
 	// @SQL: SELECT `DISTINCT?` `sel1`, `sel2`, `sel3` ... [SelectNext]
-	Select(sel ...Value)
+	Select(sel ...Value) SelectNext
 }
 
 // SelectNext represents additional chained SELECT values
 // when DISTINCT is already applied.
 type SelectNext interface {
-	// Select writes the SELECT clause values
+	// Distinct writes DISTINCT in the SELECT clause
 	//
-	// @SQL: SELECT `DISTINCT?` `sel1`, `sel2`, `sel3` ... [SelectNext]
-	Select(sel ...Value)
+	// @SQL: SELECT `DISTINCT` ...
+	Distinct()
 }
 
 // ----- FROM

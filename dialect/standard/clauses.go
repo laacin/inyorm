@@ -6,7 +6,7 @@ func (dial *DialectStandard) WriteInsertInto(w entity.Writer, cls *entity.Insert
 	w.Write("INSERT INTO")
 	w.Char(' ')
 
-	w.Write(cls.Table)
+	w.Value(cls.Table, entity.WriteDef)
 	w.Char(' ')
 
 	w.Char('(')
@@ -146,7 +146,7 @@ func (dial *DialectStandard) WriteUpdate(w entity.Writer, cls *entity.Update) {
 	w.Write("UPDATE")
 	w.Char(' ')
 
-	w.Write(cls.Table)
+	w.Value(cls.Table, entity.WriteDef)
 	w.Write(" SET ")
 
 	for i, col := range cls.Cols {

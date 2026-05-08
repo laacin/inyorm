@@ -10,15 +10,15 @@ type SelectImpl struct {
 	emb      entity.Select
 }
 
-func (c *SelectImpl) Distinct() api.SelectNext {
+func (c *SelectImpl) Distinct() {
 	c.declared = true
 	c.emb.Distinct = true
-	return c
 }
 
-func (c *SelectImpl) Select(values ...any) {
+func (c *SelectImpl) Select(values ...any) api.SelectNext {
 	c.declared = true
 	c.emb.Values = values
+	return c
 }
 
 // --- Build
