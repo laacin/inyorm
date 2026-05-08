@@ -2,7 +2,7 @@ package api
 
 // SelectStmt represents a full SELECT statement
 type SelectStmt interface {
-	// Executor
+	Executor
 	Select
 	From
 	Join
@@ -16,20 +16,20 @@ type SelectStmt interface {
 
 // InsertStmt represents a full INSERT statement
 type InsertStmt interface {
-	// Executor
+	Executor
 	Insert
 }
 
 // UpdateStmt represents a full UPDATE statement
 type UpdateStmt interface {
-	// Executor
+	Executor
 	Update
 	Where
 }
 
 // DeleteStmt represents a full DELETE statement
 type DeleteStmt interface {
-	// Executor
+	Executor
 	Delete
 	From
 	Where

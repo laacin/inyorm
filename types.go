@@ -22,7 +22,7 @@ type (
 
 	// Executor
 	Prepare  = api.Prepare
-	Executor = api.Executor[Prepare]
+	Executor = api.Executor
 
 	// Expression Builder
 	ExprBuilder = api.ExprBuilder[Case]
