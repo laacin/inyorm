@@ -25,11 +25,13 @@ func (dial *DialectStandard) InsertOrder() []entity.ClauseKind {
 func (dial *DialectStandard) UpdateOrder() []entity.ClauseKind {
 	return []entity.ClauseKind{
 		entity.ClauseUpdate,
+		entity.ClauseWhere,
 	}
 }
 
 func (dial *DialectStandard) DeleteOrder() []entity.ClauseKind {
 	return []entity.ClauseKind{
 		entity.ClauseDelete,
+		entity.ClauseWhere,
 	}
 }

@@ -158,7 +158,7 @@ func (dial *DialectStandard) WriteUpdate(w entity.Writer, cls *entity.Update) {
 
 		w.Write(col)
 		w.Write(" = ")
-		dial.WritePlaceholder(w)
+		w.Value(cls.Values[i], entity.WriteDef)
 	}
 }
 

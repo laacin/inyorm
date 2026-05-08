@@ -24,3 +24,9 @@ func (eng *Engine) NewInsert(ctx context.Context, table string) (InsertStatement
 	exprBuilder := &expression.ExprBuilderImpl{DefaultRef: table}
 	return stmt, exprBuilder
 }
+
+func (eng *Engine) NewUpdate(ctx context.Context, table string) (UpdateStatement, ExprBuilder) {
+	stmt := &statement.UpdateStmtImpl{Dialect: eng.dialect, DefaultRef: table}
+	exprBuilder := &expression.ExprBuilderImpl{DefaultRef: table}
+	return stmt, exprBuilder
+}

@@ -305,74 +305,75 @@ func TestInsert(t *testing.T) {
 	})
 }
 
-// func TestUpdate(t *testing.T) {
-// 	qe := inyorm.New("", nil, nil)
-//
-// 	type Post struct {
-// 		Title       string `col:"title"`
-// 		Description string `col:"description"`
-// 	}
-//
-// 	t.Run("update_one", func(t *testing.T) {
-// 		q, c := qe.NewUpdate(context.Background(), "posts")
-// 		q.Update(&Post{}).Values(Post{
-// 			Title:       "something else",
-// 			Description: "little description",
-// 		})
-// 		q.Where(c.Col("id")).Equal(c.Param(10))
-//
-// 		exp := "UPDATE posts SET description = ?, title = ? WHERE (id = ?)"
-// 		run(t, q, exp, []any{"little description", "something else", 10})
-// 	})
-//
-// 	t.Run("with_cols", func(t *testing.T) {
-// 		q, c := qe.NewUpdate(context.Background(), "posts")
-//
-// 		q.Update(c.Col("title"), c.Col("description")).Values(Post{
-// 			Title: "asd", Description: "dep",
-// 		})
-// 		q.Where(c.Col("id")).Equal(c.Param(10))
-//
-// 		exp := "UPDATE posts SET description = ?, title = ? WHERE (id = ?)"
-// 		run(t, q, exp, []any{"dep", "asd", 10})
-// 	})
-//
-// 	t.Run("with_map", func(t *testing.T) {
-// 		q, _ := qe.NewUpdate(context.Background(), "users")
-// 		vals := map[string]any{
-// 			"account": "acc123",
-// 			"age":     56,
-// 			"name":    "matias",
-// 		}
-// 		q.Update(vals).Values(vals)
-//
-// 		exp := "UPDATE users SET account = ?, age = ?, name = ?"
-// 		run(t, q, exp, []any{"acc123", 56, "matias"})
-// 	})
-//
-// 	t.Run("omit_values", func(t *testing.T) {
-// 		q, c := qe.NewUpdate(context.Background(), "users")
-// 		vals := map[string]any{
-// 			"account":  "acc123",
-// 			"age":      56,
-// 			"name":     "matias",
-// 			"lastname": "doe",
-// 			"id":       123,
-// 		}
-//
-// 		var (
-// 			name = c.Col("name")
-// 			acc  = c.Col("account")
-// 			age  = c.Col("age")
-// 		)
-//
-// 		q.Update(name, acc, age).Values(vals)
-//
-// 		exp := "UPDATE users SET account = ?, age = ?, name = ?"
-// 		run(t, q, exp, []any{"acc123", 56, "matias"})
-// 	})
-// }
-//
+func TestUpdate(t *testing.T) {
+	dial := standard.DialectDefault()
+	qe := inyorm.New(dial)
+
+	type Post struct {
+		Title       string `inyorm:"title"`
+		Description string `inyorm:"description"`
+	}
+
+	t.Run("update_one", func(t *testing.T) {
+		q, c := qe.NewUpdate(context.Background(), "posts")
+		q.Update(&Post{}).Values(Post{
+			Title:       "something else",
+			Description: "little description",
+		})
+		q.Where(c.Col("id")).Equal(c.Param(10))
+
+		exp := "UPDATE posts SET description = ?, title = ? WHERE (id = ?)"
+		run(t, q, exp, []any{"little description", "something else", 10})
+	})
+
+	t.Run("with_cols", func(t *testing.T) {
+		q, c := qe.NewUpdate(context.Background(), "posts")
+
+		q.Update(c.Col("title"), c.Col("description")).Values(Post{
+			Title: "asd", Description: "dep",
+		})
+		q.Where(c.Col("id")).Equal(c.Param(10))
+
+		exp := "UPDATE posts SET description = ?, title = ? WHERE (id = ?)"
+		run(t, q, exp, []any{"dep", "asd", 10})
+	})
+
+	t.Run("with_map", func(t *testing.T) {
+		q, _ := qe.NewUpdate(context.Background(), "users")
+		vals := map[string]any{
+			"account": "acc123",
+			"age":     56,
+			"name":    "matias",
+		}
+		q.Update(vals).Values(vals)
+
+		exp := "UPDATE users SET account = ?, age = ?, name = ?"
+		run(t, q, exp, []any{"acc123", 56, "matias"})
+	})
+
+	t.Run("omit_values", func(t *testing.T) {
+		q, c := qe.NewUpdate(context.Background(), "users")
+		vals := map[string]any{
+			"account":  "acc123",
+			"age":      56,
+			"name":     "matias",
+			"lastname": "doe",
+			"id":       123,
+		}
+
+		var (
+			name = c.Col("name")
+			acc  = c.Col("account")
+			age  = c.Col("age")
+		)
+
+		q.Update(name, acc, age).Values(vals)
+
+		exp := "UPDATE users SET account = ?, age = ?, name = ?"
+		run(t, q, exp, []any{"acc123", 56, "matias"})
+	})
+}
+
 // func TestDelete(t *testing.T) {
 // 	qe := inyorm.New("", nil, nil)
 //
