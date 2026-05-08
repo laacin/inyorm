@@ -18,6 +18,8 @@ func (dial *DialectStandard) WriteInsertInto(w entity.Writer, cls *entity.Insert
 	}
 	w.Char(')')
 
+	perRow := len(cls.Values) / cls.Rows
+
 	w.Write(" VALUES ")
 	for row := range cls.Rows {
 		if row > 0 {
@@ -29,7 +31,7 @@ func (dial *DialectStandard) WriteInsertInto(w entity.Writer, cls *entity.Insert
 			if ci > 0 {
 				w.Write(", ")
 			}
-			dial.WritePlaceholder(w)
+			w.Value(cls.Values[row*perRow+ci], entity.WriteDef)
 		}
 		w.Char(')')
 	}

@@ -18,3 +18,9 @@ func (eng *Engine) NewSelect(ctx context.Context, table string) (SelectStatement
 	exprBuilder := &expression.ExprBuilderImpl{DefaultRef: table}
 	return stmt, exprBuilder
 }
+
+func (eng *Engine) NewInsert(ctx context.Context, table string) (InsertStatement, ExprBuilder) {
+	stmt := &statement.InsertStmtImpl{Dialect: eng.dialect, DefaultRef: table}
+	exprBuilder := &expression.ExprBuilderImpl{DefaultRef: table}
+	return stmt, exprBuilder
+}

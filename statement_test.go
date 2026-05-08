@@ -229,81 +229,82 @@ func TestSelect(t *testing.T) {
 	})
 }
 
-// func TestInsert(t *testing.T) {
-// 	qe := inyorm.New("", nil, nil)
-//
-// 	type User struct {
-// 		Account string `col:"account"`
-// 		Age     int    `col:"age"`
-// 	}
-//
-// 	t.Run("insert_one", func(t *testing.T) {
-// 		q, _ := qe.NewInsert(context.Background(), "users")
-//
-// 		q.Insert(User{}).Values(User{
-// 			Account: "myacc",
-// 			Age:     29,
-// 		})
-//
-// 		exp := "INSERT INTO users (account, age) VALUES (?, ?)"
-// 		run(t, q, exp, []any{"myacc", 29})
-// 	})
-//
-// 	t.Run("insert_many", func(t *testing.T) {
-// 		q, _ := qe.NewInsert(context.Background(), "users")
-//
-// 		q.Insert(User{}).Values([]User{
-// 			{Account: "acc1", Age: 10},
-// 			{Account: "acc2", Age: 20},
-// 			{Account: "acc3", Age: 30},
-// 			{Account: "acc4", Age: 40},
-// 			{Account: "acc5", Age: 50},
-// 			{Account: "acc6", Age: 60},
-// 		})
-//
-// 		args := []any{
-// 			"acc1", 10,
-// 			"acc2", 20,
-// 			"acc3", 30,
-// 			"acc4", 40,
-// 			"acc5", 50,
-// 			"acc6", 60,
-// 		}
-//
-// 		exp := "INSERT INTO users (account, age) VALUES "
-// 		exp += "(?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)"
-// 		run(t, q, exp, args)
-// 	})
-//
-// 	t.Run("omit_values", func(t *testing.T) {
-// 		q, c := qe.NewInsert(context.Background(), "users")
-//
-// 		vals := []map[string]any{
-// 			{"account": "acc1", "age": 10, "active": true, "score": 100, "country": "AR"},
-// 			{"account": "acc2", "age": 20, "active": false, "score": 200, "country": "US"},
-// 			{"account": "acc3", "age": 30, "active": true, "score": 300, "country": "BR"},
-// 			{"account": "acc4", "age": 40, "active": false, "score": 400, "country": "UK"},
-// 			{"account": "acc5", "age": 50, "active": true, "score": 500, "country": "DE"},
-// 			{"account": "acc6", "age": 60, "active": true, "score": 600, "country": "JP"},
-// 		}
-//
-// 		q.Insert(c.Col("score"), c.Col("age")).Values(&vals)
-//
-// 		args := []any{
-// 			10, 100,
-// 			20, 200,
-// 			30, 300,
-// 			40, 400,
-// 			50, 500,
-// 			60, 600,
-// 		}
-//
-// 		exp := "INSERT INTO users (age, score) VALUES "
-// 		exp += "(?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)"
-// 		run(t, q, exp, args)
-// 	})
-// }
-//
+func TestInsert(t *testing.T) {
+	dial := standard.DialectDefault()
+	qe := inyorm.New(dial)
+
+	type User struct {
+		Account string `inyorm:"account"`
+		Age     int    `inyorm:"age"`
+	}
+
+	t.Run("insert_one", func(t *testing.T) {
+		q, _ := qe.NewInsert(context.Background(), "users")
+
+		q.Insert(User{}).Values(User{
+			Account: "myacc",
+			Age:     29,
+		})
+
+		exp := "INSERT INTO users (account, age) VALUES (?, ?)"
+		run(t, q, exp, []any{"myacc", 29})
+	})
+
+	t.Run("insert_many", func(t *testing.T) {
+		q, _ := qe.NewInsert(context.Background(), "users")
+
+		q.Insert(User{}).Values([]User{
+			{Account: "acc1", Age: 10},
+			{Account: "acc2", Age: 20},
+			{Account: "acc3", Age: 30},
+			{Account: "acc4", Age: 40},
+			{Account: "acc5", Age: 50},
+			{Account: "acc6", Age: 60},
+		})
+
+		args := []any{
+			"acc1", 10,
+			"acc2", 20,
+			"acc3", 30,
+			"acc4", 40,
+			"acc5", 50,
+			"acc6", 60,
+		}
+
+		exp := "INSERT INTO users (account, age) VALUES "
+		exp += "(?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)"
+		run(t, q, exp, args)
+	})
+
+	t.Run("omit_values", func(t *testing.T) {
+		q, c := qe.NewInsert(context.Background(), "users")
+
+		vals := []map[string]any{
+			{"account": "acc1", "age": 10, "active": true, "score": 100, "country": "AR"},
+			{"account": "acc2", "age": 20, "active": false, "score": 200, "country": "US"},
+			{"account": "acc3", "age": 30, "active": true, "score": 300, "country": "BR"},
+			{"account": "acc4", "age": 40, "active": false, "score": 400, "country": "UK"},
+			{"account": "acc5", "age": 50, "active": true, "score": 500, "country": "DE"},
+			{"account": "acc6", "age": 60, "active": true, "score": 600, "country": "JP"},
+		}
+
+		q.Insert(c.Col("score"), c.Col("age")).Values(&vals)
+
+		args := []any{
+			10, 100,
+			20, 200,
+			30, 300,
+			40, 400,
+			50, 500,
+			60, 600,
+		}
+
+		exp := "INSERT INTO users (age, score) VALUES "
+		exp += "(?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)"
+		run(t, q, exp, args)
+	})
+}
+
 // func TestUpdate(t *testing.T) {
 // 	qe := inyorm.New("", nil, nil)
 //

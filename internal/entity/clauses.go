@@ -40,14 +40,16 @@ type Offset struct {
 }
 
 type InsertInto struct {
-	Table any
-	Cols  []string
-	Rows  int
+	Table  any
+	Cols   []string
+	Rows   int
+	Values []any
 }
 
 type Update struct {
-	Table any
-	Cols  []string
+	Table  any
+	Cols   []string
+	Values []any
 }
 
 type Delete struct{}
