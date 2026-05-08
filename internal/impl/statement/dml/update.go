@@ -1,7 +1,10 @@
 package dml
 
 import (
+	"context"
+
 	"github.com/laacin/inyorm/internal/entity"
+	"github.com/laacin/inyorm/internal/execution"
 	"github.com/laacin/inyorm/internal/impl/clause"
 	"github.com/laacin/inyorm/internal/impl/statement/writer"
 )
@@ -12,6 +15,15 @@ type UpdateStmtImpl struct {
 
 	clause.UpdateImpl
 	clause.WhereImpl
+
+	*execution.Executor
+}
+
+func NewUpdateStatement(ctx context.Context, dial entity.Dialect, ref string) *UpdateStmtImpl {
+	stmt := &UpdateStmtImpl{Dialect: dial, DefaultRef: ref}
+	exec := &execution.Executor{Ctx: ctx, Statement: stmt}
+	stmt.Executor = exec
+	return stmt
 }
 
 func (s *UpdateStmtImpl) Kind() entity.StatementKind {

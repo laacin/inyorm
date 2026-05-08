@@ -14,25 +14,25 @@ func New(dialect Dialect) *Engine {
 }
 
 func (eng *Engine) NewSelect(ctx context.Context, table string) (SelectStatement, ExprBuilder) {
-	stmt := &dml.SelectStmtImpl{Dialect: eng.dialect, DefaultRef: table}
+	stmt := dml.NewSelectStatement(ctx, eng.dialect, table)
 	exprBuilder := &expression.ExprBuilderImpl{DefaultRef: table}
 	return stmt, exprBuilder
 }
 
 func (eng *Engine) NewInsert(ctx context.Context, table string) (InsertStatement, ExprBuilder) {
-	stmt := &dml.InsertStmtImpl{Dialect: eng.dialect, DefaultRef: table}
+	stmt := dml.NewInsertStatement(ctx, eng.dialect, table)
 	exprBuilder := &expression.ExprBuilderImpl{DefaultRef: table}
 	return stmt, exprBuilder
 }
 
 func (eng *Engine) NewUpdate(ctx context.Context, table string) (UpdateStatement, ExprBuilder) {
-	stmt := &dml.UpdateStmtImpl{Dialect: eng.dialect, DefaultRef: table}
+	stmt := dml.NewUpdateStatement(ctx, eng.dialect, table)
 	exprBuilder := &expression.ExprBuilderImpl{DefaultRef: table}
 	return stmt, exprBuilder
 }
 
 func (eng *Engine) NewDelete(ctx context.Context, table string) (DeleteStatement, ExprBuilder) {
-	stmt := &dml.DeleteStmtImpl{Dialect: eng.dialect, DefaultRef: table}
+	stmt := dml.NewDeleteStatement(ctx, eng.dialect, table)
 	exprBuilder := &expression.ExprBuilderImpl{DefaultRef: table}
 	return stmt, exprBuilder
 }

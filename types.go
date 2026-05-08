@@ -21,8 +21,8 @@ type (
 	CaseNext      = api.CaseNext
 
 	// Executor
-	Executor = api.Executor
 	Prepare  = api.Prepare
+	Executor = api.Executor[Prepare]
 
 	// Expression Builder
 	ExprBuilder = api.ExprBuilder[Case]

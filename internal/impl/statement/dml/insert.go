@@ -1,7 +1,10 @@
 package dml
 
 import (
+	"context"
+
 	"github.com/laacin/inyorm/internal/entity"
+	"github.com/laacin/inyorm/internal/execution"
 	"github.com/laacin/inyorm/internal/impl/clause"
 	"github.com/laacin/inyorm/internal/impl/statement/writer"
 )
@@ -11,6 +14,15 @@ type InsertStmtImpl struct {
 	Dialect    entity.Dialect
 
 	clause.InsertIntoImpl
+
+	*execution.Executor
+}
+
+func NewInsertStatement(ctx context.Context, dial entity.Dialect, ref string) *InsertStmtImpl {
+	stmt := &InsertStmtImpl{Dialect: dial, DefaultRef: ref}
+	exec := &execution.Executor{Ctx: ctx, Statement: stmt}
+	stmt.Executor = exec
+	return stmt
 }
 
 func (s *InsertStmtImpl) Kind() entity.StatementKind {

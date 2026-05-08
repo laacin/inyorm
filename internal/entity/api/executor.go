@@ -1,8 +1,8 @@
 package api
 
-type Executor interface {
+type Executor[Prep any] interface {
 	Run(binder ...Scanner) error
-	Prepare(fn func(exec Prepare) error) error
+	Prepare(fn func(exec Prep) error) error
 }
 
 type Prepare interface {
