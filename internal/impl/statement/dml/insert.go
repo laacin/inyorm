@@ -2,6 +2,7 @@ package dml
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/laacin/inyorm/internal/entity"
 	"github.com/laacin/inyorm/internal/execution"
@@ -18,9 +19,9 @@ type InsertStmtImpl struct {
 	*execution.Executor
 }
 
-func NewInsertStatement(ctx context.Context, dial entity.Dialect, ref string) *InsertStmtImpl {
+func NewInsertStatement(ctx context.Context, dial entity.Dialect, instance *sql.DB, ref string) *InsertStmtImpl {
 	stmt := &InsertStmtImpl{Dialect: dial, DefaultRef: ref}
-	exec := &execution.Executor{Ctx: ctx, Statement: stmt}
+	exec := &execution.Executor{Ctx: ctx, Statement: stmt, Instance: instance}
 	stmt.Executor = exec
 	return stmt
 }

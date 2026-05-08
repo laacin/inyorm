@@ -2,6 +2,7 @@ package dml
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/laacin/inyorm/internal/entity"
 	"github.com/laacin/inyorm/internal/execution"
@@ -20,9 +21,9 @@ type DeleteStmtImpl struct {
 	*execution.Executor
 }
 
-func NewDeleteStatement(ctx context.Context, dial entity.Dialect, ref string) *DeleteStmtImpl {
+func NewDeleteStatement(ctx context.Context, dial entity.Dialect, instance *sql.DB, ref string) *DeleteStmtImpl {
 	stmt := &DeleteStmtImpl{Dialect: dial, DefaultRef: ref}
-	exec := &execution.Executor{Ctx: ctx, Statement: stmt}
+	exec := &execution.Executor{Ctx: ctx, Statement: stmt, Instance: instance}
 	stmt.Executor = exec
 	return stmt
 }
