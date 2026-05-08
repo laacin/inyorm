@@ -1,4 +1,4 @@
-package statement
+package dml
 
 import (
 	"github.com/laacin/inyorm/internal/entity"
@@ -6,30 +6,24 @@ import (
 	"github.com/laacin/inyorm/internal/impl/statement/writer"
 )
 
-type DeleteStmtImpl struct {
+type InsertStmtImpl struct {
 	DefaultRef string
 	Dialect    entity.Dialect
 
-	clause.DeleteImpl
-	clause.FromImpl
-	clause.WhereImpl
+	clause.InsertIntoImpl
 }
 
-func (s *DeleteStmtImpl) Kind() entity.StatementKind {
-	return entity.StatementDelete
+func (s *InsertStmtImpl) Kind() entity.StatementKind {
+	return entity.StatementInsert
 }
 
-func (s *DeleteStmtImpl) Build() *entity.Query {
+func (s *InsertStmtImpl) Build() (*entity.Statement, error) {
 	// Auto-FROM
-	if !s.FromImpl.IsDeclared() && s.DefaultRef != "" {
-		s.FromImpl.From(&entity.Table{Value: s.DefaultRef})
-	}
+	s.InsertIntoImpl.Table(&entity.Table{Value: s.DefaultRef})
 
 	// --- Load clauses
 	clauses := []entity.ClauseBuilder{
-		&s.DeleteImpl,
-		&s.FromImpl,
-		&s.WhereImpl,
+		&s.InsertIntoImpl,
 	}
 
 	clauseMap := make(map[entity.ClauseKind]entity.Clause)
@@ -43,18 +37,17 @@ func (s *DeleteStmtImpl) Build() *entity.Query {
 
 	var (
 		parameters = &writer.ParamStore{}
-		errs       []error
 	)
-
-	// --- Write the statement
 
 	w := &writer.WriterImpl{
 		Syntax: s.Dialect,
 		Params: parameters,
 	}
 
+	// --- Write the statement
+
 	first := true
-	for _, ord := range s.Dialect.DeleteOrder() {
+	for _, ord := range s.Dialect.InsertOrder() {
 		if clause, ok := clauseMap[ord]; ok {
 			if !first {
 				w.Char(' ')
@@ -67,12 +60,11 @@ func (s *DeleteStmtImpl) Build() *entity.Query {
 	// --- Validate values
 
 	if err := parameters.Validate(); err != nil {
-		errs = append(errs, err)
+		return nil, err
 	}
 
-	return &entity.Query{
-		Statement: w.ToString(),
-		Values:    parameters.Values(),
-		Errs:      errs,
-	}
+	return &entity.Statement{
+		Query:  w.ToString(),
+		Values: parameters.Values(),
+	}, nil
 }

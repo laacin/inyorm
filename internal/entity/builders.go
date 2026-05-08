@@ -79,5 +79,5 @@ type ClauseBuilder interface {
 
 type StatementBuilder interface {
 	Kind() StatementKind
-	Build() *Query
+	Build() (*Statement, error)
 }

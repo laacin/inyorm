@@ -1,4 +1,4 @@
-package statement
+package dml
 
 import (
 	"github.com/laacin/inyorm/internal/entity"
@@ -6,24 +6,25 @@ import (
 	"github.com/laacin/inyorm/internal/impl/statement/writer"
 )
 
-type InsertStmtImpl struct {
+type UpdateStmtImpl struct {
 	DefaultRef string
 	Dialect    entity.Dialect
 
-	clause.InsertIntoImpl
+	clause.UpdateImpl
+	clause.WhereImpl
 }
 
-func (s *InsertStmtImpl) Kind() entity.StatementKind {
-	return entity.StatementInsert
+func (s *UpdateStmtImpl) Kind() entity.StatementKind {
+	return entity.StatementSelect
 }
 
-func (s *InsertStmtImpl) Build() *entity.Query {
-	// Auto-FROM
-	s.InsertIntoImpl.Table(&entity.Table{Value: s.DefaultRef})
+func (s *UpdateStmtImpl) Build() (*entity.Statement, error) {
+	s.UpdateImpl.Table(&entity.Table{Value: s.DefaultRef})
 
 	// --- Load clauses
 	clauses := []entity.ClauseBuilder{
-		&s.InsertIntoImpl,
+		&s.UpdateImpl,
+		&s.WhereImpl,
 	}
 
 	clauseMap := make(map[entity.ClauseKind]entity.Clause)
@@ -37,18 +38,17 @@ func (s *InsertStmtImpl) Build() *entity.Query {
 
 	var (
 		parameters = &writer.ParamStore{}
-		errs       []error
 	)
-
-	// --- Write the statement
 
 	w := &writer.WriterImpl{
 		Syntax: s.Dialect,
 		Params: parameters,
 	}
 
+	// --- Write the statement
+
 	first := true
-	for _, ord := range s.Dialect.InsertOrder() {
+	for _, ord := range s.Dialect.UpdateOrder() {
 		if clause, ok := clauseMap[ord]; ok {
 			if !first {
 				w.Char(' ')
@@ -61,12 +61,11 @@ func (s *InsertStmtImpl) Build() *entity.Query {
 	// --- Validate values
 
 	if err := parameters.Validate(); err != nil {
-		errs = append(errs, err)
+		return nil, err
 	}
 
-	return &entity.Query{
-		Statement: w.ToString(),
-		Values:    parameters.Values(),
-		Errs:      errs,
-	}
+	return &entity.Statement{
+		Query:  w.ToString(),
+		Values: parameters.Values(),
+	}, nil
 }

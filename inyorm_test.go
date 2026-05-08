@@ -11,18 +11,20 @@ import (
 	"github.com/laacin/inyorm/internal/entity/api"
 )
 
-func run(t *testing.T, stmt any, exp string, vals []any) {
-	query := stmt.(interface{ Build() *entity.Query }).Build()
-	if err := query.FirstErr(); err != nil {
+func run(t *testing.T, q any, exp string, vals []any) {
+	stmt, err := q.(interface {
+		Build() (*entity.Statement, error)
+	}).Build()
+	if err != nil {
 		t.Fatal(err)
 	}
 
-	if query.Statement != exp {
-		t.Errorf("mismatch query:\nExpect:\n%s\nHave:\n%s", exp, query.Statement)
+	if stmt.Query != exp {
+		t.Errorf("mismatch query:\nExpect:\n%s\nHave:\n%s", exp, stmt.Query)
 	}
 
-	if !reflect.DeepEqual(query.Values, vals) {
-		t.Errorf("mismatch values:\nExpect:\n%#v\nHave:\n%#v", vals, query.Values)
+	if !reflect.DeepEqual(stmt.Values, vals) {
+		t.Errorf("mismatch values:\nExpect:\n%#v\nHave:\n%#v", vals, stmt.Values)
 	}
 }
 

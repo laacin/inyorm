@@ -1,4 +1,4 @@
-package statement
+package dml
 
 import (
 	"github.com/laacin/inyorm/internal/entity"
@@ -25,7 +25,7 @@ func (s *SelectStmtImpl) Kind() entity.StatementKind {
 	return entity.StatementSelect
 }
 
-func (s *SelectStmtImpl) Build() *entity.Query {
+func (s *SelectStmtImpl) Build() (*entity.Statement, error) {
 	// Auto-FROM
 	if !s.FromImpl.IsDeclared() && s.DefaultRef != "" {
 		s.FromImpl.From(&entity.Table{Value: s.DefaultRef})
@@ -56,7 +56,6 @@ func (s *SelectStmtImpl) Build() *entity.Query {
 	var (
 		parameters = &writer.ParamStore{}
 		aliases    *writer.AliasStore
-		errs       []error
 	)
 
 	// --- Set table references if Join exists
@@ -88,12 +87,11 @@ func (s *SelectStmtImpl) Build() *entity.Query {
 	// --- Validate values
 
 	if err := parameters.Validate(); err != nil {
-		errs = append(errs, err)
+		return nil, err
 	}
 
-	return &entity.Query{
-		Statement: w.ToString(),
-		Values:    parameters.Values(),
-		Errs:      errs,
-	}
+	return &entity.Statement{
+		Query:  w.ToString(),
+		Values: parameters.Values(),
+	}, nil
 }
