@@ -2,15 +2,29 @@ package inyorm
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/laacin/inyorm/internal/impl/expression"
 	"github.com/laacin/inyorm/internal/impl/statement/dml"
 )
 
-type Engine struct{ dialect Dialect }
+type Engine struct {
+	dialect  Dialect
+	instance *sql.DB
+}
 
 func New(dialect Dialect) *Engine {
-	return &Engine{dialect}
+	return &Engine{
+		dialect:  dialect,
+		instance: nil,
+	}
+}
+
+func NewWithInstance(dialect Dialect, db *sql.DB) *Engine {
+	return &Engine{
+		dialect:  dialect,
+		instance: db,
+	}
 }
 
 func (eng *Engine) NewSelect(ctx context.Context, table string) (SelectStatement, ExprBuilder) {
