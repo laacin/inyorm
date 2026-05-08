@@ -374,15 +374,17 @@ func TestUpdate(t *testing.T) {
 	})
 }
 
-// func TestDelete(t *testing.T) {
-// 	qe := inyorm.New("", nil, nil)
-//
-// 	t.Run("delete_one", func(t *testing.T) {
-// 		q, c := qe.NewDelete(context.Background(), "comments")
-//
-// 		q.Where(c.Col("id")).Equal(c.Param(12310))
-//
-// 		exp := "DELETE FROM comments WHERE (id = ?)"
-// 		run(t, q, exp, []any{12310})
-// 	})
-// }
+func TestDelete(t *testing.T) {
+	dial := standard.DialectDefault()
+	qe := inyorm.New(dial)
+
+	t.Run("delete_one", func(t *testing.T) {
+		q, c := qe.NewDelete(context.Background(), "comments")
+
+		q.Delete()
+		q.Where(c.Col("id")).Equal(c.Param(12310))
+
+		exp := "DELETE FROM comments WHERE (id = ?)"
+		run(t, q, exp, []any{12310})
+	})
+}

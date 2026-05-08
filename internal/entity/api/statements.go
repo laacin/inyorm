@@ -30,6 +30,7 @@ type UpdateStmt interface {
 // DeleteStmt represents a full DELETE statement
 type DeleteStmt interface {
 	// Executor
+	Delete
 	From
 	Where
 }

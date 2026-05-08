@@ -1,0 +1,78 @@
+package statement
+
+import (
+	"github.com/laacin/inyorm/internal/entity"
+	"github.com/laacin/inyorm/internal/impl/clause"
+	"github.com/laacin/inyorm/internal/impl/statement/writer"
+)
+
+type DeleteStmtImpl struct {
+	DefaultRef string
+	Dialect    entity.Dialect
+
+	clause.DeleteImpl
+	clause.FromImpl
+	clause.WhereImpl
+}
+
+func (s *DeleteStmtImpl) Kind() entity.StatementKind {
+	return entity.StatementDelete
+}
+
+func (s *DeleteStmtImpl) Build() *entity.Query {
+	// Auto-FROM
+	if !s.FromImpl.IsDeclared() && s.DefaultRef != "" {
+		s.FromImpl.From(&entity.Table{Value: s.DefaultRef})
+	}
+
+	// --- Load clauses
+	clauses := []entity.ClauseBuilder{
+		&s.DeleteImpl,
+		&s.FromImpl,
+		&s.WhereImpl,
+	}
+
+	clauseMap := make(map[entity.ClauseKind]entity.Clause)
+	for _, cls := range clauses {
+		if cls.IsDeclared() {
+			clauseMap[cls.Kind()] = cls.Build()
+		}
+	}
+
+	// --- Declarate writers
+
+	var (
+		parameters = &writer.ParamStore{}
+		errs       []error
+	)
+
+	// --- Write the statement
+
+	w := &writer.WriterImpl{
+		Syntax: s.Dialect,
+		Params: parameters,
+	}
+
+	first := true
+	for _, ord := range s.Dialect.DeleteOrder() {
+		if clause, ok := clauseMap[ord]; ok {
+			if !first {
+				w.Char(' ')
+			}
+			first = false
+			clause.Write(w, s.Dialect)
+		}
+	}
+
+	// --- Validate values
+
+	if err := parameters.Validate(); err != nil {
+		errs = append(errs, err)
+	}
+
+	return &entity.Query{
+		Statement: w.ToString(),
+		Values:    parameters.Values(),
+		Errs:      errs,
+	}
+}

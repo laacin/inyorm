@@ -212,3 +212,8 @@ type Values interface {
 	// You can omit this call if using prepared columns without values.
 	Values(values Value)
 }
+
+// Delete represents the DELETE clause.
+type Delete interface {
+	Delete()
+}

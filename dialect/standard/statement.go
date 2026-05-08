@@ -32,6 +32,7 @@ func (dial *DialectStandard) UpdateOrder() []entity.ClauseKind {
 func (dial *DialectStandard) DeleteOrder() []entity.ClauseKind {
 	return []entity.ClauseKind{
 		entity.ClauseDelete,
+		entity.ClauseFrom,
 		entity.ClauseWhere,
 	}
 }

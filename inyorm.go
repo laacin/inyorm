@@ -30,3 +30,9 @@ func (eng *Engine) NewUpdate(ctx context.Context, table string) (UpdateStatement
 	exprBuilder := &expression.ExprBuilderImpl{DefaultRef: table}
 	return stmt, exprBuilder
 }
+
+func (eng *Engine) NewDelete(ctx context.Context, table string) (DeleteStatement, ExprBuilder) {
+	stmt := &statement.DeleteStmtImpl{Dialect: eng.dialect, DefaultRef: table}
+	exprBuilder := &expression.ExprBuilderImpl{DefaultRef: table}
+	return stmt, exprBuilder
+}

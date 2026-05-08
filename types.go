@@ -41,6 +41,9 @@ type (
 	OrderByNext = api.OrderByNext
 	Limit       = api.Limit
 	Offset      = api.Offset
+	InsertInto  = api.Insert
+	Update      = api.Update
+	Delete      = api.Delete
 
 	// Statements
 	SelectStatement = api.SelectStmt
