@@ -16,7 +16,7 @@ type ValueSyntax interface {
 	WriteWildcard(Writer)
 
 	// Specials
-	WritePlaceholder(Writer)
+	WritePlaceholder(Writer, int)
 	WriteConcat(Writer, *Concat)
 	WriteCondition(Writer, *Condition, WritingMode)
 	WriteCaseSwitch(Writer, *CaseSwitch, WritingMode)

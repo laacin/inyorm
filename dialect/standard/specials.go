@@ -2,7 +2,7 @@ package standard
 
 import "github.com/laacin/inyorm/internal/entity"
 
-func (dial *DialectStandard) WritePlaceholder(w entity.Writer) {
+func (dial *DialectStandard) WritePlaceholder(w entity.Writer, count int) {
 	w.Char('?')
 }
 
