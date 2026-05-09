@@ -1,8 +1,8 @@
-package standard
+package dialect
 
 import "github.com/laacin/inyorm/internal/entity"
 
-func (dial *DialectStandard) WriteInsertInto(w entity.Writer, cls *entity.InsertInto) {
+func (dial *DialectStd) WriteInsertInto(w entity.Writer, cls *entity.InsertInto) {
 	w.Write("INSERT INTO")
 	w.Char(' ')
 
@@ -37,7 +37,7 @@ func (dial *DialectStandard) WriteInsertInto(w entity.Writer, cls *entity.Insert
 	}
 }
 
-func (dial *DialectStandard) WriteSelect(w entity.Writer, cls *entity.Select) {
+func (dial *DialectStd) WriteSelect(w entity.Writer, cls *entity.Select) {
 	w.Write("SELECT")
 	w.Char(' ')
 
@@ -54,7 +54,7 @@ func (dial *DialectStandard) WriteSelect(w entity.Writer, cls *entity.Select) {
 	}
 }
 
-func (dial *DialectStandard) WriteFrom(w entity.Writer, cls *entity.From) {
+func (dial *DialectStd) WriteFrom(w entity.Writer, cls *entity.From) {
 	w.Write("FROM")
 	w.Char(' ')
 	w.Value(cls.Value, entity.WriteDef)
@@ -68,7 +68,7 @@ var joinTypeMap = map[entity.JoinType]string{
 	entity.JoinCross: "CROSS",
 }
 
-func (dial *DialectStandard) WriteJoin(w entity.Writer, cls *entity.Join) {
+func (dial *DialectStd) WriteJoin(w entity.Writer, cls *entity.Join) {
 	for i, join := range cls.Joins {
 		if i > 0 {
 			w.Char(' ')
@@ -85,7 +85,7 @@ func (dial *DialectStandard) WriteJoin(w entity.Writer, cls *entity.Join) {
 	}
 }
 
-func (dial *DialectStandard) WriteWhere(w entity.Writer, cls *entity.Where) {
+func (dial *DialectStd) WriteWhere(w entity.Writer, cls *entity.Where) {
 	w.Write("WHERE")
 	w.Char(' ')
 
@@ -97,7 +97,7 @@ func (dial *DialectStandard) WriteWhere(w entity.Writer, cls *entity.Where) {
 	}
 }
 
-func (dial *DialectStandard) WriteGroupBy(w entity.Writer, cls *entity.GroupBy) {
+func (dial *DialectStd) WriteGroupBy(w entity.Writer, cls *entity.GroupBy) {
 	w.Write("GROUP BY")
 	w.Char(' ')
 
@@ -109,13 +109,13 @@ func (dial *DialectStandard) WriteGroupBy(w entity.Writer, cls *entity.GroupBy) 
 	}
 }
 
-func (dial *DialectStandard) WriteHaving(w entity.Writer, cls *entity.Having) {
+func (dial *DialectStd) WriteHaving(w entity.Writer, cls *entity.Having) {
 	w.Write("HAVING")
 	w.Char(' ')
 	w.Value(cls.Cond, entity.WriteExpr)
 }
 
-func (dial *DialectStandard) WriteOrderBy(w entity.Writer, cls *entity.OrderBy) {
+func (dial *DialectStd) WriteOrderBy(w entity.Writer, cls *entity.OrderBy) {
 	w.Write("ORDER BY")
 	w.Char(' ')
 
@@ -132,19 +132,19 @@ func (dial *DialectStandard) WriteOrderBy(w entity.Writer, cls *entity.OrderBy) 
 	}
 }
 
-func (dial *DialectStandard) WriteLimit(w entity.Writer, cls *entity.Limit) {
+func (dial *DialectStd) WriteLimit(w entity.Writer, cls *entity.Limit) {
 	w.Write("LIMIT")
 	w.Char(' ')
 	w.Value(cls.ValueNumber, entity.WriteBase)
 }
 
-func (dial *DialectStandard) WriteOffset(w entity.Writer, cls *entity.Offset) {
+func (dial *DialectStd) WriteOffset(w entity.Writer, cls *entity.Offset) {
 	w.Write("OFFSET")
 	w.Char(' ')
 	w.Value(cls.ValueNumber, entity.WriteBase)
 }
 
-func (dial *DialectStandard) WriteUpdate(w entity.Writer, cls *entity.Update) {
+func (dial *DialectStd) WriteUpdate(w entity.Writer, cls *entity.Update) {
 	w.Write("UPDATE")
 	w.Char(' ')
 
@@ -162,6 +162,6 @@ func (dial *DialectStandard) WriteUpdate(w entity.Writer, cls *entity.Update) {
 	}
 }
 
-func (dial *DialectStandard) WriteDelete(w entity.Writer, cls *entity.Delete) {
+func (dial *DialectStd) WriteDelete(w entity.Writer, cls *entity.Delete) {
 	w.Write("DELETE")
 }

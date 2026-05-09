@@ -1,8 +1,8 @@
-package standard
+package dialect
 
 import "github.com/laacin/inyorm/internal/entity"
 
-func (dial *DialectStandard) WriteTable(w entity.Writer, tbl *entity.Table) {
+func (dial *DialectStd) WriteTable(w entity.Writer, tbl *entity.Table) {
 	w.Write(tbl.Value)
 	if ref, ok := w.GetRef(tbl.Value); ok {
 		w.Char(' ')
@@ -10,7 +10,7 @@ func (dial *DialectStandard) WriteTable(w entity.Writer, tbl *entity.Table) {
 	}
 }
 
-func (dial *DialectStandard) WriteColBase(w entity.Writer, col *entity.Column) {
+func (dial *DialectStd) WriteColBase(w entity.Writer, col *entity.Column) {
 	if ref, ok := w.GetRef(col.Ref); ok {
 		w.Char(ref)
 		w.Char('.')
@@ -18,7 +18,7 @@ func (dial *DialectStandard) WriteColBase(w entity.Writer, col *entity.Column) {
 	w.Write(col.Name)
 }
 
-func (dial *DialectStandard) WriteColExpr(w entity.Writer, col *entity.Column) {
+func (dial *DialectStd) WriteColExpr(w entity.Writer, col *entity.Column) {
 	dial.BuildCol(w.New(), col)
 
 	if col.Value == "" {
@@ -29,7 +29,7 @@ func (dial *DialectStandard) WriteColExpr(w entity.Writer, col *entity.Column) {
 	w.Write(col.Value)
 }
 
-func (dial *DialectStandard) WriteColAlias(w entity.Writer, col *entity.Column) {
+func (dial *DialectStd) WriteColAlias(w entity.Writer, col *entity.Column) {
 	dial.BuildCol(w.New(), col)
 
 	if col.Alias != "" {
@@ -45,7 +45,7 @@ func (dial *DialectStandard) WriteColAlias(w entity.Writer, col *entity.Column) 
 	dial.WriteColBase(w, col)
 }
 
-func (dial *DialectStandard) WriteColDef(w entity.Writer, col *entity.Column) {
+func (dial *DialectStd) WriteColDef(w entity.Writer, col *entity.Column) {
 	dial.BuildCol(w.New(), col)
 
 	if col.Value == "" {
@@ -61,7 +61,7 @@ func (dial *DialectStandard) WriteColDef(w entity.Writer, col *entity.Column) {
 }
 
 // --- Helpers
-func (dial *DialectStandard) BuildFirst(w entity.Writer, col *entity.Column) {
+func (dial *DialectStd) BuildFirst(w entity.Writer, col *entity.Column) {
 	if col.From != nil {
 		if col.From.Kind() == entity.ValueWildcard {
 			if ref, ok := w.GetRef(col.Ref); ok {
@@ -82,7 +82,7 @@ func (dial *DialectStandard) BuildFirst(w entity.Writer, col *entity.Column) {
 }
 
 // FIX: illegible
-func (dial *DialectStandard) BuildCol(w entity.Writer, col *entity.Column) {
+func (dial *DialectStd) BuildCol(w entity.Writer, col *entity.Column) {
 	if (col == nil) || (col.Exprs == nil && col.Aggr == nil && col.From == nil) {
 		return
 	}

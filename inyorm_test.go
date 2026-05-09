@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/laacin/inyorm"
-	"github.com/laacin/inyorm/dialect/standard"
+	"github.com/laacin/inyorm/engine/std"
 	"github.com/laacin/inyorm/internal/entity"
 	"github.com/laacin/inyorm/internal/entity/api"
 )
@@ -29,7 +29,7 @@ func run(t *testing.T, q any, exp string, vals []any) {
 }
 
 func TestSelect(t *testing.T) {
-	qe := inyorm.New(nil, standard.DialectDefault())
+	qe := inyorm.New(std.JustDialect())
 
 	t.Run("simple", func(t *testing.T) {
 		q, c := qe.NewSelect(context.Background(), "users")
@@ -231,7 +231,7 @@ func TestSelect(t *testing.T) {
 }
 
 func TestInsert(t *testing.T) {
-	qe := inyorm.New(nil, standard.DialectDefault())
+	qe := inyorm.New(std.JustDialect())
 
 	type User struct {
 		Account string `inyorm:"account"`
@@ -306,7 +306,7 @@ func TestInsert(t *testing.T) {
 }
 
 func TestUpdate(t *testing.T) {
-	qe := inyorm.New(nil, standard.DialectDefault())
+	qe := inyorm.New(std.JustDialect())
 
 	type Post struct {
 		Title       string `inyorm:"title"`
@@ -374,7 +374,7 @@ func TestUpdate(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	qe := inyorm.New(nil, standard.DialectDefault())
+	qe := inyorm.New(std.JustDialect())
 
 	t.Run("delete_one", func(t *testing.T) {
 		q, c := qe.NewDelete(context.Background(), "comments")
