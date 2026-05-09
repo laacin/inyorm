@@ -11,14 +11,18 @@ import (
 type Engine struct {
 	Dialect entity.Dialect
 	Driver  entity.Driver
+	Err     error
 }
 
 type DB struct {
 	eng *Engine
 }
 
-func New(eng *Engine) *DB {
-	return &DB{eng}
+func New(eng *Engine) (*DB, error) {
+	if eng.Err != nil {
+		return nil, eng.Err
+	}
+	return &DB{eng}, nil
 }
 
 func (db *DB) NewSelect(ctx context.Context, table string) (SelectStatement, ExprBuilder) {
