@@ -2,7 +2,7 @@ package dialect
 
 import "github.com/laacin/inyorm/internal/entity"
 
-func (dial *DialectStd) SelectOrder() []entity.ClauseKind {
+func (dial *StdDialect) SelectOrder() []entity.ClauseKind {
 	return []entity.ClauseKind{
 		entity.ClauseSelect,
 		entity.ClauseFrom,
@@ -16,20 +16,20 @@ func (dial *DialectStd) SelectOrder() []entity.ClauseKind {
 	}
 }
 
-func (dial *DialectStd) InsertOrder() []entity.ClauseKind {
+func (dial *StdDialect) InsertOrder() []entity.ClauseKind {
 	return []entity.ClauseKind{
 		entity.ClauseInsertInto,
 	}
 }
 
-func (dial *DialectStd) UpdateOrder() []entity.ClauseKind {
+func (dial *StdDialect) UpdateOrder() []entity.ClauseKind {
 	return []entity.ClauseKind{
 		entity.ClauseUpdate,
 		entity.ClauseWhere,
 	}
 }
 
-func (dial *DialectStd) DeleteOrder() []entity.ClauseKind {
+func (dial *StdDialect) DeleteOrder() []entity.ClauseKind {
 	return []entity.ClauseKind{
 		entity.ClauseDelete,
 		entity.ClauseFrom,

@@ -2,11 +2,11 @@ package dialect
 
 import "github.com/laacin/inyorm/internal/entity"
 
-func (dial *DialectStd) WritePlaceholder(w entity.Writer, count int) {
+func (dial *StdDialect) WritePlaceholder(w entity.Writer, count int) {
 	w.Char('?')
 }
 
-func (dial *DialectStd) WriteCondition(w entity.Writer, cond *entity.Condition, mode entity.WritingMode) {
+func (dial *StdDialect) WriteCondition(w entity.Writer, cond *entity.Condition, mode entity.WritingMode) {
 	w.Char('(')
 	for i, pred := range cond.Predicates {
 		if !pred.Closed {
@@ -52,7 +52,7 @@ func (dial *DialectStd) WriteCondition(w entity.Writer, cond *entity.Condition, 
 	w.Char(')')
 }
 
-func (dial *DialectStd) WriteConcat(w entity.Writer, con *entity.Concat) {
+func (dial *StdDialect) WriteConcat(w entity.Writer, con *entity.Concat) {
 	w.Write("CONCAT")
 	w.Char('(')
 	for i, val := range con.Values {
@@ -64,7 +64,7 @@ func (dial *DialectStd) WriteConcat(w entity.Writer, con *entity.Concat) {
 	w.Char(')')
 }
 
-func (dial *DialectStd) WriteCaseSwitch(w entity.Writer, cas *entity.CaseSwitch, mode entity.WritingMode) {
+func (dial *StdDialect) WriteCaseSwitch(w entity.Writer, cas *entity.CaseSwitch, mode entity.WritingMode) {
 	w.Write("CASE")
 	w.Char(' ')
 	w.Value(cas.Cond, entity.WriteExpr)
@@ -88,7 +88,7 @@ func (dial *DialectStd) WriteCaseSwitch(w entity.Writer, cas *entity.CaseSwitch,
 	w.Write("END")
 }
 
-func (dial *DialectStd) WriteCaseSearch(w entity.Writer, cas *entity.CaseSearch, mode entity.WritingMode) {
+func (dial *StdDialect) WriteCaseSearch(w entity.Writer, cas *entity.CaseSearch, mode entity.WritingMode) {
 	w.Write("CASE WHEN")
 	w.Char(' ')
 

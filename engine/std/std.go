@@ -8,15 +8,18 @@ import (
 	"github.com/laacin/inyorm/engine/std/driver"
 )
 
+// Expose dialect for the others dialects
+type StdDialect = dialect.StdDialect
+
 func FromInstance(db *sql.DB) *inyorm.Engine {
 	return &inyorm.Engine{
 		Driver:  &driver.StdDriver{Instance: db},
-		Dialect: &dialect.DialectStd{},
+		Dialect: &dialect.StdDialect{},
 	}
 }
 
 func JustDialect() *inyorm.Engine {
 	return &inyorm.Engine{
-		Dialect: &dialect.DialectStd{},
+		Dialect: &dialect.StdDialect{},
 	}
 }

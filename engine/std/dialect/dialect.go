@@ -1,3 +1,3 @@
 package dialect
 
-type DialectStd struct{}
+type StdDialect struct{}
