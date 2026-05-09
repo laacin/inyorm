@@ -2,7 +2,6 @@ package dml
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/laacin/inyorm/internal/entity"
 	"github.com/laacin/inyorm/internal/execution"
@@ -20,9 +19,9 @@ type UpdateStmtImpl struct {
 	*execution.Executor
 }
 
-func NewUpdateStatement(ctx context.Context, dial entity.Dialect, instance *sql.DB, ref string) *UpdateStmtImpl {
+func NewUpdateStatement(ctx context.Context, dial entity.Dialect, driver entity.Driver, ref string) *UpdateStmtImpl {
 	stmt := &UpdateStmtImpl{Dialect: dial, DefaultRef: ref}
-	exec := &execution.Executor{Ctx: ctx, Statement: stmt, Instance: instance}
+	exec := &execution.Executor{Ctx: ctx, Statement: stmt, Driver: driver}
 	stmt.Executor = exec
 	return stmt
 }

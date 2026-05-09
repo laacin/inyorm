@@ -2,7 +2,6 @@ package dml
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/laacin/inyorm/internal/entity"
 	"github.com/laacin/inyorm/internal/execution"
@@ -27,9 +26,9 @@ type SelectStmtImpl struct {
 	*execution.Executor
 }
 
-func NewSelectStatement(ctx context.Context, dial entity.Dialect, instance *sql.DB, ref string) *SelectStmtImpl {
+func NewSelectStatement(ctx context.Context, dial entity.Dialect, driver entity.Driver, ref string) *SelectStmtImpl {
 	stmt := &SelectStmtImpl{Dialect: dial, DefaultRef: ref}
-	exec := &execution.Executor{Ctx: ctx, Statement: stmt, Instance: instance}
+	exec := &execution.Executor{Ctx: ctx, Statement: stmt, Driver: driver}
 	stmt.Executor = exec
 	return stmt
 }

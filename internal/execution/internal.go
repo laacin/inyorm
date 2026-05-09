@@ -2,25 +2,19 @@ package execution
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 
+	"github.com/laacin/inyorm/internal/entity"
 	"github.com/laacin/inyorm/internal/mapper"
 )
 
-type instance interface {
-	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
-	QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
-}
-
 func run(
 	ctx context.Context,
-	db instance,
+	db entity.Driver,
 	query string,
 	args []any,
 ) error {
-	_, err := db.ExecContext(ctx, query, args...)
-	if err != nil {
+	if err := db.Exec(ctx, query, args...); err != nil {
 		return errSQL(err)
 	}
 	return nil
@@ -28,13 +22,13 @@ func run(
 
 func scan(
 	ctx context.Context,
-	db instance,
+	db entity.Driver,
 	tag string,
 	query string,
 	args []any,
 	scan any,
 ) error {
-	rows, err := db.QueryContext(ctx, query, args...)
+	rows, err := db.Query(ctx, query, args...)
 	if err != nil {
 		return errSQL(err)
 	}
@@ -42,32 +36,34 @@ func scan(
 	return mapper.Scan(rows, tag, scan)
 }
 
-func runPrep(
-	ctx context.Context,
-	stmt *sql.Stmt,
-	args []any,
-) error {
-	_, err := stmt.ExecContext(ctx, args...)
-	if err != nil {
-		return errSQL(err)
-	}
-	return nil
-}
+// TODO:
 
-func scanPrep(
-	ctx context.Context,
-	stmt *sql.Stmt,
-	tag string,
-	vals []any,
-	scan any,
-) error {
-	rows, err := stmt.QueryContext(ctx, vals...)
-	if err != nil {
-		return errSQL(err)
-	}
-
-	return mapper.Scan(rows, tag, scan)
-}
+// func runPrep(
+// 	ctx context.Context,
+// 	stmt *sql.Stmt,
+// 	args []any,
+// ) error {
+// 	_, err := stmt.ExecContext(ctx, args...)
+// 	if err != nil {
+// 		return errSQL(err)
+// 	}
+// 	return nil
+// }
+//
+// func scanPrep(
+// 	ctx context.Context,
+// 	stmt *sql.Stmt,
+// 	tag string,
+// 	vals []any,
+// 	scan any,
+// ) error {
+// 	rows, err := stmt.QueryContext(ctx, vals...)
+// 	if err != nil {
+// 		return errSQL(err)
+// 	}
+//
+// 	return mapper.Scan(rows, tag, scan)
+// }
 
 func errSQL(err error) error {
 	return fmt.Errorf("SQL Error: %w", err)

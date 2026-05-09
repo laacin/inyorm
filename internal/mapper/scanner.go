@@ -1,17 +1,15 @@
 package mapper
 
 import (
-	"database/sql"
+	"errors"
 	"reflect"
+
+	"github.com/laacin/inyorm/internal/entity"
 )
 
-type RowScanner interface {
-	Columns() ([]string, error)
-	Next() bool
-	Scan(...any) error
-}
+var errNoRows = errors.New("no results") // TODO: improve msg
 
-func Scan(rows RowScanner, tag string, v any) error {
+func Scan(rows entity.Rows, tag string, v any) error {
 	s := getSchema(tag, v)
 
 	if s.Type != typeMap && !s.Slc && !s.Ptr {
@@ -42,15 +40,15 @@ func Scan(rows RowScanner, tag string, v any) error {
 
 // -- internal
 
-func scanPrim(rows RowScanner, v any) error {
+func scanPrim(rows entity.Rows, v any) error {
 	if rows.Next() {
 		return rows.Scan(v)
 	} else {
-		return sql.ErrNoRows
+		return errNoRows
 	}
 }
 
-func scanMap(rows RowScanner, v any, ptr bool) error {
+func scanMap(rows entity.Rows, v any, ptr bool) error {
 	var mp map[string]any
 	if ptr {
 		mp = *(v).(*map[string]any)
@@ -70,7 +68,7 @@ func scanMap(rows RowScanner, v any, ptr bool) error {
 			return err
 		}
 	} else {
-		return sql.ErrNoRows
+		return errNoRows
 	}
 
 	for i, col := range cols {
@@ -80,7 +78,7 @@ func scanMap(rows RowScanner, v any, ptr bool) error {
 	return nil
 }
 
-func scanSlcOfMap(rows RowScanner, v any) error {
+func scanSlcOfMap(rows entity.Rows, v any) error {
 	mp := v.(*[]map[string]any)
 
 	cols, _ := rows.Columns()
@@ -114,7 +112,7 @@ func scanSlcOfMap(rows RowScanner, v any) error {
 	return nil
 }
 
-func scanStruct(rows RowScanner, indexFields map[string][]int, v any) error {
+func scanStruct(rows entity.Rows, indexFields map[string][]int, v any) error {
 	val := reflect.ValueOf(v).Elem()
 
 	cols, _ := rows.Columns()
@@ -133,13 +131,13 @@ func scanStruct(rows RowScanner, indexFields map[string][]int, v any) error {
 			return err
 		}
 	} else {
-		return sql.ErrNoRows
+		return errNoRows
 	}
 
 	return nil
 }
 
-func scanSlcOfStruct(rows RowScanner, indexField map[string][]int, v any) error {
+func scanSlcOfStruct(rows entity.Rows, indexField map[string][]int, v any) error {
 	val := reflect.ValueOf(v).Elem()
 
 	typ := val.Type().Elem()
