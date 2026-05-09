@@ -11,14 +11,14 @@ import (
 
 type PsqlDialect = dialect.PsqlDialect
 
-func Open(ctx context.Context, dsn string) *inyorm.Engine {
+func Open(ctx context.Context, dsn string) (*inyorm.Engine, error) {
 	conn, err := pgx.Connect(ctx, dsn)
 	if err != nil {
-		panic("TODO")
+		return nil, err
 	}
 
 	return &inyorm.Engine{
 		Dialect: &dialect.PsqlDialect{},
 		Driver:  &driver.PsqlDriver{Conn: conn},
-	}
+	}, nil
 }
