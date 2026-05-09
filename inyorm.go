@@ -8,45 +8,38 @@ import (
 	"github.com/laacin/inyorm/internal/impl/statement/dml"
 )
 
-type Engine struct {
+type DB struct {
 	dialect Dialect
 	driver  entity.Driver
 }
 
-// func New(dialect Dialect) *Engine {
-// 	return &Engine{
-// 		dialect: dialect,
-// 		driver:  nil,
-// 	}
-// }
-
-func New(driver entity.Driver, dialect Dialect) *Engine {
-	return &Engine{
+func New(driver entity.Driver, dialect Dialect) *DB {
+	return &DB{
 		dialect: dialect,
 		driver:  driver,
 	}
 }
 
-func (eng *Engine) NewSelect(ctx context.Context, table string) (SelectStatement, ExprBuilder) {
-	stmt := dml.NewSelectStatement(ctx, eng.dialect, eng.driver, table)
+func (db *DB) NewSelect(ctx context.Context, table string) (SelectStatement, ExprBuilder) {
+	stmt := dml.NewSelectStatement(ctx, db.dialect, db.driver, table)
 	exprBuilder := &expression.ExprBuilderImpl{DefaultRef: table}
 	return stmt, exprBuilder
 }
 
-func (eng *Engine) NewInsert(ctx context.Context, table string) (InsertStatement, ExprBuilder) {
-	stmt := dml.NewInsertStatement(ctx, eng.dialect, eng.driver, table)
+func (db *DB) NewInsert(ctx context.Context, table string) (InsertStatement, ExprBuilder) {
+	stmt := dml.NewInsertStatement(ctx, db.dialect, db.driver, table)
 	exprBuilder := &expression.ExprBuilderImpl{DefaultRef: table}
 	return stmt, exprBuilder
 }
 
-func (eng *Engine) NewUpdate(ctx context.Context, table string) (UpdateStatement, ExprBuilder) {
-	stmt := dml.NewUpdateStatement(ctx, eng.dialect, eng.driver, table)
+func (db *DB) NewUpdate(ctx context.Context, table string) (UpdateStatement, ExprBuilder) {
+	stmt := dml.NewUpdateStatement(ctx, db.dialect, db.driver, table)
 	exprBuilder := &expression.ExprBuilderImpl{DefaultRef: table}
 	return stmt, exprBuilder
 }
 
-func (eng *Engine) NewDelete(ctx context.Context, table string) (DeleteStatement, ExprBuilder) {
-	stmt := dml.NewDeleteStatement(ctx, eng.dialect, eng.driver, table)
+func (db *DB) NewDelete(ctx context.Context, table string) (DeleteStatement, ExprBuilder) {
+	stmt := dml.NewDeleteStatement(ctx, db.dialect, db.driver, table)
 	exprBuilder := &expression.ExprBuilderImpl{DefaultRef: table}
 	return stmt, exprBuilder
 }
