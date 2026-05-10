@@ -1,5 +1,15 @@
 package entity
 
+import "context"
+
+type Engine struct {
+	Dialect Dialect
+	Driver  Driver
+	Err     error
+}
+
+// ---- Dialect
+
 type Dialect interface {
 	ValueSyntax
 	ClauseSyntax
@@ -53,4 +63,28 @@ type StatementOrder interface {
 	InsertOrder() []ClauseKind
 	UpdateOrder() []ClauseKind
 	DeleteOrder() []ClauseKind
+}
+
+// --- Driver
+
+type Driver interface {
+	Connection
+	Executor
+}
+
+type Connection interface {
+	Close() error
+}
+
+type Executor interface {
+	Exec(context.Context, string, ...any) error
+	Query(context.Context, string, ...any) (Rows, error)
+}
+
+// dependecies
+
+type Rows interface {
+	Columns() ([]string, error)
+	Next() bool
+	Scan(...any) error
 }

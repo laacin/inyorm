@@ -2,21 +2,14 @@ package inyorm
 
 import (
 	"context"
+	"errors"
 
 	"github.com/laacin/inyorm/internal/entity"
 	"github.com/laacin/inyorm/internal/impl/expression"
 	"github.com/laacin/inyorm/internal/impl/statement/dml"
 )
 
-type Engine struct {
-	Dialect entity.Dialect
-	Driver  entity.Driver
-	Err     error
-}
-
-type DB struct {
-	eng *Engine
-}
+type DB struct{ eng *entity.Engine }
 
 func New(eng *Engine) (*DB, error) {
 	if eng.Err != nil {
@@ -24,6 +17,8 @@ func New(eng *Engine) (*DB, error) {
 	}
 	return &DB{eng}, nil
 }
+
+// --- DML Statements
 
 func (db *DB) NewSelect(ctx context.Context, table string) (SelectStatement, ExprBuilder) {
 	stmt := dml.NewSelectStatement(ctx, db.eng.Dialect, db.eng.Driver, table)
@@ -47,4 +42,18 @@ func (db *DB) NewDelete(ctx context.Context, table string) (DeleteStatement, Exp
 	stmt := dml.NewDeleteStatement(ctx, db.eng.Dialect, db.eng.Driver, table)
 	exprBuilder := &expression.ExprBuilderImpl{DefaultRef: table}
 	return stmt, exprBuilder
+}
+
+// --- Connection
+
+func (db *DB) Close(ctx context.Context) error {
+	errCh := make(chan error, 1)
+	go func() { errCh <- db.eng.Driver.Close() }()
+
+	select {
+	case <-ctx.Done():
+		return errors.New("context timeout")
+	case err := <-errCh:
+		return err
+	}
 }

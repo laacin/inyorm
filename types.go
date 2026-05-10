@@ -1,8 +1,13 @@
 package inyorm
 
-import "github.com/laacin/inyorm/internal/entity/api"
+import (
+	"github.com/laacin/inyorm/internal/entity"
+	"github.com/laacin/inyorm/internal/entity/api"
+)
 
 type (
+	Engine = entity.Engine
+
 	// Values
 	Value   = api.Value
 	Scanner = api.Scanner
