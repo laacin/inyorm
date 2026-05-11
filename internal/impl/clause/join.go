@@ -57,12 +57,12 @@ func (c *JoinImpl) Kind() entity.ClauseKind {
 	return entity.ClauseJoin
 }
 
-func (c *JoinImpl) Build() entity.Clause {
+func (c *JoinImpl) Build() (entity.Clause, error) {
 	for i, cond := range c.conds {
 		if cond == nil {
 			c.emb.Joins[i].Cond = nil
 		}
 		c.emb.Joins[i].Cond = cond.Build().(*entity.Condition)
 	}
-	return &c.emb
+	return &c.emb, nil
 }

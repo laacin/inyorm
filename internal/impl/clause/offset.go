@@ -24,6 +24,6 @@ func (c *OffsetImpl) Kind() entity.ClauseKind {
 	return entity.ClauseOffset
 }
 
-func (c *OffsetImpl) Build() entity.Clause {
-	return &c.emb
+func (c *OffsetImpl) Build() (entity.Clause, error) {
+	return &c.emb, nil
 }

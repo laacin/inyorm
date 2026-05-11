@@ -41,7 +41,12 @@ func (s *InsertStmtImpl) Build() (*entity.Statement, error) {
 	clauseMap := make(map[entity.ClauseKind]entity.Clause)
 	for _, cls := range clauses {
 		if cls.IsDeclared() {
-			clauseMap[cls.Kind()] = cls.Build()
+			builded, err := cls.Build()
+			if err != nil {
+				return nil, err
+			}
+
+			clauseMap[cls.Kind()] = builded
 		}
 	}
 

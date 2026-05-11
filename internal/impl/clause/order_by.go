@@ -34,11 +34,11 @@ func (c *OrderByImpl) Kind() entity.ClauseKind {
 	return entity.ClauseOrderBy
 }
 
-func (c *OrderByImpl) Build() entity.Clause {
+func (c *OrderByImpl) Build() (entity.Clause, error) {
 	c.emb.Orders = make([]entity.OrderSegment, len(c.segments))
 	for i, seg := range c.segments {
 		c.emb.Orders[i] = *seg
 	}
 
-	return &c.emb
+	return &c.emb, nil
 }

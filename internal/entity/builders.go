@@ -74,7 +74,7 @@ type ValueBuilder interface {
 type ClauseBuilder interface {
 	IsDeclared() bool
 	Kind() ClauseKind
-	Build() Clause
+	Build() (Clause, error)
 }
 
 type StatementBuilder interface {

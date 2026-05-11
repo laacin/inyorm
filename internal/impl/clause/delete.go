@@ -21,6 +21,6 @@ func (c *DeleteImpl) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *DeleteImpl) Build() entity.Clause {
-	return &c.emb
+func (c *DeleteImpl) Build() (entity.Clause, error) {
+	return &c.emb, nil
 }

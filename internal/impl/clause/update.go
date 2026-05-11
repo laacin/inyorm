@@ -1,6 +1,8 @@
 package clause
 
 import (
+	"errors"
+	"fmt"
 	"slices"
 
 	"github.com/laacin/inyorm/internal/entity"
@@ -47,22 +49,19 @@ func (c *UpdateImpl) Kind() entity.ClauseKind {
 	return entity.ClauseUpdate
 }
 
-func (c *UpdateImpl) Build() entity.Clause {
+func (c *UpdateImpl) Build() (entity.Clause, error) {
 	if len(c.ref) < 1 {
-		panic("TODO")
-		// return errors.New("missing reference")
+		return nil, errors.New("missing reference")
 	}
 
 	cols, err := mapper.GetColumns("inyorm", c.ref)
 	if err != nil {
-		panic("TODO")
-		// return fmt.Errorf("failed to get columns: %w", err)
+		return nil, fmt.Errorf("failed to get columns: %w", err)
 	}
 
 	ignores, err := mapper.GetColumns("inyorm", c.ignores)
 	if err != nil {
-		panic("TODO")
-		// return fmt.Errorf("failed to get columns: %w", err)
+		return nil, fmt.Errorf("failed to get columns: %w", err)
 	}
 
 	cols = slices.DeleteFunc(cols, func(col string) bool {
@@ -71,8 +70,7 @@ func (c *UpdateImpl) Build() entity.Clause {
 
 	result, err := mapper.Read("inyorm", cols, c.values)
 	if err != nil {
-		panic("TODO")
-		// return fmt.Errorf("failed to map value: %w", err)
+		return nil, fmt.Errorf("failed to map value: %w", err)
 	}
 
 	params := make([]any, len(result.Args))
@@ -85,5 +83,5 @@ func (c *UpdateImpl) Build() entity.Clause {
 
 	c.emb.Cols = cols
 	c.emb.Values = params
-	return &c.emb
+	return &c.emb, nil
 }

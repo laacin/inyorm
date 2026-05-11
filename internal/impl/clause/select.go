@@ -31,6 +31,6 @@ func (c *SelectImpl) Kind() entity.ClauseKind {
 	return entity.ClauseSelect
 }
 
-func (c *SelectImpl) Build() entity.Clause {
-	return &c.emb
+func (c *SelectImpl) Build() (entity.Clause, error) {
+	return &c.emb, nil
 }

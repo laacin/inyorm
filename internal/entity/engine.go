@@ -81,7 +81,7 @@ type Executor interface {
 	Query(context.Context, string, ...any) (Rows, error)
 }
 
-// dependecies
+// dependencies
 
 type Rows interface {
 	Columns() ([]string, error)

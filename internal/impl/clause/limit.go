@@ -24,6 +24,6 @@ func (c *LimitImpl) Kind() entity.ClauseKind {
 	return entity.ClauseLimit
 }
 
-func (c *LimitImpl) Build() entity.Clause {
-	return &c.emb
+func (c *LimitImpl) Build() (entity.Clause, error) {
+	return &c.emb, nil
 }

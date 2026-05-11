@@ -22,6 +22,6 @@ func (c *FromImpl) Kind() entity.ClauseKind {
 	return entity.ClauseFrom
 }
 
-func (c *FromImpl) Build() entity.Clause {
-	return &c.emb
+func (c *FromImpl) Build() (entity.Clause, error) {
+	return &c.emb, nil
 }

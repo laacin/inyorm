@@ -30,10 +30,10 @@ func (c *WhereImpl) Kind() entity.ClauseKind {
 	return entity.ClauseWhere
 }
 
-func (c *WhereImpl) Build() entity.Clause {
+func (c *WhereImpl) Build() (entity.Clause, error) {
 	for _, cond := range c.conds {
 		c.emb.Conds = append(c.emb.Conds, cond.Build().(*entity.Condition))
 	}
 
-	return &c.emb
+	return &c.emb, nil
 }

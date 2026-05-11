@@ -28,7 +28,7 @@ func (c *HavingImpl) Kind() entity.ClauseKind {
 	return entity.ClauseHaving
 }
 
-func (c *HavingImpl) Build() entity.Clause {
+func (c *HavingImpl) Build() (entity.Clause, error) {
 	c.emb.Cond = c.cond.Build().(*entity.Condition)
-	return &c.emb
+	return &c.emb, nil
 }

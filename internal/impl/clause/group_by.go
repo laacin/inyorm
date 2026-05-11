@@ -22,6 +22,6 @@ func (c *GroupByImpl) Kind() entity.ClauseKind {
 	return entity.ClauseGroupBy
 }
 
-func (c *GroupByImpl) Build() entity.Clause {
-	return &c.emb
+func (c *GroupByImpl) Build() (entity.Clause, error) {
+	return &c.emb, nil
 }
