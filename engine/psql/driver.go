@@ -1,4 +1,4 @@
-package driver
+package psql
 
 import (
 	"context"
@@ -6,6 +6,14 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/laacin/inyorm/internal/entity/driver"
 )
+
+type PsqlDriver struct {
+	Conn *pgx.Conn
+}
+
+func (d *PsqlDriver) Close() error {
+	return d.Conn.Close(context.Background())
+}
 
 func (d *PsqlDriver) Exec(ctx context.Context, query string, args ...any) error {
 	_, err := d.Conn.Exec(ctx, query, args...)
