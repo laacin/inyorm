@@ -4,17 +4,17 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/laacin/inyorm/internal/entity"
+	"github.com/laacin/inyorm/internal/entity/driver"
 	"github.com/laacin/inyorm/internal/mapper"
 )
 
 func run(
 	ctx context.Context,
-	db entity.Driver,
+	driver driver.Driver,
 	query string,
 	args []any,
 ) error {
-	if err := db.Exec(ctx, query, args...); err != nil {
+	if err := driver.Exec(ctx, query, args...); err != nil {
 		return errSQL(err)
 	}
 	return nil
@@ -22,13 +22,13 @@ func run(
 
 func scan(
 	ctx context.Context,
-	db entity.Driver,
+	driver driver.Driver,
 	tag string,
 	query string,
 	args []any,
 	scan any,
 ) error {
-	rows, err := db.Query(ctx, query, args...)
+	rows, err := driver.Query(ctx, query, args...)
 	if err != nil {
 		return errSQL(err)
 	}

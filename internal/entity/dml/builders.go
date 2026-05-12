@@ -1,4 +1,6 @@
-package entity
+package dml
+
+import "github.com/laacin/inyorm/internal/entity/core"
 
 type ValueKind int
 
@@ -58,12 +60,12 @@ const (
 
 type Value interface {
 	Kind() ValueKind
-	Write(InternalWriter, ValueSyntax, WritingMode)
+	Write(core.InternalWriter, ValueSyntax, core.WritingMode)
 }
 
 type Clause interface {
 	Kind() ClauseKind
-	Write(InternalWriter, ClauseSyntax)
+	Write(core.InternalWriter, ClauseSyntax)
 }
 
 // Wrapper implementations must implement this

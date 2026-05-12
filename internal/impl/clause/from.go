@@ -1,10 +1,10 @@
 package clause
 
-import "github.com/laacin/inyorm/internal/entity"
+import "github.com/laacin/inyorm/internal/entity/dml"
 
 type FromImpl struct {
 	declared bool
-	emb      entity.From
+	emb      dml.From
 }
 
 func (c *FromImpl) From(from any) {
@@ -18,10 +18,10 @@ func (c *FromImpl) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *FromImpl) Kind() entity.ClauseKind {
-	return entity.ClauseFrom
+func (c *FromImpl) Kind() dml.ClauseKind {
+	return dml.ClauseFrom
 }
 
-func (c *FromImpl) Build() (entity.Clause, error) {
+func (c *FromImpl) Build() (dml.Clause, error) {
 	return &c.emb, nil
 }

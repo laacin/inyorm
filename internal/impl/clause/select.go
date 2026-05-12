@@ -1,13 +1,13 @@
 package clause
 
 import (
-	"github.com/laacin/inyorm/internal/entity"
 	"github.com/laacin/inyorm/internal/entity/api"
+	"github.com/laacin/inyorm/internal/entity/dml"
 )
 
 type SelectImpl struct {
 	declared bool
-	emb      entity.Select
+	emb      dml.Select
 }
 
 func (c *SelectImpl) Distinct() {
@@ -27,10 +27,10 @@ func (c *SelectImpl) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *SelectImpl) Kind() entity.ClauseKind {
-	return entity.ClauseSelect
+func (c *SelectImpl) Kind() dml.ClauseKind {
+	return dml.ClauseSelect
 }
 
-func (c *SelectImpl) Build() (entity.Clause, error) {
+func (c *SelectImpl) Build() (dml.Clause, error) {
 	return &c.emb, nil
 }

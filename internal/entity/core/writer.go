@@ -1,4 +1,4 @@
-package entity
+package core
 
 // Writing modes
 type WritingMode int

@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/laacin/inyorm/internal/entity"
+	"github.com/laacin/inyorm/internal/entity/driver"
 )
 
 func (d *PsqlDriver) Exec(ctx context.Context, query string, args ...any) error {
@@ -12,7 +12,7 @@ func (d *PsqlDriver) Exec(ctx context.Context, query string, args ...any) error 
 	return err
 }
 
-func (d *PsqlDriver) Query(ctx context.Context, query string, args ...any) (entity.Rows, error) {
+func (d *PsqlDriver) Query(ctx context.Context, query string, args ...any) (driver.Rows, error) {
 	rows, err := d.Conn.Query(ctx, query, args...)
 	if err != nil {
 		return nil, err

@@ -1,8 +1,11 @@
 package dialect
 
-import "github.com/laacin/inyorm/internal/entity"
+import (
+	"github.com/laacin/inyorm/internal/entity/core"
+	"github.com/laacin/inyorm/internal/entity/dml"
+)
 
-func (dial *StdDialect) WriteTable(w entity.Writer, tbl *entity.Table) {
+func (dial *StdDialect) WriteTable(w core.Writer, tbl *dml.Table) {
 	w.Write(tbl.Value)
 	if ref, ok := w.GetRef(tbl.Value); ok {
 		w.Char(' ')
@@ -10,7 +13,7 @@ func (dial *StdDialect) WriteTable(w entity.Writer, tbl *entity.Table) {
 	}
 }
 
-func (dial *StdDialect) WriteColBase(w entity.Writer, col *entity.Column) {
+func (dial *StdDialect) WriteColBase(w core.Writer, col *dml.Column) {
 	if ref, ok := w.GetRef(col.Ref); ok {
 		w.Char(ref)
 		w.Char('.')
@@ -18,7 +21,7 @@ func (dial *StdDialect) WriteColBase(w entity.Writer, col *entity.Column) {
 	w.Write(col.Name)
 }
 
-func (dial *StdDialect) WriteColExpr(w entity.Writer, col *entity.Column) {
+func (dial *StdDialect) WriteColExpr(w core.Writer, col *dml.Column) {
 	dial.BuildCol(w.New(), col)
 
 	if col.Value == "" {
@@ -29,7 +32,7 @@ func (dial *StdDialect) WriteColExpr(w entity.Writer, col *entity.Column) {
 	w.Write(col.Value)
 }
 
-func (dial *StdDialect) WriteColAlias(w entity.Writer, col *entity.Column) {
+func (dial *StdDialect) WriteColAlias(w core.Writer, col *dml.Column) {
 	dial.BuildCol(w.New(), col)
 
 	if col.Alias != "" {
@@ -45,7 +48,7 @@ func (dial *StdDialect) WriteColAlias(w entity.Writer, col *entity.Column) {
 	dial.WriteColBase(w, col)
 }
 
-func (dial *StdDialect) WriteColDef(w entity.Writer, col *entity.Column) {
+func (dial *StdDialect) WriteColDef(w core.Writer, col *dml.Column) {
 	dial.BuildCol(w.New(), col)
 
 	if col.Value == "" {
@@ -61,15 +64,15 @@ func (dial *StdDialect) WriteColDef(w entity.Writer, col *entity.Column) {
 }
 
 // --- Helpers
-func (dial *StdDialect) BuildFirst(w entity.Writer, col *entity.Column) {
+func (dial *StdDialect) BuildFirst(w core.Writer, col *dml.Column) {
 	if col.From != nil {
-		if col.From.Kind() == entity.ValueWildcard {
+		if col.From.Kind() == dml.ValueWildcard {
 			if ref, ok := w.GetRef(col.Ref); ok {
 				w.Char(ref)
 				w.Char('.')
 			}
 		}
-		w.Value(col.From, entity.WriteExpr)
+		w.Value(col.From, core.WriteExpr)
 		return
 	}
 
@@ -82,7 +85,7 @@ func (dial *StdDialect) BuildFirst(w entity.Writer, col *entity.Column) {
 }
 
 // FIX: illegible
-func (dial *StdDialect) BuildCol(w entity.Writer, col *entity.Column) {
+func (dial *StdDialect) BuildCol(w core.Writer, col *dml.Column) {
 	if (col == nil) || (col.Exprs == nil && col.Aggr == nil && col.From == nil) {
 		return
 	}
@@ -100,7 +103,7 @@ func (dial *StdDialect) BuildCol(w entity.Writer, col *entity.Column) {
 				continue
 			}
 
-			if expr.Kind == entity.ColArithWrap {
+			if expr.Kind == dml.ColArithWrap {
 				wWrap(w)
 				continue
 			}
@@ -119,38 +122,38 @@ func (dial *StdDialect) BuildCol(w entity.Writer, col *entity.Column) {
 }
 
 // maps
-var aggrMap = map[entity.ColKindExpr]string{
-	entity.ColAggrCount: "COUNT",
-	entity.ColAggrSum:   "SUM",
-	entity.ColAggrMin:   "MIN",
-	entity.ColAggrMax:   "MAX",
-	entity.ColAggrAvg:   "AVG",
+var aggrMap = map[dml.ColKindExpr]string{
+	dml.ColAggrCount: "COUNT",
+	dml.ColAggrSum:   "SUM",
+	dml.ColAggrMin:   "MIN",
+	dml.ColAggrMax:   "MAX",
+	dml.ColAggrAvg:   "AVG",
 }
 
-var scalarMap = map[entity.ColKindExpr]string{
-	entity.ColScalarLower: "LOWER",
-	entity.ColScalarUpper: "UPPER",
-	entity.ColScalarTrim:  "TRIM",
-	entity.ColScalarRound: "ROUND",
-	entity.ColScalarAbs:   "ABS",
+var scalarMap = map[dml.ColKindExpr]string{
+	dml.ColScalarLower: "LOWER",
+	dml.ColScalarUpper: "UPPER",
+	dml.ColScalarTrim:  "TRIM",
+	dml.ColScalarRound: "ROUND",
+	dml.ColScalarAbs:   "ABS",
 }
 
-var arithMap = map[entity.ColKindExpr]byte{
-	entity.ColArithAdd: '+',
-	entity.ColArithSub: '-',
-	entity.ColArithMul: '*',
-	entity.ColArithDiv: '/',
-	entity.ColArithMod: '%',
+var arithMap = map[dml.ColKindExpr]byte{
+	dml.ColArithAdd: '+',
+	dml.ColArithSub: '-',
+	dml.ColArithMul: '*',
+	dml.ColArithDiv: '/',
+	dml.ColArithMod: '%',
 }
 
-func wArith(w entity.Writer, arg byte, value any) {
+func wArith(w core.Writer, arg byte, value any) {
 	w.Char(' ')
 	w.Char(arg)
 	w.Char(' ')
-	w.Value(value, entity.WriteExpr)
+	w.Value(value, core.WriteExpr)
 }
 
-func wScalar(w entity.Writer, arg string) {
+func wScalar(w core.Writer, arg string) {
 	prev := w.ToString()
 	w.Reset()
 
@@ -160,7 +163,7 @@ func wScalar(w entity.Writer, arg string) {
 	w.Char(')')
 }
 
-func wWrap(w entity.Writer) {
+func wWrap(w core.Writer) {
 	prev := w.ToString()
 	w.Reset()
 
@@ -169,7 +172,7 @@ func wWrap(w entity.Writer) {
 	w.Char(')')
 }
 
-func wAggr(w entity.Writer, distinct any, aggr string) {
+func wAggr(w core.Writer, distinct any, aggr string) {
 	prev := w.ToString()
 	w.Reset()
 

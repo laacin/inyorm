@@ -1,4 +1,6 @@
-package entity
+package dml
+
+import "github.com/laacin/inyorm/internal/entity/core"
 
 type (
 	Parameter struct {
@@ -29,23 +31,23 @@ func (*CaseSwitch) Kind() ValueKind { return ValueCaseSwitch }
 func (*CaseSearch) Kind() ValueKind { return ValueCaseSearch }
 
 // Writers
-func (v *Parameter) Write(w InternalWriter, dial ValueSyntax, mode WritingMode) {
+func (v *Parameter) Write(w core.InternalWriter, dial ValueSyntax, mode core.WritingMode) {
 	if v.Store {
 		w.PushValue(v.Value)
 	}
 	w.IncValueCount()
 	dial.WritePlaceholder(w, w.ValueCount())
 }
-func (v *Condition) Write(w InternalWriter, dial ValueSyntax, mode WritingMode) {
+func (v *Condition) Write(w core.InternalWriter, dial ValueSyntax, mode core.WritingMode) {
 	dial.WriteCondition(w, v, mode)
 }
-func (v *Concat) Write(w InternalWriter, dial ValueSyntax, mode WritingMode) {
+func (v *Concat) Write(w core.InternalWriter, dial ValueSyntax, mode core.WritingMode) {
 	dial.WriteConcat(w, v)
 }
-func (v *CaseSwitch) Write(w InternalWriter, dial ValueSyntax, mode WritingMode) {
+func (v *CaseSwitch) Write(w core.InternalWriter, dial ValueSyntax, mode core.WritingMode) {
 	dial.WriteCaseSwitch(w, v, mode)
 }
-func (v *CaseSearch) Write(w InternalWriter, dial ValueSyntax, mode WritingMode) {
+func (v *CaseSearch) Write(w core.InternalWriter, dial ValueSyntax, mode core.WritingMode) {
 	dial.WriteCaseSearch(w, v, mode)
 }
 

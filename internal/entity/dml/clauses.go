@@ -1,4 +1,6 @@
-package entity
+package dml
+
+import "github.com/laacin/inyorm/internal/entity/core"
 
 // --- Clauses
 
@@ -71,18 +73,18 @@ func (c *Delete) Kind() ClauseKind     { return ClauseDelete }
 
 // --- Writes
 
-func (c *Select) Write(w InternalWriter, dial ClauseSyntax)     { dial.WriteSelect(w, c) }
-func (c *From) Write(w InternalWriter, dial ClauseSyntax)       { dial.WriteFrom(w, c) }
-func (c *Join) Write(w InternalWriter, dial ClauseSyntax)       { dial.WriteJoin(w, c) }
-func (c *Where) Write(w InternalWriter, dial ClauseSyntax)      { dial.WriteWhere(w, c) }
-func (c *GroupBy) Write(w InternalWriter, dial ClauseSyntax)    { dial.WriteGroupBy(w, c) }
-func (c *Having) Write(w InternalWriter, dial ClauseSyntax)     { dial.WriteHaving(w, c) }
-func (c *OrderBy) Write(w InternalWriter, dial ClauseSyntax)    { dial.WriteOrderBy(w, c) }
-func (c *Limit) Write(w InternalWriter, dial ClauseSyntax)      { dial.WriteLimit(w, c) }
-func (c *Offset) Write(w InternalWriter, dial ClauseSyntax)     { dial.WriteOffset(w, c) }
-func (c *InsertInto) Write(w InternalWriter, dial ClauseSyntax) { dial.WriteInsertInto(w, c) }
-func (c *Update) Write(w InternalWriter, dial ClauseSyntax)     { dial.WriteUpdate(w, c) }
-func (c *Delete) Write(w InternalWriter, dial ClauseSyntax)     { dial.WriteDelete(w, c) }
+func (c *Select) Write(w core.InternalWriter, dial ClauseSyntax)     { dial.WriteSelect(w, c) }
+func (c *From) Write(w core.InternalWriter, dial ClauseSyntax)       { dial.WriteFrom(w, c) }
+func (c *Join) Write(w core.InternalWriter, dial ClauseSyntax)       { dial.WriteJoin(w, c) }
+func (c *Where) Write(w core.InternalWriter, dial ClauseSyntax)      { dial.WriteWhere(w, c) }
+func (c *GroupBy) Write(w core.InternalWriter, dial ClauseSyntax)    { dial.WriteGroupBy(w, c) }
+func (c *Having) Write(w core.InternalWriter, dial ClauseSyntax)     { dial.WriteHaving(w, c) }
+func (c *OrderBy) Write(w core.InternalWriter, dial ClauseSyntax)    { dial.WriteOrderBy(w, c) }
+func (c *Limit) Write(w core.InternalWriter, dial ClauseSyntax)      { dial.WriteLimit(w, c) }
+func (c *Offset) Write(w core.InternalWriter, dial ClauseSyntax)     { dial.WriteOffset(w, c) }
+func (c *InsertInto) Write(w core.InternalWriter, dial ClauseSyntax) { dial.WriteInsertInto(w, c) }
+func (c *Update) Write(w core.InternalWriter, dial ClauseSyntax)     { dial.WriteUpdate(w, c) }
+func (c *Delete) Write(w core.InternalWriter, dial ClauseSyntax)     { dial.WriteDelete(w, c) }
 
 // --- Utilities
 

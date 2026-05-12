@@ -1,17 +1,17 @@
 package expression
 
 import (
-	"github.com/laacin/inyorm/internal/entity"
 	"github.com/laacin/inyorm/internal/entity/api"
+	"github.com/laacin/inyorm/internal/entity/dml"
 )
 
 type CaseSearchImpl struct {
-	entity.CaseSearch
-	current *entity.CaseWhen
+	dml.CaseSearch
+	current *dml.CaseWhen
 }
 
 func (c *CaseSearchImpl) When(when any) api.CaseNext {
-	c.current = &entity.CaseWhen{When: when}
+	c.current = &dml.CaseWhen{When: when}
 	return c
 }
 
@@ -27,6 +27,6 @@ func (c *CaseSearchImpl) Else(els any) {
 
 // --- Build
 
-func (c *CaseSearchImpl) Build() entity.Value {
+func (c *CaseSearchImpl) Build() dml.Value {
 	return &c.CaseSearch
 }

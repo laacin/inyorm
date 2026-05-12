@@ -1,44 +1,46 @@
-package dml
+package statement
 
 import (
 	"context"
 
-	"github.com/laacin/inyorm/internal/entity"
+	"github.com/laacin/inyorm/internal/entity/dml"
+	"github.com/laacin/inyorm/internal/entity/driver"
 	"github.com/laacin/inyorm/internal/execution"
 	"github.com/laacin/inyorm/internal/impl/clause"
 	"github.com/laacin/inyorm/internal/impl/statement/writer"
 )
 
-type InsertStmtImpl struct {
+type UpdateStmtImpl struct {
 	DefaultRef string
-	Dialect    entity.Dialect
+	Dialect    dml.Dialect
 
-	clause.InsertIntoImpl
+	clause.UpdateImpl
+	clause.WhereImpl
 
 	*execution.Executor
 }
 
-func NewInsertStatement(ctx context.Context, dial entity.Dialect, driver entity.Driver, ref string) *InsertStmtImpl {
-	stmt := &InsertStmtImpl{Dialect: dial, DefaultRef: ref}
+func NewUpdateStatement(ctx context.Context, dial dml.Dialect, driver driver.Driver, ref string) *UpdateStmtImpl {
+	stmt := &UpdateStmtImpl{Dialect: dial, DefaultRef: ref}
 	exec := &execution.Executor{Ctx: ctx, Statement: stmt, Driver: driver}
 	stmt.Executor = exec
 	return stmt
 }
 
-func (s *InsertStmtImpl) Kind() entity.StatementKind {
-	return entity.StatementInsert
+func (s *UpdateStmtImpl) Kind() dml.StatementKind {
+	return dml.StatementSelect
 }
 
-func (s *InsertStmtImpl) Build() (*entity.Statement, error) {
-	// Auto-FROM
-	s.InsertIntoImpl.Table(&entity.Table{Value: s.DefaultRef})
+func (s *UpdateStmtImpl) Build() (*dml.Statement, error) {
+	s.UpdateImpl.Table(&dml.Table{Value: s.DefaultRef})
 
 	// --- Load clauses
-	clauses := []entity.ClauseBuilder{
-		&s.InsertIntoImpl,
+	clauses := []dml.ClauseBuilder{
+		&s.UpdateImpl,
+		&s.WhereImpl,
 	}
 
-	clauseMap := make(map[entity.ClauseKind]entity.Clause)
+	clauseMap := make(map[dml.ClauseKind]dml.Clause)
 	for _, cls := range clauses {
 		if cls.IsDeclared() {
 			builded, err := cls.Build()
@@ -64,7 +66,7 @@ func (s *InsertStmtImpl) Build() (*entity.Statement, error) {
 	// --- Write the statement
 
 	first := true
-	for _, ord := range s.Dialect.InsertOrder() {
+	for _, ord := range s.Dialect.UpdateOrder() {
 		if clause, ok := clauseMap[ord]; ok {
 			if !first {
 				w.Char(' ')
@@ -80,7 +82,7 @@ func (s *InsertStmtImpl) Build() (*entity.Statement, error) {
 		return nil, err
 	}
 
-	return &entity.Statement{
+	return &dml.Statement{
 		Query:  w.ToString(),
 		Values: parameters.Values(),
 	}, nil

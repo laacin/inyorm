@@ -1,9 +1,10 @@
-package dml
+package statement
 
 import (
 	"context"
 
-	"github.com/laacin/inyorm/internal/entity"
+	"github.com/laacin/inyorm/internal/entity/dml"
+	"github.com/laacin/inyorm/internal/entity/driver"
 	"github.com/laacin/inyorm/internal/execution"
 	"github.com/laacin/inyorm/internal/impl/clause"
 	"github.com/laacin/inyorm/internal/impl/statement/writer"
@@ -11,7 +12,7 @@ import (
 
 type SelectStmtImpl struct {
 	DefaultRef string
-	Dialect    entity.Dialect
+	Dialect    dml.Dialect
 
 	clause.SelectImpl
 	clause.FromImpl
@@ -26,25 +27,25 @@ type SelectStmtImpl struct {
 	*execution.Executor
 }
 
-func NewSelectStatement(ctx context.Context, dial entity.Dialect, driver entity.Driver, ref string) *SelectStmtImpl {
+func NewSelectStatement(ctx context.Context, dial dml.Dialect, driver driver.Driver, ref string) *SelectStmtImpl {
 	stmt := &SelectStmtImpl{Dialect: dial, DefaultRef: ref}
 	exec := &execution.Executor{Ctx: ctx, Statement: stmt, Driver: driver}
 	stmt.Executor = exec
 	return stmt
 }
 
-func (s *SelectStmtImpl) Kind() entity.StatementKind {
-	return entity.StatementSelect
+func (s *SelectStmtImpl) Kind() dml.StatementKind {
+	return dml.StatementSelect
 }
 
-func (s *SelectStmtImpl) Build() (*entity.Statement, error) {
+func (s *SelectStmtImpl) Build() (*dml.Statement, error) {
 	// Auto-FROM
 	if !s.FromImpl.IsDeclared() && s.DefaultRef != "" {
-		s.FromImpl.From(&entity.Table{Value: s.DefaultRef})
+		s.FromImpl.From(&dml.Table{Value: s.DefaultRef})
 	}
 
 	// --- Load clauses
-	clauses := []entity.ClauseBuilder{
+	clauses := []dml.ClauseBuilder{
 		&s.SelectImpl,
 		&s.FromImpl,
 		&s.JoinImpl,
@@ -56,7 +57,7 @@ func (s *SelectStmtImpl) Build() (*entity.Statement, error) {
 		&s.OffsetImpl,
 	}
 
-	clauseMap := make(map[entity.ClauseKind]entity.Clause)
+	clauseMap := make(map[dml.ClauseKind]dml.Clause)
 	for _, cls := range clauses {
 		if cls.IsDeclared() {
 			builded, err := cls.Build()
@@ -107,7 +108,7 @@ func (s *SelectStmtImpl) Build() (*entity.Statement, error) {
 		return nil, err
 	}
 
-	return &entity.Statement{
+	return &dml.Statement{
 		Query:  w.ToString(),
 		Values: parameters.Values(),
 	}, nil

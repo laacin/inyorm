@@ -18,7 +18,7 @@ func Open(ctx context.Context, dsn string) *inyorm.Engine {
 	}
 
 	return &inyorm.Engine{
-		Dialect: &dialect.PsqlDialect{},
-		Driver:  &driver.PsqlDriver{Conn: conn},
+		DML:    &dialect.PsqlDialect{},
+		Driver: &driver.PsqlDriver{Conn: conn},
 	}
 }

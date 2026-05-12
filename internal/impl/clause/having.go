@@ -1,14 +1,14 @@
 package clause
 
 import (
-	"github.com/laacin/inyorm/internal/entity"
 	"github.com/laacin/inyorm/internal/entity/api"
+	"github.com/laacin/inyorm/internal/entity/dml"
 	"github.com/laacin/inyorm/internal/impl/expression"
 )
 
 type HavingImpl struct {
 	declared bool
-	emb      entity.Having
+	emb      dml.Having
 	cond     *expression.ConditionImpl
 }
 
@@ -24,11 +24,11 @@ func (c *HavingImpl) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *HavingImpl) Kind() entity.ClauseKind {
-	return entity.ClauseHaving
+func (c *HavingImpl) Kind() dml.ClauseKind {
+	return dml.ClauseHaving
 }
 
-func (c *HavingImpl) Build() (entity.Clause, error) {
-	c.emb.Cond = c.cond.Build().(*entity.Condition)
+func (c *HavingImpl) Build() (dml.Clause, error) {
+	c.emb.Cond = c.cond.Build().(*dml.Condition)
 	return &c.emb, nil
 }

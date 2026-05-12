@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/laacin/inyorm/internal/entity"
 	"github.com/laacin/inyorm/internal/entity/api"
+	"github.com/laacin/inyorm/internal/entity/dml"
 	"github.com/laacin/inyorm/internal/mapper"
 )
 
 type UpdateImpl struct {
 	declared bool
-	emb      entity.Update
+	emb      dml.Update
 	ref      []any
 	ignores  []any
 	values   any
@@ -45,11 +45,11 @@ func (c *UpdateImpl) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *UpdateImpl) Kind() entity.ClauseKind {
-	return entity.ClauseUpdate
+func (c *UpdateImpl) Kind() dml.ClauseKind {
+	return dml.ClauseUpdate
 }
 
-func (c *UpdateImpl) Build() (entity.Clause, error) {
+func (c *UpdateImpl) Build() (dml.Clause, error) {
 	if len(c.ref) < 1 {
 		return nil, errors.New("missing reference")
 	}
@@ -75,7 +75,7 @@ func (c *UpdateImpl) Build() (entity.Clause, error) {
 
 	params := make([]any, len(result.Args))
 	for i, arg := range result.Args {
-		params[i] = &entity.Parameter{
+		params[i] = &dml.Parameter{
 			Store: true,
 			Value: arg,
 		}

@@ -1,38 +1,38 @@
 package dialect
 
-import "github.com/laacin/inyorm/internal/entity"
+import "github.com/laacin/inyorm/internal/entity/dml"
 
-func (dial *StdDialect) SelectOrder() []entity.ClauseKind {
-	return []entity.ClauseKind{
-		entity.ClauseSelect,
-		entity.ClauseFrom,
-		entity.ClauseJoin,
-		entity.ClauseWhere,
-		entity.ClauseGroupBy,
-		entity.ClauseHaving,
-		entity.ClauseOrderBy,
-		entity.ClauseLimit,
-		entity.ClauseOffset,
+func (dial *StdDialect) SelectOrder() []dml.ClauseKind {
+	return []dml.ClauseKind{
+		dml.ClauseSelect,
+		dml.ClauseFrom,
+		dml.ClauseJoin,
+		dml.ClauseWhere,
+		dml.ClauseGroupBy,
+		dml.ClauseHaving,
+		dml.ClauseOrderBy,
+		dml.ClauseLimit,
+		dml.ClauseOffset,
 	}
 }
 
-func (dial *StdDialect) InsertOrder() []entity.ClauseKind {
-	return []entity.ClauseKind{
-		entity.ClauseInsertInto,
+func (dial *StdDialect) InsertOrder() []dml.ClauseKind {
+	return []dml.ClauseKind{
+		dml.ClauseInsertInto,
 	}
 }
 
-func (dial *StdDialect) UpdateOrder() []entity.ClauseKind {
-	return []entity.ClauseKind{
-		entity.ClauseUpdate,
-		entity.ClauseWhere,
+func (dial *StdDialect) UpdateOrder() []dml.ClauseKind {
+	return []dml.ClauseKind{
+		dml.ClauseUpdate,
+		dml.ClauseWhere,
 	}
 }
 
-func (dial *StdDialect) DeleteOrder() []entity.ClauseKind {
-	return []entity.ClauseKind{
-		entity.ClauseDelete,
-		entity.ClauseFrom,
-		entity.ClauseWhere,
+func (dial *StdDialect) DeleteOrder() []dml.ClauseKind {
+	return []dml.ClauseKind{
+		dml.ClauseDelete,
+		dml.ClauseFrom,
+		dml.ClauseWhere,
 	}
 }

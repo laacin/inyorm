@@ -4,12 +4,12 @@ import (
 	"errors"
 	"reflect"
 
-	"github.com/laacin/inyorm/internal/entity"
+	"github.com/laacin/inyorm/internal/entity/driver"
 )
 
 var errNoRows = errors.New("no results") // TODO: improve msg
 
-func Scan(rows entity.Rows, tag string, v any) error {
+func Scan(rows driver.Rows, tag string, v any) error {
 	s := getSchema(tag, v)
 
 	if s.Type != typeMap && !s.Slc && !s.Ptr {
@@ -40,7 +40,7 @@ func Scan(rows entity.Rows, tag string, v any) error {
 
 // -- internal
 
-func scanPrim(rows entity.Rows, v any) error {
+func scanPrim(rows driver.Rows, v any) error {
 	if rows.Next() {
 		return rows.Scan(v)
 	} else {
@@ -48,7 +48,7 @@ func scanPrim(rows entity.Rows, v any) error {
 	}
 }
 
-func scanMap(rows entity.Rows, v any, ptr bool) error {
+func scanMap(rows driver.Rows, v any, ptr bool) error {
 	var mp map[string]any
 	if ptr {
 		mp = *(v).(*map[string]any)
@@ -78,7 +78,7 @@ func scanMap(rows entity.Rows, v any, ptr bool) error {
 	return nil
 }
 
-func scanSlcOfMap(rows entity.Rows, v any) error {
+func scanSlcOfMap(rows driver.Rows, v any) error {
 	mp := v.(*[]map[string]any)
 
 	cols, _ := rows.Columns()
@@ -112,7 +112,7 @@ func scanSlcOfMap(rows entity.Rows, v any) error {
 	return nil
 }
 
-func scanStruct(rows entity.Rows, indexFields map[string][]int, v any) error {
+func scanStruct(rows driver.Rows, indexFields map[string][]int, v any) error {
 	val := reflect.ValueOf(v).Elem()
 
 	cols, _ := rows.Columns()
@@ -137,7 +137,7 @@ func scanStruct(rows entity.Rows, indexFields map[string][]int, v any) error {
 	return nil
 }
 
-func scanSlcOfStruct(rows entity.Rows, indexField map[string][]int, v any) error {
+func scanSlcOfStruct(rows driver.Rows, indexField map[string][]int, v any) error {
 	val := reflect.ValueOf(v).Elem()
 
 	typ := val.Type().Elem()

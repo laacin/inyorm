@@ -1,10 +1,10 @@
 package clause
 
-import "github.com/laacin/inyorm/internal/entity"
+import "github.com/laacin/inyorm/internal/entity/dml"
 
 type OffsetImpl struct {
 	declared bool
-	emb      entity.Offset
+	emb      dml.Offset
 }
 
 func (c *OffsetImpl) Offset(value int) {
@@ -20,10 +20,10 @@ func (c *OffsetImpl) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *OffsetImpl) Kind() entity.ClauseKind {
-	return entity.ClauseOffset
+func (c *OffsetImpl) Kind() dml.ClauseKind {
+	return dml.ClauseOffset
 }
 
-func (c *OffsetImpl) Build() (entity.Clause, error) {
+func (c *OffsetImpl) Build() (dml.Clause, error) {
 	return &c.emb, nil
 }

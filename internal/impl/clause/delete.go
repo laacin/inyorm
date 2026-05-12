@@ -1,10 +1,10 @@
 package clause
 
-import "github.com/laacin/inyorm/internal/entity"
+import "github.com/laacin/inyorm/internal/entity/dml"
 
 type DeleteImpl struct {
 	declared bool
-	emb      entity.Delete
+	emb      dml.Delete
 }
 
 func (c *DeleteImpl) Delete() {
@@ -13,14 +13,14 @@ func (c *DeleteImpl) Delete() {
 
 // --- Build
 
-func (c *DeleteImpl) Kind() entity.ClauseKind {
-	return entity.ClauseDelete
+func (c *DeleteImpl) Kind() dml.ClauseKind {
+	return dml.ClauseDelete
 }
 
 func (c *DeleteImpl) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *DeleteImpl) Build() (entity.Clause, error) {
+func (c *DeleteImpl) Build() (dml.Clause, error) {
 	return &c.emb, nil
 }

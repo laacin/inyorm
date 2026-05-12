@@ -1,50 +1,45 @@
-package dml
+package statement
 
 import (
 	"context"
 
-	"github.com/laacin/inyorm/internal/entity"
+	"github.com/laacin/inyorm/internal/entity/dml"
+	"github.com/laacin/inyorm/internal/entity/driver"
 	"github.com/laacin/inyorm/internal/execution"
 	"github.com/laacin/inyorm/internal/impl/clause"
 	"github.com/laacin/inyorm/internal/impl/statement/writer"
 )
 
-type DeleteStmtImpl struct {
+type InsertStmtImpl struct {
 	DefaultRef string
-	Dialect    entity.Dialect
+	Dialect    dml.Dialect
 
-	clause.DeleteImpl
-	clause.FromImpl
-	clause.WhereImpl
+	clause.InsertIntoImpl
 
 	*execution.Executor
 }
 
-func NewDeleteStatement(ctx context.Context, dial entity.Dialect, driver entity.Driver, ref string) *DeleteStmtImpl {
-	stmt := &DeleteStmtImpl{Dialect: dial, DefaultRef: ref}
+func NewInsertStatement(ctx context.Context, dial dml.Dialect, driver driver.Driver, ref string) *InsertStmtImpl {
+	stmt := &InsertStmtImpl{Dialect: dial, DefaultRef: ref}
 	exec := &execution.Executor{Ctx: ctx, Statement: stmt, Driver: driver}
 	stmt.Executor = exec
 	return stmt
 }
 
-func (s *DeleteStmtImpl) Kind() entity.StatementKind {
-	return entity.StatementDelete
+func (s *InsertStmtImpl) Kind() dml.StatementKind {
+	return dml.StatementInsert
 }
 
-func (s *DeleteStmtImpl) Build() (*entity.Statement, error) {
+func (s *InsertStmtImpl) Build() (*dml.Statement, error) {
 	// Auto-FROM
-	if !s.FromImpl.IsDeclared() && s.DefaultRef != "" {
-		s.FromImpl.From(&entity.Table{Value: s.DefaultRef})
-	}
+	s.InsertIntoImpl.Table(&dml.Table{Value: s.DefaultRef})
 
 	// --- Load clauses
-	clauses := []entity.ClauseBuilder{
-		&s.DeleteImpl,
-		&s.FromImpl,
-		&s.WhereImpl,
+	clauses := []dml.ClauseBuilder{
+		&s.InsertIntoImpl,
 	}
 
-	clauseMap := make(map[entity.ClauseKind]entity.Clause)
+	clauseMap := make(map[dml.ClauseKind]dml.Clause)
 	for _, cls := range clauses {
 		if cls.IsDeclared() {
 			builded, err := cls.Build()
@@ -70,7 +65,7 @@ func (s *DeleteStmtImpl) Build() (*entity.Statement, error) {
 	// --- Write the statement
 
 	first := true
-	for _, ord := range s.Dialect.DeleteOrder() {
+	for _, ord := range s.Dialect.InsertOrder() {
 		if clause, ok := clauseMap[ord]; ok {
 			if !first {
 				w.Char(' ')
@@ -86,7 +81,7 @@ func (s *DeleteStmtImpl) Build() (*entity.Statement, error) {
 		return nil, err
 	}
 
-	return &entity.Statement{
+	return &dml.Statement{
 		Query:  w.ToString(),
 		Values: parameters.Values(),
 	}, nil

@@ -6,7 +6,7 @@ import (
 
 	"github.com/laacin/inyorm/internal/entity"
 	"github.com/laacin/inyorm/internal/impl/expression"
-	"github.com/laacin/inyorm/internal/impl/statement/dml"
+	"github.com/laacin/inyorm/internal/impl/statement"
 )
 
 type DB struct{ eng *entity.Engine }
@@ -21,25 +21,25 @@ func New(eng *Engine) (*DB, error) {
 // --- DML Statements
 
 func (db *DB) NewSelect(ctx context.Context, table string) (SelectStatement, ExprBuilder) {
-	stmt := dml.NewSelectStatement(ctx, db.eng.Dialect, db.eng.Driver, table)
+	stmt := statement.NewSelectStatement(ctx, db.eng.DML, db.eng.Driver, table)
 	exprBuilder := &expression.ExprBuilderImpl{DefaultRef: table}
 	return stmt, exprBuilder
 }
 
 func (db *DB) NewInsert(ctx context.Context, table string) (InsertStatement, ExprBuilder) {
-	stmt := dml.NewInsertStatement(ctx, db.eng.Dialect, db.eng.Driver, table)
+	stmt := statement.NewInsertStatement(ctx, db.eng.DML, db.eng.Driver, table)
 	exprBuilder := &expression.ExprBuilderImpl{DefaultRef: table}
 	return stmt, exprBuilder
 }
 
 func (db *DB) NewUpdate(ctx context.Context, table string) (UpdateStatement, ExprBuilder) {
-	stmt := dml.NewUpdateStatement(ctx, db.eng.Dialect, db.eng.Driver, table)
+	stmt := statement.NewUpdateStatement(ctx, db.eng.DML, db.eng.Driver, table)
 	exprBuilder := &expression.ExprBuilderImpl{DefaultRef: table}
 	return stmt, exprBuilder
 }
 
 func (db *DB) NewDelete(ctx context.Context, table string) (DeleteStatement, ExprBuilder) {
-	stmt := dml.NewDeleteStatement(ctx, db.eng.Dialect, db.eng.Driver, table)
+	stmt := statement.NewDeleteStatement(ctx, db.eng.DML, db.eng.Driver, table)
 	exprBuilder := &expression.ExprBuilderImpl{DefaultRef: table}
 	return stmt, exprBuilder
 }

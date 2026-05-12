@@ -1,10 +1,12 @@
-package entity
+package dml
+
+import "github.com/laacin/inyorm/internal/entity/core"
 
 type Table struct{ Value string }
 
 func (*Table) Kind() ValueKind { return ValueTable }
 
-func (t *Table) Write(w InternalWriter, dial ValueSyntax, mode WritingMode) {
+func (t *Table) Write(w core.InternalWriter, dial ValueSyntax, mode core.WritingMode) {
 	w.SetRef(t.Value)
 	dial.WriteTable(w, t)
 }
@@ -21,17 +23,17 @@ type Column struct {
 
 func (c *Column) Kind() ValueKind { return ValueColumn }
 
-func (c *Column) Write(w InternalWriter, dial ValueSyntax, mode WritingMode) {
+func (c *Column) Write(w core.InternalWriter, dial ValueSyntax, mode core.WritingMode) {
 	w.SetRef(c.Ref)
 
 	switch mode {
-	case WriteBase:
+	case core.WriteBase:
 		dial.WriteColBase(w, c)
-	case WriteExpr:
+	case core.WriteExpr:
 		dial.WriteColExpr(w, c)
-	case WriteAlias:
+	case core.WriteAlias:
 		dial.WriteColAlias(w, c)
-	case WriteDef:
+	case core.WriteDef:
 		dial.WriteColDef(w, c)
 	default:
 		dial.WriteColExpr(w, c)

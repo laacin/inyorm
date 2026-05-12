@@ -3,14 +3,15 @@ package execution
 import (
 	"context"
 
-	"github.com/laacin/inyorm/internal/entity"
-	"github.com/laacin/inyorm/internal/entity/constant"
+	"github.com/laacin/inyorm/internal/entity/core"
+	"github.com/laacin/inyorm/internal/entity/dml"
+	"github.com/laacin/inyorm/internal/entity/driver"
 )
 
 type Executor struct {
 	Ctx       context.Context
-	Driver    entity.Driver
-	Statement entity.StatementBuilder
+	Driver    driver.Driver
+	Statement dml.StatementBuilder
 }
 
 func (e *Executor) Run(scanner ...any) error {
@@ -25,10 +26,10 @@ func (e *Executor) Run(scanner ...any) error {
 	}
 
 	if qty == 1 {
-		return scan(e.Ctx, e.Driver, constant.TAG, result.Query, result.Values, scanner[0])
+		return scan(e.Ctx, e.Driver, core.TAG, result.Query, result.Values, scanner[0])
 	}
 
-	return scan(e.Ctx, e.Driver, constant.TAG, result.Query, result.Values, scanner)
+	return scan(e.Ctx, e.Driver, core.TAG, result.Query, result.Values, scanner)
 }
 
 // TODO:

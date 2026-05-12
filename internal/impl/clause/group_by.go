@@ -1,10 +1,10 @@
 package clause
 
-import "github.com/laacin/inyorm/internal/entity"
+import "github.com/laacin/inyorm/internal/entity/dml"
 
 type GroupByImpl struct {
 	declared bool
-	emb      entity.GroupBy
+	emb      dml.GroupBy
 }
 
 func (c *GroupByImpl) GroupBy(values ...any) {
@@ -18,10 +18,10 @@ func (c *GroupByImpl) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *GroupByImpl) Kind() entity.ClauseKind {
-	return entity.ClauseGroupBy
+func (c *GroupByImpl) Kind() dml.ClauseKind {
+	return dml.ClauseGroupBy
 }
 
-func (c *GroupByImpl) Build() (entity.Clause, error) {
+func (c *GroupByImpl) Build() (dml.Clause, error) {
 	return &c.emb, nil
 }

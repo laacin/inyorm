@@ -1,4 +1,4 @@
-package entity
+package dml
 
 type Statement struct {
 	Query  string

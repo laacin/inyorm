@@ -13,13 +13,13 @@ type StdDialect = dialect.StdDialect
 
 func FromInstance(db *sql.DB) *inyorm.Engine {
 	return &inyorm.Engine{
-		Driver:  &driver.StdDriver{Instance: db},
-		Dialect: &dialect.StdDialect{},
+		Driver: &driver.StdDriver{Instance: db},
+		DML:    &dialect.StdDialect{},
 	}
 }
 
 func JustDialect() *inyorm.Engine {
 	return &inyorm.Engine{
-		Dialect: &dialect.StdDialect{},
+		DML: &dialect.StdDialect{},
 	}
 }

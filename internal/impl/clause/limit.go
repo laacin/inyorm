@@ -1,10 +1,10 @@
 package clause
 
-import "github.com/laacin/inyorm/internal/entity"
+import "github.com/laacin/inyorm/internal/entity/dml"
 
 type LimitImpl struct {
 	declared bool
-	emb      entity.Limit
+	emb      dml.Limit
 }
 
 func (c *LimitImpl) Limit(value int) {
@@ -20,10 +20,10 @@ func (c *LimitImpl) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *LimitImpl) Kind() entity.ClauseKind {
-	return entity.ClauseLimit
+func (c *LimitImpl) Kind() dml.ClauseKind {
+	return dml.ClauseLimit
 }
 
-func (c *LimitImpl) Build() (entity.Clause, error) {
+func (c *LimitImpl) Build() (dml.Clause, error) {
 	return &c.emb, nil
 }

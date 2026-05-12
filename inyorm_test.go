@@ -7,13 +7,13 @@ import (
 
 	"github.com/laacin/inyorm"
 	"github.com/laacin/inyorm/engine/std"
-	"github.com/laacin/inyorm/internal/entity"
 	"github.com/laacin/inyorm/internal/entity/api"
+	"github.com/laacin/inyorm/internal/entity/dml"
 )
 
 func run(t *testing.T, q any, exp string, vals []any) {
 	stmt, err := q.(interface {
-		Build() (*entity.Statement, error)
+		Build() (*dml.Statement, error)
 	}).Build()
 	if err != nil {
 		t.Fatal(err)

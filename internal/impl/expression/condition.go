@@ -1,17 +1,17 @@
 package expression
 
 import (
-	"github.com/laacin/inyorm/internal/entity"
 	"github.com/laacin/inyorm/internal/entity/api"
+	"github.com/laacin/inyorm/internal/entity/dml"
 )
 
 type ConditionImpl struct {
-	entity.Condition
-	current entity.Predicate
+	dml.Condition
+	current dml.Predicate
 }
 
 func (c *ConditionImpl) Start(ident any) api.Condition {
-	c.current = entity.Predicate{Identifier: ident}
+	c.current = dml.Predicate{Identifier: ident}
 	return c
 }
 
@@ -21,58 +21,58 @@ func (c *ConditionImpl) Not() api.Condition {
 }
 
 func (c *ConditionImpl) Equal(value any) api.ConditionNext {
-	c.push(entity.PredEqual, []any{value})
+	c.push(dml.PredEqual, []any{value})
 	return c
 }
 
 func (c *ConditionImpl) Like(value any) api.ConditionNext {
-	c.push(entity.PredLike, []any{value})
+	c.push(dml.PredLike, []any{value})
 	return c
 }
 
 func (c *ConditionImpl) In(values []any) api.ConditionNext {
-	c.push(entity.PredIn, values)
+	c.push(dml.PredIn, values)
 	return c
 }
 
 func (c *ConditionImpl) Between(val1, val2 any) api.ConditionNext {
-	c.push(entity.PredBetween, []any{val1, val2})
+	c.push(dml.PredBetween, []any{val1, val2})
 	return c
 }
 
 func (c *ConditionImpl) Greater(value any) api.ConditionNext {
-	c.push(entity.PredGreater, []any{value})
+	c.push(dml.PredGreater, []any{value})
 	return c
 }
 
 func (c *ConditionImpl) Less(value any) api.ConditionNext {
-	c.push(entity.PredLess, []any{value})
+	c.push(dml.PredLess, []any{value})
 	return c
 }
 
 func (c *ConditionImpl) IsNull() api.ConditionNext {
-	c.push(entity.PredIsNull, nil)
+	c.push(dml.PredIsNull, nil)
 	return c
 }
 
 // --- Next
 func (c *ConditionImpl) And(ident any) api.Condition {
-	c.Connectors = append(c.Connectors, entity.PredAnd)
+	c.Connectors = append(c.Connectors, dml.PredAnd)
 	return c.Start(ident)
 }
 
 func (c *ConditionImpl) Or(ident any) api.Condition {
-	c.Connectors = append(c.Connectors, entity.PredOr)
+	c.Connectors = append(c.Connectors, dml.PredOr)
 	return c.Start(ident)
 }
 
 // --- Build
-func (c *ConditionImpl) Build() entity.Value {
+func (c *ConditionImpl) Build() dml.Value {
 	return &c.Condition
 }
 
 // --- Helpers
-func (c *ConditionImpl) push(op entity.PredOperator, values []any) {
+func (c *ConditionImpl) push(op dml.PredOperator, values []any) {
 	c.current.Values = values
 	c.current.Operator = op
 	c.current.Closed = true

@@ -3,12 +3,13 @@ package writer
 import (
 	"strings"
 
-	"github.com/laacin/inyorm/internal/entity"
+	"github.com/laacin/inyorm/internal/entity/core"
+	"github.com/laacin/inyorm/internal/entity/dml"
 )
 
 type WriterImpl struct {
 	sb      strings.Builder
-	Syntax  entity.ValueSyntax
+	Syntax  dml.ValueSyntax
 	Aliases *AliasStore
 	Params  *ParamStore
 }
@@ -23,7 +24,7 @@ func (w *WriterImpl) Char(v byte) {
 	w.sb.WriteByte(v)
 }
 
-func (w *WriterImpl) Value(v any, mode entity.WritingMode) {
+func (w *WriterImpl) Value(v any, mode core.WritingMode) {
 	Normalize(v).Write(w, w.Syntax, mode)
 }
 
@@ -38,7 +39,7 @@ func (w *WriterImpl) GetRef(ref string) (byte, bool) {
 	return w.Aliases.Get(ref)
 }
 
-func (w *WriterImpl) New() entity.Writer {
+func (w *WriterImpl) New() core.Writer {
 	return &WriterImpl{
 		Syntax:  w.Syntax,
 		Aliases: w.Aliases,
