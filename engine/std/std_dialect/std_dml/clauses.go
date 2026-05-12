@@ -1,11 +1,11 @@
-package dialect
+package std_dml
 
 import (
 	"github.com/laacin/inyorm/internal/entity/core"
 	"github.com/laacin/inyorm/internal/entity/dml"
 )
 
-func (dial *StdDialect) WriteInsertInto(w core.Writer, cls *dml.InsertInto) {
+func (*DmlSyntax) WriteInsertInto(w core.Writer, cls *dml.InsertInto) {
 	w.Write("INSERT INTO")
 	w.Char(' ')
 
@@ -40,7 +40,7 @@ func (dial *StdDialect) WriteInsertInto(w core.Writer, cls *dml.InsertInto) {
 	}
 }
 
-func (dial *StdDialect) WriteSelect(w core.Writer, cls *dml.Select) {
+func (*DmlSyntax) WriteSelect(w core.Writer, cls *dml.Select) {
 	w.Write("SELECT")
 	w.Char(' ')
 
@@ -57,7 +57,7 @@ func (dial *StdDialect) WriteSelect(w core.Writer, cls *dml.Select) {
 	}
 }
 
-func (dial *StdDialect) WriteFrom(w core.Writer, cls *dml.From) {
+func (*DmlSyntax) WriteFrom(w core.Writer, cls *dml.From) {
 	w.Write("FROM")
 	w.Char(' ')
 	w.Value(cls.Value, core.WriteDef)
@@ -71,7 +71,7 @@ var joinTypeMap = map[dml.JoinType]string{
 	dml.JoinCross: "CROSS",
 }
 
-func (dial *StdDialect) WriteJoin(w core.Writer, cls *dml.Join) {
+func (*DmlSyntax) WriteJoin(w core.Writer, cls *dml.Join) {
 	for i, join := range cls.Joins {
 		if i > 0 {
 			w.Char(' ')
@@ -88,7 +88,7 @@ func (dial *StdDialect) WriteJoin(w core.Writer, cls *dml.Join) {
 	}
 }
 
-func (dial *StdDialect) WriteWhere(w core.Writer, cls *dml.Where) {
+func (*DmlSyntax) WriteWhere(w core.Writer, cls *dml.Where) {
 	w.Write("WHERE")
 	w.Char(' ')
 
@@ -100,7 +100,7 @@ func (dial *StdDialect) WriteWhere(w core.Writer, cls *dml.Where) {
 	}
 }
 
-func (dial *StdDialect) WriteGroupBy(w core.Writer, cls *dml.GroupBy) {
+func (*DmlSyntax) WriteGroupBy(w core.Writer, cls *dml.GroupBy) {
 	w.Write("GROUP BY")
 	w.Char(' ')
 
@@ -112,13 +112,13 @@ func (dial *StdDialect) WriteGroupBy(w core.Writer, cls *dml.GroupBy) {
 	}
 }
 
-func (dial *StdDialect) WriteHaving(w core.Writer, cls *dml.Having) {
+func (*DmlSyntax) WriteHaving(w core.Writer, cls *dml.Having) {
 	w.Write("HAVING")
 	w.Char(' ')
 	w.Value(cls.Cond, core.WriteExpr)
 }
 
-func (dial *StdDialect) WriteOrderBy(w core.Writer, cls *dml.OrderBy) {
+func (*DmlSyntax) WriteOrderBy(w core.Writer, cls *dml.OrderBy) {
 	w.Write("ORDER BY")
 	w.Char(' ')
 
@@ -135,19 +135,19 @@ func (dial *StdDialect) WriteOrderBy(w core.Writer, cls *dml.OrderBy) {
 	}
 }
 
-func (dial *StdDialect) WriteLimit(w core.Writer, cls *dml.Limit) {
+func (*DmlSyntax) WriteLimit(w core.Writer, cls *dml.Limit) {
 	w.Write("LIMIT")
 	w.Char(' ')
 	w.Value(cls.ValueNumber, core.WriteBase)
 }
 
-func (dial *StdDialect) WriteOffset(w core.Writer, cls *dml.Offset) {
+func (*DmlSyntax) WriteOffset(w core.Writer, cls *dml.Offset) {
 	w.Write("OFFSET")
 	w.Char(' ')
 	w.Value(cls.ValueNumber, core.WriteBase)
 }
 
-func (dial *StdDialect) WriteUpdate(w core.Writer, cls *dml.Update) {
+func (*DmlSyntax) WriteUpdate(w core.Writer, cls *dml.Update) {
 	w.Write("UPDATE")
 	w.Char(' ')
 
@@ -165,6 +165,6 @@ func (dial *StdDialect) WriteUpdate(w core.Writer, cls *dml.Update) {
 	}
 }
 
-func (dial *StdDialect) WriteDelete(w core.Writer, cls *dml.Delete) {
+func (*DmlSyntax) WriteDelete(w core.Writer, cls *dml.Delete) {
 	w.Write("DELETE")
 }

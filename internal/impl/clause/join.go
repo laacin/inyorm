@@ -3,6 +3,7 @@ package clause
 import (
 	"github.com/laacin/inyorm/internal/entity/api"
 	"github.com/laacin/inyorm/internal/entity/dml"
+	"github.com/laacin/inyorm/internal/entity/expr"
 	"github.com/laacin/inyorm/internal/impl/expression"
 )
 
@@ -62,7 +63,7 @@ func (c *JoinImpl) Build() (dml.Clause, error) {
 		if cond == nil {
 			c.emb.Joins[i].Cond = nil
 		}
-		c.emb.Joins[i].Cond = cond.Build().(*dml.Condition)
+		c.emb.Joins[i].Cond = cond.Build().(*expr.Condition)
 	}
 	return &c.emb, nil
 }

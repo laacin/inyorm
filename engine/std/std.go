@@ -4,22 +4,22 @@ import (
 	"database/sql"
 
 	"github.com/laacin/inyorm"
-	"github.com/laacin/inyorm/engine/std/dialect"
-	"github.com/laacin/inyorm/engine/std/driver"
+	"github.com/laacin/inyorm/engine/std/std_dialect"
+	"github.com/laacin/inyorm/engine/std/std_driver"
 )
 
 // Expose dialect for the others dialects
-type StdDialect = dialect.StdDialect
+type Dialect = std_dialect.Dialect
 
 func FromInstance(db *sql.DB) *inyorm.Engine {
 	return &inyorm.Engine{
-		Driver: &driver.StdDriver{Instance: db},
-		DML:    &dialect.StdDialect{},
+		Driver:  &std_driver.Driver{Instance: db},
+		Dialect: &std_dialect.Dialect{},
 	}
 }
 
 func JustDialect() *inyorm.Engine {
 	return &inyorm.Engine{
-		DML: &dialect.StdDialect{},
+		Dialect: &std_dialect.Dialect{},
 	}
 }

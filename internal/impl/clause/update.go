@@ -7,6 +7,7 @@ import (
 
 	"github.com/laacin/inyorm/internal/entity/api"
 	"github.com/laacin/inyorm/internal/entity/dml"
+	"github.com/laacin/inyorm/internal/entity/expr"
 	"github.com/laacin/inyorm/internal/mapper"
 )
 
@@ -75,7 +76,7 @@ func (c *UpdateImpl) Build() (dml.Clause, error) {
 
 	params := make([]any, len(result.Args))
 	for i, arg := range result.Args {
-		params[i] = &dml.Parameter{
+		params[i] = &expr.Parameter{
 			Store: true,
 			Value: arg,
 		}

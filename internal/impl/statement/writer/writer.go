@@ -4,12 +4,12 @@ import (
 	"strings"
 
 	"github.com/laacin/inyorm/internal/entity/core"
-	"github.com/laacin/inyorm/internal/entity/dml"
+	"github.com/laacin/inyorm/internal/entity/expr"
 )
 
 type WriterImpl struct {
 	sb      strings.Builder
-	Syntax  dml.ValueSyntax
+	Syntax  expr.Syntax
 	Aliases *AliasStore
 	Params  *ParamStore
 }

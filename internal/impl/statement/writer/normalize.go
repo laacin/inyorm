@@ -1,110 +1,110 @@
 package writer
 
-import "github.com/laacin/inyorm/internal/entity/dml"
+import "github.com/laacin/inyorm/internal/entity/expr"
 
-func Normalize(value any) dml.Value {
+func Normalize(value any) expr.Value {
 	if value == nil {
-		return &dml.Null{}
+		return &expr.Null{}
 	}
 
-	if v, ok := value.(dml.Value); ok {
+	if v, ok := value.(expr.Value); ok {
 		return v
 	}
 
-	if v, ok := value.(dml.ValueBuilder); ok {
+	if v, ok := value.(expr.ValueBuilder); ok {
 		return v.Build()
 	}
 
 	switch v := value.(type) {
 	case string:
-		return dml.String(v)
+		return expr.String(v)
 
 	case *string:
 		if v == nil {
-			return &dml.Null{}
+			return &expr.Null{}
 		}
-		return dml.String(*v)
+		return expr.String(*v)
 
 	case int:
-		return dml.Number(v)
+		return expr.Number(v)
 	case int8:
-		return dml.Number(int(v))
+		return expr.Number(int(v))
 	case int16:
-		return dml.Number(int(v))
+		return expr.Number(int(v))
 	case int32:
-		return dml.Number(int(v))
+		return expr.Number(int(v))
 	case int64:
-		return dml.Number(int(v))
+		return expr.Number(int(v))
 
 	case uint:
-		return dml.Number(int(v))
+		return expr.Number(int(v))
 	case uint8:
-		return dml.Number(int(v))
+		return expr.Number(int(v))
 	case uint16:
-		return dml.Number(int(v))
+		return expr.Number(int(v))
 	case uint32:
-		return dml.Number(int(v))
+		return expr.Number(int(v))
 	case uint64:
-		return dml.Number(int(v))
+		return expr.Number(int(v))
 
 	case *int:
 		if v == nil {
-			return &dml.Null{}
+			return &expr.Null{}
 		}
-		return dml.Number(*v)
+		return expr.Number(*v)
 
 	case *int8:
 		if v == nil {
-			return &dml.Null{}
+			return &expr.Null{}
 		}
-		return dml.Number(int(*v))
+		return expr.Number(int(*v))
 
 	case *int16:
 		if v == nil {
-			return &dml.Null{}
+			return &expr.Null{}
 		}
-		return dml.Number(int(*v))
+		return expr.Number(int(*v))
 
 	case *int32:
 		if v == nil {
-			return &dml.Null{}
+			return &expr.Null{}
 		}
-		return dml.Number(int(*v))
+		return expr.Number(int(*v))
 
 	case *int64:
 		if v == nil {
-			return &dml.Null{}
+			return &expr.Null{}
 		}
-		return dml.Number(int(*v))
+		return expr.Number(int(*v))
 
 	case float32:
-		return dml.Float(float64(v))
+		return expr.Float(float64(v))
 
 	case float64:
-		return dml.Float(v)
+		return expr.Float(v)
 
 	case *float32:
 		if v == nil {
-			return &dml.Null{}
+			return &expr.Null{}
 		}
-		return dml.Float(float64(*v))
+		return expr.Float(float64(*v))
 
 	case *float64:
 		if v == nil {
-			return &dml.Null{}
+			return &expr.Null{}
 		}
-		return dml.Float(*v)
+		return expr.Float(*v)
 
 	case bool:
-		return dml.Bool(v)
+		return expr.Bool(v)
 
 	case *bool:
 		if v == nil {
-			return &dml.Null{}
+			return &expr.Null{}
 		}
-		return dml.Bool(*v)
+		return expr.Bool(*v)
 
 	default:
-		return &dml.Null{}
+		return &expr.Null{}
 	}
 }

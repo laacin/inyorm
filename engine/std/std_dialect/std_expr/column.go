@@ -1,11 +1,11 @@
-package dialect
+package std_expr
 
 import (
 	"github.com/laacin/inyorm/internal/entity/core"
-	"github.com/laacin/inyorm/internal/entity/dml"
+	"github.com/laacin/inyorm/internal/entity/expr"
 )
 
-func (dial *StdDialect) WriteTable(w core.Writer, tbl *dml.Table) {
+func (s *ExprSyntax) WriteTable(w core.Writer, tbl *expr.Table) {
 	w.Write(tbl.Value)
 	if ref, ok := w.GetRef(tbl.Value); ok {
 		w.Char(' ')
@@ -13,7 +13,7 @@ func (dial *StdDialect) WriteTable(w core.Writer, tbl *dml.Table) {
 	}
 }
 
-func (dial *StdDialect) WriteColBase(w core.Writer, col *dml.Column) {
+func (s *ExprSyntax) WriteColBase(w core.Writer, col *expr.Column) {
 	if ref, ok := w.GetRef(col.Ref); ok {
 		w.Char(ref)
 		w.Char('.')
@@ -21,19 +21,19 @@ func (dial *StdDialect) WriteColBase(w core.Writer, col *dml.Column) {
 	w.Write(col.Name)
 }
 
-func (dial *StdDialect) WriteColExpr(w core.Writer, col *dml.Column) {
-	dial.BuildCol(w.New(), col)
+func (s *ExprSyntax) WriteColExpr(w core.Writer, col *expr.Column) {
+	s.buildCol(w.New(), col)
 
 	if col.Value == "" {
-		dial.WriteColBase(w, col)
+		s.WriteColBase(w, col)
 		return
 	}
 
 	w.Write(col.Value)
 }
 
-func (dial *StdDialect) WriteColAlias(w core.Writer, col *dml.Column) {
-	dial.BuildCol(w.New(), col)
+func (s *ExprSyntax) WriteColAlias(w core.Writer, col *expr.Column) {
+	s.buildCol(w.New(), col)
 
 	if col.Alias != "" {
 		w.Write(col.Alias)
@@ -41,22 +41,22 @@ func (dial *StdDialect) WriteColAlias(w core.Writer, col *dml.Column) {
 	}
 
 	if col.Value != "" {
-		dial.WriteColExpr(w, col)
+		s.WriteColExpr(w, col)
 		return
 	}
 
-	dial.WriteColBase(w, col)
+	s.WriteColBase(w, col)
 }
 
-func (dial *StdDialect) WriteColDef(w core.Writer, col *dml.Column) {
-	dial.BuildCol(w.New(), col)
+func (s *ExprSyntax) WriteColDef(w core.Writer, col *expr.Column) {
+	s.buildCol(w.New(), col)
 
 	if col.Value == "" {
-		dial.WriteColBase(w, col)
+		s.WriteColBase(w, col)
 		return
 	}
 
-	dial.WriteColExpr(w, col)
+	s.WriteColExpr(w, col)
 	if col.Alias != "" {
 		w.Write(" AS ")
 		w.Write(col.Alias)
@@ -64,9 +64,9 @@ func (dial *StdDialect) WriteColDef(w core.Writer, col *dml.Column) {
 }
 
 // --- Helpers
-func (dial *StdDialect) BuildFirst(w core.Writer, col *dml.Column) {
+func (s *ExprSyntax) buildFirst(w core.Writer, col *expr.Column) {
 	if col.From != nil {
-		if col.From.Kind() == dml.ValueWildcard {
+		if col.From.Kind() == expr.ValueWildcard {
 			if ref, ok := w.GetRef(col.Ref); ok {
 				w.Char(ref)
 				w.Char('.')
@@ -81,29 +81,29 @@ func (dial *StdDialect) BuildFirst(w core.Writer, col *dml.Column) {
 		return
 	}
 
-	dial.WriteColBase(w, col)
+	s.WriteColBase(w, col)
 }
 
 // FIX: illegible
-func (dial *StdDialect) BuildCol(w core.Writer, col *dml.Column) {
+func (s *ExprSyntax) buildCol(w core.Writer, col *expr.Column) {
 	if (col == nil) || (col.Exprs == nil && col.Aggr == nil && col.From == nil) {
 		return
 	}
 
-	dial.BuildFirst(w, col)
+	s.buildFirst(w, col)
 	if col.Exprs != nil {
-		for _, expr := range col.Exprs {
-			if scalar, ok := scalarMap[expr.Kind]; ok {
+		for _, e := range col.Exprs {
+			if scalar, ok := scalarMap[e.Kind]; ok {
 				wScalar(w, scalar)
 				continue
 			}
 
-			if arith, ok := arithMap[expr.Kind]; ok {
-				wArith(w, arith, expr.Value)
+			if arith, ok := arithMap[e.Kind]; ok {
+				wArith(w, arith, e.Value)
 				continue
 			}
 
-			if expr.Kind == dml.ColArithWrap {
+			if e.Kind == expr.ColArithWrap {
 				wWrap(w)
 				continue
 			}
@@ -122,28 +122,28 @@ func (dial *StdDialect) BuildCol(w core.Writer, col *dml.Column) {
 }
 
 // maps
-var aggrMap = map[dml.ColKindExpr]string{
-	dml.ColAggrCount: "COUNT",
-	dml.ColAggrSum:   "SUM",
-	dml.ColAggrMin:   "MIN",
-	dml.ColAggrMax:   "MAX",
-	dml.ColAggrAvg:   "AVG",
+var aggrMap = map[expr.ColKindExpr]string{
+	expr.ColAggrCount: "COUNT",
+	expr.ColAggrSum:   "SUM",
+	expr.ColAggrMin:   "MIN",
+	expr.ColAggrMax:   "MAX",
+	expr.ColAggrAvg:   "AVG",
 }
 
-var scalarMap = map[dml.ColKindExpr]string{
-	dml.ColScalarLower: "LOWER",
-	dml.ColScalarUpper: "UPPER",
-	dml.ColScalarTrim:  "TRIM",
-	dml.ColScalarRound: "ROUND",
-	dml.ColScalarAbs:   "ABS",
+var scalarMap = map[expr.ColKindExpr]string{
+	expr.ColScalarLower: "LOWER",
+	expr.ColScalarUpper: "UPPER",
+	expr.ColScalarTrim:  "TRIM",
+	expr.ColScalarRound: "ROUND",
+	expr.ColScalarAbs:   "ABS",
 }
 
-var arithMap = map[dml.ColKindExpr]byte{
-	dml.ColArithAdd: '+',
-	dml.ColArithSub: '-',
-	dml.ColArithMul: '*',
-	dml.ColArithDiv: '/',
-	dml.ColArithMod: '%',
+var arithMap = map[expr.ColKindExpr]byte{
+	expr.ColArithAdd: '+',
+	expr.ColArithSub: '-',
+	expr.ColArithMul: '*',
+	expr.ColArithDiv: '/',
+	expr.ColArithMod: '%',
 }
 
 func wArith(w core.Writer, arg byte, value any) {

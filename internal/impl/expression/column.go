@@ -2,15 +2,15 @@ package expression
 
 import (
 	"github.com/laacin/inyorm/internal/entity/api"
-	"github.com/laacin/inyorm/internal/entity/dml"
+	"github.com/laacin/inyorm/internal/entity/expr"
 )
 
-type ColumnImpl struct{ dml.Column }
+type ColumnImpl struct{ expr.Column }
 
 func (c *ColumnImpl) Count(distinct ...bool) api.Column {
 	dist := len(distinct) > 0 && distinct[0]
-	c.Aggr = &dml.ColExpr{
-		Kind:  dml.ColAggrCount,
+	c.Aggr = &expr.ColExpr{
+		Kind:  expr.ColAggrCount,
 		Value: dist,
 	}
 	return c
@@ -18,8 +18,8 @@ func (c *ColumnImpl) Count(distinct ...bool) api.Column {
 
 func (c *ColumnImpl) Sum(distinct ...bool) api.Column {
 	dist := len(distinct) > 0 && distinct[0]
-	c.Aggr = &dml.ColExpr{
-		Kind:  dml.ColAggrSum,
+	c.Aggr = &expr.ColExpr{
+		Kind:  expr.ColAggrSum,
 		Value: dist,
 	}
 	return c
@@ -27,8 +27,8 @@ func (c *ColumnImpl) Sum(distinct ...bool) api.Column {
 
 func (c *ColumnImpl) Min(distinct ...bool) api.Column {
 	dist := len(distinct) > 0 && distinct[0]
-	c.Aggr = &dml.ColExpr{
-		Kind:  dml.ColAggrMin,
+	c.Aggr = &expr.ColExpr{
+		Kind:  expr.ColAggrMin,
 		Value: dist,
 	}
 	return c
@@ -36,8 +36,8 @@ func (c *ColumnImpl) Min(distinct ...bool) api.Column {
 
 func (c *ColumnImpl) Max(distinct ...bool) api.Column {
 	dist := len(distinct) > 0 && distinct[0]
-	c.Aggr = &dml.ColExpr{
-		Kind:  dml.ColAggrMax,
+	c.Aggr = &expr.ColExpr{
+		Kind:  expr.ColAggrMax,
 		Value: dist,
 	}
 	return c
@@ -45,8 +45,8 @@ func (c *ColumnImpl) Max(distinct ...bool) api.Column {
 
 func (c *ColumnImpl) Avg(distinct ...bool) api.Column {
 	dist := len(distinct) > 0 && distinct[0]
-	c.Aggr = &dml.ColExpr{
-		Kind:  dml.ColAggrAvg,
+	c.Aggr = &expr.ColExpr{
+		Kind:  expr.ColAggrAvg,
 		Value: dist,
 	}
 	return c
@@ -55,48 +55,48 @@ func (c *ColumnImpl) Avg(distinct ...bool) api.Column {
 // --- Arith
 
 func (c *ColumnImpl) Add(v any) api.Column {
-	c.Exprs = append(c.Exprs, dml.ColExpr{
-		Kind:  dml.ColArithAdd,
+	c.Exprs = append(c.Exprs, expr.ColExpr{
+		Kind:  expr.ColArithAdd,
 		Value: v,
 	})
 	return c
 }
 
 func (c *ColumnImpl) Sub(v any) api.Column {
-	c.Exprs = append(c.Exprs, dml.ColExpr{
-		Kind:  dml.ColArithSub,
+	c.Exprs = append(c.Exprs, expr.ColExpr{
+		Kind:  expr.ColArithSub,
 		Value: v,
 	})
 	return c
 }
 
 func (c *ColumnImpl) Mul(v any) api.Column {
-	c.Exprs = append(c.Exprs, dml.ColExpr{
-		Kind:  dml.ColArithMul,
+	c.Exprs = append(c.Exprs, expr.ColExpr{
+		Kind:  expr.ColArithMul,
 		Value: v,
 	})
 	return c
 }
 
 func (c *ColumnImpl) Div(v any) api.Column {
-	c.Exprs = append(c.Exprs, dml.ColExpr{
-		Kind:  dml.ColArithDiv,
+	c.Exprs = append(c.Exprs, expr.ColExpr{
+		Kind:  expr.ColArithDiv,
 		Value: v,
 	})
 	return c
 }
 
 func (c *ColumnImpl) Mod(v any) api.Column {
-	c.Exprs = append(c.Exprs, dml.ColExpr{
-		Kind:  dml.ColArithMod,
+	c.Exprs = append(c.Exprs, expr.ColExpr{
+		Kind:  expr.ColArithMod,
 		Value: v,
 	})
 	return c
 }
 
 func (c *ColumnImpl) Wrap() api.Column {
-	c.Exprs = append(c.Exprs, dml.ColExpr{
-		Kind: dml.ColArithWrap,
+	c.Exprs = append(c.Exprs, expr.ColExpr{
+		Kind: expr.ColArithWrap,
 	})
 	return c
 }
@@ -104,36 +104,36 @@ func (c *ColumnImpl) Wrap() api.Column {
 // --- Scalar
 
 func (c *ColumnImpl) Lower() api.Column {
-	c.Exprs = append(c.Exprs, dml.ColExpr{
-		Kind: dml.ColScalarLower,
+	c.Exprs = append(c.Exprs, expr.ColExpr{
+		Kind: expr.ColScalarLower,
 	})
 	return c
 }
 
 func (c *ColumnImpl) Upper() api.Column {
-	c.Exprs = append(c.Exprs, dml.ColExpr{
-		Kind: dml.ColScalarUpper,
+	c.Exprs = append(c.Exprs, expr.ColExpr{
+		Kind: expr.ColScalarUpper,
 	})
 	return c
 }
 
 func (c *ColumnImpl) Trim() api.Column {
-	c.Exprs = append(c.Exprs, dml.ColExpr{
-		Kind: dml.ColScalarTrim,
+	c.Exprs = append(c.Exprs, expr.ColExpr{
+		Kind: expr.ColScalarTrim,
 	})
 	return c
 }
 
 func (c *ColumnImpl) Round() api.Column {
-	c.Exprs = append(c.Exprs, dml.ColExpr{
-		Kind: dml.ColScalarRound,
+	c.Exprs = append(c.Exprs, expr.ColExpr{
+		Kind: expr.ColScalarRound,
 	})
 	return c
 }
 
 func (c *ColumnImpl) Abs() api.Column {
-	c.Exprs = append(c.Exprs, dml.ColExpr{
-		Kind: dml.ColScalarAbs,
+	c.Exprs = append(c.Exprs, expr.ColExpr{
+		Kind: expr.ColScalarAbs,
 	})
 	return c
 }
@@ -147,6 +147,6 @@ func (c *ColumnImpl) As(value string) api.Column {
 
 // --- Build
 
-func (c *ColumnImpl) Build() dml.Value {
+func (c *ColumnImpl) Build() expr.Value {
 	return &c.Column
 }

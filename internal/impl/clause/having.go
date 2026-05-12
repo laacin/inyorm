@@ -3,6 +3,7 @@ package clause
 import (
 	"github.com/laacin/inyorm/internal/entity/api"
 	"github.com/laacin/inyorm/internal/entity/dml"
+	"github.com/laacin/inyorm/internal/entity/expr"
 	"github.com/laacin/inyorm/internal/impl/expression"
 )
 
@@ -29,6 +30,6 @@ func (c *HavingImpl) Kind() dml.ClauseKind {
 }
 
 func (c *HavingImpl) Build() (dml.Clause, error) {
-	c.emb.Cond = c.cond.Build().(*dml.Condition)
+	c.emb.Cond = c.cond.Build().(*expr.Condition)
 	return &c.emb, nil
 }

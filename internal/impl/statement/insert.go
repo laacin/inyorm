@@ -3,8 +3,9 @@ package statement
 import (
 	"context"
 
+	"github.com/laacin/inyorm/internal/entity"
 	"github.com/laacin/inyorm/internal/entity/dml"
-	"github.com/laacin/inyorm/internal/entity/driver"
+	"github.com/laacin/inyorm/internal/entity/expr"
 	"github.com/laacin/inyorm/internal/execution"
 	"github.com/laacin/inyorm/internal/impl/clause"
 	"github.com/laacin/inyorm/internal/impl/statement/writer"
@@ -12,16 +13,16 @@ import (
 
 type InsertStmtImpl struct {
 	DefaultRef string
-	Dialect    dml.Dialect
+	Dialect    entity.Dialect
 
 	clause.InsertIntoImpl
 
 	*execution.Executor
 }
 
-func NewInsertStatement(ctx context.Context, dial dml.Dialect, driver driver.Driver, ref string) *InsertStmtImpl {
-	stmt := &InsertStmtImpl{Dialect: dial, DefaultRef: ref}
-	exec := &execution.Executor{Ctx: ctx, Statement: stmt, Driver: driver}
+func NewInsertStatement(ctx context.Context, eng *entity.Engine, ref string) *InsertStmtImpl {
+	stmt := &InsertStmtImpl{Dialect: eng.Dialect, DefaultRef: ref}
+	exec := &execution.Executor{Ctx: ctx, Statement: stmt, Driver: eng.Driver}
 	stmt.Executor = exec
 	return stmt
 }
@@ -32,7 +33,7 @@ func (s *InsertStmtImpl) Kind() dml.StatementKind {
 
 func (s *InsertStmtImpl) Build() (*dml.Statement, error) {
 	// Auto-FROM
-	s.InsertIntoImpl.Table(&dml.Table{Value: s.DefaultRef})
+	s.InsertIntoImpl.Table(&expr.Table{Value: s.DefaultRef})
 
 	// --- Load clauses
 	clauses := []dml.ClauseBuilder{

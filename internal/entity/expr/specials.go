@@ -1,4 +1,4 @@
-package dml
+package expr
 
 import "github.com/laacin/inyorm/internal/entity/core"
 

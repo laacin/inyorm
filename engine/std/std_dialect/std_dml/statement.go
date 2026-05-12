@@ -1,8 +1,8 @@
-package dialect
+package std_dml
 
 import "github.com/laacin/inyorm/internal/entity/dml"
 
-func (dial *StdDialect) SelectOrder() []dml.ClauseKind {
+func (*DmlSyntax) SelectOrder() []dml.ClauseKind {
 	return []dml.ClauseKind{
 		dml.ClauseSelect,
 		dml.ClauseFrom,
@@ -16,20 +16,20 @@ func (dial *StdDialect) SelectOrder() []dml.ClauseKind {
 	}
 }
 
-func (dial *StdDialect) InsertOrder() []dml.ClauseKind {
+func (*DmlSyntax) InsertOrder() []dml.ClauseKind {
 	return []dml.ClauseKind{
 		dml.ClauseInsertInto,
 	}
 }
 
-func (dial *StdDialect) UpdateOrder() []dml.ClauseKind {
+func (*DmlSyntax) UpdateOrder() []dml.ClauseKind {
 	return []dml.ClauseKind{
 		dml.ClauseUpdate,
 		dml.ClauseWhere,
 	}
 }
 
-func (dial *StdDialect) DeleteOrder() []dml.ClauseKind {
+func (*DmlSyntax) DeleteOrder() []dml.ClauseKind {
 	return []dml.ClauseKind{
 		dml.ClauseDelete,
 		dml.ClauseFrom,

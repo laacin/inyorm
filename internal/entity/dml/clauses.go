@@ -1,6 +1,9 @@
 package dml
 
-import "github.com/laacin/inyorm/internal/entity/core"
+import (
+	"github.com/laacin/inyorm/internal/entity/core"
+	"github.com/laacin/inyorm/internal/entity/expr"
+)
 
 // --- Clauses
 
@@ -18,7 +21,7 @@ type Join struct {
 }
 
 type Where struct {
-	Conds []*Condition
+	Conds []*expr.Condition
 }
 
 type GroupBy struct {
@@ -26,7 +29,7 @@ type GroupBy struct {
 }
 
 type Having struct {
-	Cond *Condition
+	Cond *expr.Condition
 }
 
 type OrderBy struct {
@@ -101,7 +104,7 @@ const (
 type JoinSegment struct {
 	Type  JoinType
 	Table any
-	Cond  *Condition
+	Cond  *expr.Condition
 }
 
 type OrderSegment struct {

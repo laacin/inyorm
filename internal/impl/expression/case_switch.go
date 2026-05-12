@@ -2,12 +2,12 @@ package expression
 
 import (
 	"github.com/laacin/inyorm/internal/entity/api"
-	"github.com/laacin/inyorm/internal/entity/dml"
+	"github.com/laacin/inyorm/internal/entity/expr"
 )
 
 type CaseSwitchImpl struct {
-	dml.CaseSwitch
-	current *dml.CaseWhen
+	expr.CaseSwitch
+	current *expr.CaseWhen
 }
 
 func (c *CaseSwitchImpl) Start(cond any) api.Case {
@@ -16,7 +16,7 @@ func (c *CaseSwitchImpl) Start(cond any) api.Case {
 }
 
 func (c *CaseSwitchImpl) When(when any) api.CaseNext {
-	c.current = &dml.CaseWhen{When: when}
+	c.current = &expr.CaseWhen{When: when}
 	return c
 }
 
@@ -32,6 +32,6 @@ func (c *CaseSwitchImpl) Else(els any) {
 
 // --- Build
 
-func (c *CaseSwitchImpl) Build() dml.Value {
+func (c *CaseSwitchImpl) Build() expr.Value {
 	return &c.CaseSwitch
 }

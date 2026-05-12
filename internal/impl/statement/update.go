@@ -3,8 +3,9 @@ package statement
 import (
 	"context"
 
+	"github.com/laacin/inyorm/internal/entity"
 	"github.com/laacin/inyorm/internal/entity/dml"
-	"github.com/laacin/inyorm/internal/entity/driver"
+	"github.com/laacin/inyorm/internal/entity/expr"
 	"github.com/laacin/inyorm/internal/execution"
 	"github.com/laacin/inyorm/internal/impl/clause"
 	"github.com/laacin/inyorm/internal/impl/statement/writer"
@@ -12,7 +13,7 @@ import (
 
 type UpdateStmtImpl struct {
 	DefaultRef string
-	Dialect    dml.Dialect
+	Dialect    entity.Dialect
 
 	clause.UpdateImpl
 	clause.WhereImpl
@@ -20,9 +21,9 @@ type UpdateStmtImpl struct {
 	*execution.Executor
 }
 
-func NewUpdateStatement(ctx context.Context, dial dml.Dialect, driver driver.Driver, ref string) *UpdateStmtImpl {
-	stmt := &UpdateStmtImpl{Dialect: dial, DefaultRef: ref}
-	exec := &execution.Executor{Ctx: ctx, Statement: stmt, Driver: driver}
+func NewUpdateStatement(ctx context.Context, eng *entity.Engine, ref string) *UpdateStmtImpl {
+	stmt := &UpdateStmtImpl{Dialect: eng.Dialect, DefaultRef: ref}
+	exec := &execution.Executor{Ctx: ctx, Statement: stmt, Driver: eng.Driver}
 	stmt.Executor = exec
 	return stmt
 }
@@ -32,7 +33,7 @@ func (s *UpdateStmtImpl) Kind() dml.StatementKind {
 }
 
 func (s *UpdateStmtImpl) Build() (*dml.Statement, error) {
-	s.UpdateImpl.Table(&dml.Table{Value: s.DefaultRef})
+	s.UpdateImpl.Table(&expr.Table{Value: s.DefaultRef})
 
 	// --- Load clauses
 	clauses := []dml.ClauseBuilder{

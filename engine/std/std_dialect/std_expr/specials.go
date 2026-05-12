@@ -1,15 +1,15 @@
-package dialect
+package std_expr
 
 import (
 	"github.com/laacin/inyorm/internal/entity/core"
-	"github.com/laacin/inyorm/internal/entity/dml"
+	"github.com/laacin/inyorm/internal/entity/expr"
 )
 
-func (dial *StdDialect) WritePlaceholder(w core.Writer, count int) {
+func (*ExprSyntax) WritePlaceholder(w core.Writer, count int) {
 	w.Char('?')
 }
 
-func (dial *StdDialect) WriteCondition(w core.Writer, cond *dml.Condition, mode core.WritingMode) {
+func (*ExprSyntax) WriteCondition(w core.Writer, cond *expr.Condition, mode core.WritingMode) {
 	w.Char('(')
 	for i, pred := range cond.Predicates {
 		if !pred.Closed {
@@ -27,15 +27,15 @@ func (dial *StdDialect) WriteCondition(w core.Writer, cond *dml.Condition, mode 
 		w.Char(' ')
 		w.Write(getOp(pred.Operator, pred.Negated))
 		switch pred.Operator {
-		case dml.PredIsNull:
+		case expr.PredIsNull:
 
-		case dml.PredBetween:
+		case expr.PredBetween:
 			w.Char(' ')
 			w.Value(pred.Values[0], mode)
 			w.Write(" AND ")
 			w.Value(pred.Values[1], mode)
 
-		case dml.PredIn:
+		case expr.PredIn:
 			w.Char(' ')
 
 			w.Char('(')
@@ -55,7 +55,7 @@ func (dial *StdDialect) WriteCondition(w core.Writer, cond *dml.Condition, mode 
 	w.Char(')')
 }
 
-func (dial *StdDialect) WriteConcat(w core.Writer, con *dml.Concat) {
+func (*ExprSyntax) WriteConcat(w core.Writer, con *expr.Concat) {
 	w.Write("CONCAT")
 	w.Char('(')
 	for i, val := range con.Values {
@@ -67,7 +67,7 @@ func (dial *StdDialect) WriteConcat(w core.Writer, con *dml.Concat) {
 	w.Char(')')
 }
 
-func (dial *StdDialect) WriteCaseSwitch(w core.Writer, cas *dml.CaseSwitch, mode core.WritingMode) {
+func (*ExprSyntax) WriteCaseSwitch(w core.Writer, cas *expr.CaseSwitch, mode core.WritingMode) {
 	w.Write("CASE")
 	w.Char(' ')
 	w.Value(cas.Cond, core.WriteExpr)
@@ -91,7 +91,7 @@ func (dial *StdDialect) WriteCaseSwitch(w core.Writer, cas *dml.CaseSwitch, mode
 	w.Write("END")
 }
 
-func (dial *StdDialect) WriteCaseSearch(w core.Writer, cas *dml.CaseSearch, mode core.WritingMode) {
+func (*ExprSyntax) WriteCaseSearch(w core.Writer, cas *expr.CaseSearch, mode core.WritingMode) {
 	w.Write("CASE WHEN")
 	w.Char(' ')
 
@@ -114,34 +114,34 @@ func (dial *StdDialect) WriteCaseSearch(w core.Writer, cas *dml.CaseSearch, mode
 
 // --- Helpers
 
-func getOp(op dml.PredOperator, negated bool) string {
+func getOp(op expr.PredOperator, negated bool) string {
 	if negated {
 		return negatedMap[op]
 	}
 	return operatorsMap[op]
 }
 
-var operatorsMap = map[dml.PredOperator]string{
-	dml.PredEqual:   "=",
-	dml.PredLike:    "LIKE",
-	dml.PredIn:      "IN",
-	dml.PredBetween: "BETWEEN",
-	dml.PredGreater: ">",
-	dml.PredLess:    "<",
-	dml.PredIsNull:  "IS NULL",
+var operatorsMap = map[expr.PredOperator]string{
+	expr.PredEqual:   "=",
+	expr.PredLike:    "LIKE",
+	expr.PredIn:      "IN",
+	expr.PredBetween: "BETWEEN",
+	expr.PredGreater: ">",
+	expr.PredLess:    "<",
+	expr.PredIsNull:  "IS NULL",
 }
 
-var negatedMap = map[dml.PredOperator]string{
-	dml.PredEqual:   "<>",
-	dml.PredLike:    "NOT LIKE",
-	dml.PredIn:      "NOT IN",
-	dml.PredBetween: "NOT BETWEEN",
-	dml.PredGreater: ">=",
-	dml.PredLess:    "<=",
-	dml.PredIsNull:  "IS NOT NULL",
+var negatedMap = map[expr.PredOperator]string{
+	expr.PredEqual:   "<>",
+	expr.PredLike:    "NOT LIKE",
+	expr.PredIn:      "NOT IN",
+	expr.PredBetween: "NOT BETWEEN",
+	expr.PredGreater: ">=",
+	expr.PredLess:    "<=",
+	expr.PredIsNull:  "IS NOT NULL",
 }
 
-var connectorMap = map[dml.PredConnector]string{
-	dml.PredAnd: "AND",
-	dml.PredOr:  "OR",
+var connectorMap = map[expr.PredConnector]string{
+	expr.PredAnd: "AND",
+	expr.PredOr:  "OR",
 }

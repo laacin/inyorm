@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/laacin/inyorm/internal/entity/api"
-	"github.com/laacin/inyorm/internal/entity/dml"
+	"github.com/laacin/inyorm/internal/entity/expr"
 	"github.com/laacin/inyorm/internal/impl/expression"
 	"github.com/laacin/inyorm/internal/mapper"
 )
@@ -22,7 +22,7 @@ func run(t *testing.T, v []any, exp []string) {
 }
 
 func col(name string) api.Column {
-	return &expression.ColumnImpl{Column: dml.Column{Name: name}}
+	return &expression.ColumnImpl{Column: expr.Column{Name: name}}
 }
 
 func TestGetColumn(t *testing.T) {

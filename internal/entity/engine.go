@@ -3,10 +3,16 @@ package entity
 import (
 	"github.com/laacin/inyorm/internal/entity/dml"
 	"github.com/laacin/inyorm/internal/entity/driver"
+	"github.com/laacin/inyorm/internal/entity/expr"
 )
 
 type Engine struct {
-	DML    dml.Dialect
-	Driver driver.Driver
-	Err    error
+	Dialect Dialect
+	Driver  driver.Driver
+	Err     error
+}
+
+type Dialect interface {
+	dml.Syntax
+	expr.Syntax
 }

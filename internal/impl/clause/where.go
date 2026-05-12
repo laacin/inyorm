@@ -3,6 +3,7 @@ package clause
 import (
 	"github.com/laacin/inyorm/internal/entity/api"
 	"github.com/laacin/inyorm/internal/entity/dml"
+	"github.com/laacin/inyorm/internal/entity/expr"
 	"github.com/laacin/inyorm/internal/impl/expression"
 )
 
@@ -32,7 +33,7 @@ func (c *WhereImpl) Kind() dml.ClauseKind {
 
 func (c *WhereImpl) Build() (dml.Clause, error) {
 	for _, cond := range c.conds {
-		c.emb.Conds = append(c.emb.Conds, cond.Build().(*dml.Condition))
+		c.emb.Conds = append(c.emb.Conds, cond.Build().(*expr.Condition))
 	}
 
 	return &c.emb, nil
