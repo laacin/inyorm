@@ -1,17 +1,17 @@
 package clause
 
 import (
-	"github.com/laacin/inyorm/internal/entity/api"
-	"github.com/laacin/inyorm/internal/entity/dml"
-	"github.com/laacin/inyorm/internal/entity/expr"
-	"github.com/laacin/inyorm/internal/impl/expression"
+	"github.com/laacin/inyorm/internal/api"
+	"github.com/laacin/inyorm/internal/impl/exprimpl"
+	"github.com/laacin/inyorm/internal/ir/dml"
+	"github.com/laacin/inyorm/internal/ir/expr"
 )
 
 type JoinImpl struct {
 	declared bool
 	emb      dml.Join
 	current  *dml.JoinSegment
-	conds    []*expression.ConditionImpl
+	conds    []*exprimpl.ConditionImpl
 }
 
 func (c *JoinImpl) Join(table any) api.JoinNext {
@@ -42,7 +42,7 @@ func (c *JoinImpl) Cross() {
 }
 
 func (c *JoinImpl) On(ident any) api.Condition {
-	cond := &expression.ConditionImpl{}
+	cond := &exprimpl.ConditionImpl{}
 	c.emb.Joins = append(c.emb.Joins, *c.current)
 	c.conds = append(c.conds, cond)
 	return cond.Start(ident)

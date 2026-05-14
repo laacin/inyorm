@@ -7,8 +7,8 @@ import (
 
 	"github.com/laacin/inyorm"
 	"github.com/laacin/inyorm/engine/std"
-	"github.com/laacin/inyorm/internal/entity/api"
-	"github.com/laacin/inyorm/internal/entity/dml"
+	"github.com/laacin/inyorm/internal/api"
+	"github.com/laacin/inyorm/internal/ir/dml"
 )
 
 func run(t *testing.T, q any, exp string, vals []any) {

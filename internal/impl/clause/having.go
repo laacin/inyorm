@@ -1,21 +1,21 @@
 package clause
 
 import (
-	"github.com/laacin/inyorm/internal/entity/api"
-	"github.com/laacin/inyorm/internal/entity/dml"
-	"github.com/laacin/inyorm/internal/entity/expr"
-	"github.com/laacin/inyorm/internal/impl/expression"
+	"github.com/laacin/inyorm/internal/api"
+	"github.com/laacin/inyorm/internal/impl/exprimpl"
+	"github.com/laacin/inyorm/internal/ir/dml"
+	"github.com/laacin/inyorm/internal/ir/expr"
 )
 
 type HavingImpl struct {
 	declared bool
 	emb      dml.Having
-	cond     *expression.ConditionImpl
+	cond     *exprimpl.ConditionImpl
 }
 
 func (c *HavingImpl) Having(ident any) api.Condition {
 	c.declared = true
-	c.cond = &expression.ConditionImpl{}
+	c.cond = &exprimpl.ConditionImpl{}
 	return c.cond.Start(ident)
 }
 

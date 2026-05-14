@@ -1,12 +1,12 @@
 package inyorm
 
 import (
-	"github.com/laacin/inyorm/internal/entity"
-	"github.com/laacin/inyorm/internal/entity/api"
+	"github.com/laacin/inyorm/internal/api"
+	"github.com/laacin/inyorm/internal/ir"
 )
 
 type (
-	Engine = entity.Engine
+	Engine = ir.Engine
 
 	// Values
 	Value   = api.Value

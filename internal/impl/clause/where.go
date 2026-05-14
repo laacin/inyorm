@@ -1,22 +1,22 @@
 package clause
 
 import (
-	"github.com/laacin/inyorm/internal/entity/api"
-	"github.com/laacin/inyorm/internal/entity/dml"
-	"github.com/laacin/inyorm/internal/entity/expr"
-	"github.com/laacin/inyorm/internal/impl/expression"
+	"github.com/laacin/inyorm/internal/api"
+	"github.com/laacin/inyorm/internal/impl/exprimpl"
+	"github.com/laacin/inyorm/internal/ir/dml"
+	"github.com/laacin/inyorm/internal/ir/expr"
 )
 
 type WhereImpl struct {
 	declared bool
 	emb      dml.Where
-	conds    []*expression.ConditionImpl
-	current  *expression.ConditionImpl
+	conds    []*exprimpl.ConditionImpl
+	current  *exprimpl.ConditionImpl
 }
 
 func (c *WhereImpl) Where(ident any) api.Condition {
 	c.declared = true
-	cond := &expression.ConditionImpl{}
+	cond := &exprimpl.ConditionImpl{}
 	c.conds = append(c.conds, cond)
 	return cond.Start(ident)
 }

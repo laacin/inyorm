@@ -1,8 +1,8 @@
 package clause
 
 import (
-	"github.com/laacin/inyorm/internal/entity/api"
-	"github.com/laacin/inyorm/internal/entity/dml"
+	"github.com/laacin/inyorm/internal/api"
+	"github.com/laacin/inyorm/internal/ir/dml"
 )
 
 type OrderByImpl struct {

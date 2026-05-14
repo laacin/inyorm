@@ -3,7 +3,7 @@ package std_driver
 import (
 	"context"
 
-	"github.com/laacin/inyorm/internal/entity/driver"
+	"github.com/laacin/inyorm/internal/ir/driver"
 )
 
 func (d *Driver) Exec(ctx context.Context, query string, args ...any) error {

@@ -4,7 +4,7 @@ import (
 	"strconv"
 
 	"github.com/laacin/inyorm/engine/std"
-	"github.com/laacin/inyorm/internal/entity/core"
+	"github.com/laacin/inyorm/internal/core"
 )
 
 type PsqlDialect struct {
