@@ -3,7 +3,7 @@ package types
 import (
 	"reflect"
 
-	"github.com/laacin/inyorm/internal/entity/core"
+	"github.com/laacin/inyorm/internal/core"
 )
 
 type FieldInfo struct {

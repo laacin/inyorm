@@ -4,14 +4,14 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/laacin/inyorm/internal/entity/api"
+	"github.com/laacin/inyorm/internal/api"
 )
 
 type TypeInfo struct {
 	Kind Kind
 	Ptr  int
 	Slc  int
-	Fi   []FieldInfo // if Kind != KindStruct; Fi = nil
+	Fis  []FieldInfo // nil if Kind != KindStruct
 }
 
 // --- Valid app types
