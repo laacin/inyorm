@@ -1,6 +1,6 @@
 package std_dml
 
-import "github.com/laacin/inyorm/internal/entity/dml"
+import "github.com/laacin/inyorm/internal/ir/dml"
 
 func (*DmlSyntax) SelectOrder() []dml.ClauseKind {
 	return []dml.ClauseKind{

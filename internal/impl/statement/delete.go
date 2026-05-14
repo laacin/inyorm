@@ -3,28 +3,28 @@ package statement
 import (
 	"context"
 
-	"github.com/laacin/inyorm/internal/entity"
-	"github.com/laacin/inyorm/internal/entity/dml"
-	"github.com/laacin/inyorm/internal/entity/expr"
-	"github.com/laacin/inyorm/internal/execution"
 	"github.com/laacin/inyorm/internal/impl/clause"
-	"github.com/laacin/inyorm/internal/impl/statement/writer"
+	"github.com/laacin/inyorm/internal/impl/exec"
+	"github.com/laacin/inyorm/internal/impl/writer"
+	"github.com/laacin/inyorm/internal/ir"
+	"github.com/laacin/inyorm/internal/ir/dml"
+	"github.com/laacin/inyorm/internal/ir/expr"
 )
 
 type DeleteStmtImpl struct {
 	DefaultRef string
-	Dialect    entity.Dialect
+	Dialect    ir.Dialect
 
 	clause.DeleteImpl
 	clause.FromImpl
 	clause.WhereImpl
 
-	*execution.Executor
+	*exec.Executor
 }
 
-func NewDeleteStatement(ctx context.Context, eng *entity.Engine, ref string) *DeleteStmtImpl {
+func NewDeleteStatement(ctx context.Context, eng *ir.Engine, ref string) *DeleteStmtImpl {
 	stmt := &DeleteStmtImpl{Dialect: eng.Dialect, DefaultRef: ref}
-	exec := &execution.Executor{Ctx: ctx, Statement: stmt, Driver: eng.Driver}
+	exec := &exec.Executor{Ctx: ctx, Statement: stmt, Driver: eng.Driver}
 	stmt.Executor = exec
 	return stmt
 }

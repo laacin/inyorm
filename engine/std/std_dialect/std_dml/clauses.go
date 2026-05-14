@@ -1,8 +1,8 @@
 package std_dml
 
 import (
-	"github.com/laacin/inyorm/internal/entity/core"
-	"github.com/laacin/inyorm/internal/entity/dml"
+	"github.com/laacin/inyorm/internal/core"
+	"github.com/laacin/inyorm/internal/ir/dml"
 )
 
 func (*DmlSyntax) WriteInsertInto(w core.Writer, cls *dml.InsertInto) {

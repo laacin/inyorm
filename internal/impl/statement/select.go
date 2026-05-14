@@ -3,17 +3,17 @@ package statement
 import (
 	"context"
 
-	"github.com/laacin/inyorm/internal/entity"
-	"github.com/laacin/inyorm/internal/entity/dml"
-	"github.com/laacin/inyorm/internal/entity/expr"
-	"github.com/laacin/inyorm/internal/execution"
 	"github.com/laacin/inyorm/internal/impl/clause"
-	"github.com/laacin/inyorm/internal/impl/statement/writer"
+	"github.com/laacin/inyorm/internal/impl/exec"
+	"github.com/laacin/inyorm/internal/impl/writer"
+	"github.com/laacin/inyorm/internal/ir"
+	"github.com/laacin/inyorm/internal/ir/dml"
+	"github.com/laacin/inyorm/internal/ir/expr"
 )
 
 type SelectStmtImpl struct {
 	DefaultRef string
-	Dialect    entity.Dialect
+	Dialect    ir.Dialect
 
 	clause.SelectImpl
 	clause.FromImpl
@@ -25,12 +25,12 @@ type SelectStmtImpl struct {
 	clause.LimitImpl
 	clause.OffsetImpl
 
-	*execution.Executor
+	*exec.Executor
 }
 
-func NewSelectStatement(ctx context.Context, eng *entity.Engine, ref string) *SelectStmtImpl {
+func NewSelectStatement(ctx context.Context, eng *ir.Engine, ref string) *SelectStmtImpl {
 	stmt := &SelectStmtImpl{Dialect: eng.Dialect, DefaultRef: ref}
-	exec := &execution.Executor{Ctx: ctx, Statement: stmt, Driver: eng.Driver}
+	exec := &exec.Executor{Ctx: ctx, Statement: stmt, Driver: eng.Driver}
 	stmt.Executor = exec
 	return stmt
 }

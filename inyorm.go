@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 
-	"github.com/laacin/inyorm/internal/entity"
-	"github.com/laacin/inyorm/internal/impl/expression"
+	"github.com/laacin/inyorm/internal/impl/exprimpl"
 	"github.com/laacin/inyorm/internal/impl/statement"
+	"github.com/laacin/inyorm/internal/ir"
 )
 
-type DB struct{ eng *entity.Engine }
+type DB struct{ eng *ir.Engine }
 
 func New(eng *Engine) (*DB, error) {
 	if eng.Err != nil {
@@ -22,25 +22,25 @@ func New(eng *Engine) (*DB, error) {
 
 func (db *DB) NewSelect(ctx context.Context, table string) (SelectStatement, ExprBuilder) {
 	stmt := statement.NewSelectStatement(ctx, db.eng, table)
-	exprBuilder := &expression.ExprBuilderImpl{DefaultRef: table}
+	exprBuilder := &exprimpl.ExprBuilderImpl{DefaultRef: table}
 	return stmt, exprBuilder
 }
 
 func (db *DB) NewInsert(ctx context.Context, table string) (InsertStatement, ExprBuilder) {
 	stmt := statement.NewInsertStatement(ctx, db.eng, table)
-	exprBuilder := &expression.ExprBuilderImpl{DefaultRef: table}
+	exprBuilder := &exprimpl.ExprBuilderImpl{DefaultRef: table}
 	return stmt, exprBuilder
 }
 
 func (db *DB) NewUpdate(ctx context.Context, table string) (UpdateStatement, ExprBuilder) {
 	stmt := statement.NewUpdateStatement(ctx, db.eng, table)
-	exprBuilder := &expression.ExprBuilderImpl{DefaultRef: table}
+	exprBuilder := &exprimpl.ExprBuilderImpl{DefaultRef: table}
 	return stmt, exprBuilder
 }
 
 func (db *DB) NewDelete(ctx context.Context, table string) (DeleteStatement, ExprBuilder) {
 	stmt := statement.NewDeleteStatement(ctx, db.eng, table)
-	exprBuilder := &expression.ExprBuilderImpl{DefaultRef: table}
+	exprBuilder := &exprimpl.ExprBuilderImpl{DefaultRef: table}
 	return stmt, exprBuilder
 }
 

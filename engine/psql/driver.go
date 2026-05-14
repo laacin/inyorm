@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/laacin/inyorm/internal/entity/driver"
+	"github.com/laacin/inyorm/internal/ir/driver"
 )
 
 type PsqlDriver struct {

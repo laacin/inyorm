@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/laacin/inyorm/internal/entity/api"
-	"github.com/laacin/inyorm/internal/entity/dml"
-	"github.com/laacin/inyorm/internal/entity/expr"
-	"github.com/laacin/inyorm/internal/mapper"
+	"github.com/laacin/inyorm/internal/api"
+	"github.com/laacin/inyorm/internal/impl/mapper"
+	"github.com/laacin/inyorm/internal/ir/dml"
+	"github.com/laacin/inyorm/internal/ir/expr"
 )
 
 type InsertIntoImpl struct {

@@ -3,7 +3,7 @@ package std_expr
 import (
 	"strconv"
 
-	"github.com/laacin/inyorm/internal/entity/core"
+	"github.com/laacin/inyorm/internal/core"
 )
 
 var quote byte = "'"[0]

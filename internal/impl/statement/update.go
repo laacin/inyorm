@@ -3,27 +3,27 @@ package statement
 import (
 	"context"
 
-	"github.com/laacin/inyorm/internal/entity"
-	"github.com/laacin/inyorm/internal/entity/dml"
-	"github.com/laacin/inyorm/internal/entity/expr"
-	"github.com/laacin/inyorm/internal/execution"
 	"github.com/laacin/inyorm/internal/impl/clause"
-	"github.com/laacin/inyorm/internal/impl/statement/writer"
+	"github.com/laacin/inyorm/internal/impl/exec"
+	"github.com/laacin/inyorm/internal/impl/writer"
+	"github.com/laacin/inyorm/internal/ir"
+	"github.com/laacin/inyorm/internal/ir/dml"
+	"github.com/laacin/inyorm/internal/ir/expr"
 )
 
 type UpdateStmtImpl struct {
 	DefaultRef string
-	Dialect    entity.Dialect
+	Dialect    ir.Dialect
 
 	clause.UpdateImpl
 	clause.WhereImpl
 
-	*execution.Executor
+	*exec.Executor
 }
 
-func NewUpdateStatement(ctx context.Context, eng *entity.Engine, ref string) *UpdateStmtImpl {
+func NewUpdateStatement(ctx context.Context, eng *ir.Engine, ref string) *UpdateStmtImpl {
 	stmt := &UpdateStmtImpl{Dialect: eng.Dialect, DefaultRef: ref}
-	exec := &execution.Executor{Ctx: ctx, Statement: stmt, Driver: eng.Driver}
+	exec := &exec.Executor{Ctx: ctx, Statement: stmt, Driver: eng.Driver}
 	stmt.Executor = exec
 	return stmt
 }

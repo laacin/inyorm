@@ -1,6 +1,6 @@
 package clause
 
-import "github.com/laacin/inyorm/internal/entity/dml"
+import "github.com/laacin/inyorm/internal/ir/dml"
 
 type LimitImpl struct {
 	declared bool

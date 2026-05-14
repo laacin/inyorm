@@ -1,8 +1,8 @@
 package std_expr
 
 import (
-	"github.com/laacin/inyorm/internal/entity/core"
-	"github.com/laacin/inyorm/internal/entity/expr"
+	"github.com/laacin/inyorm/internal/core"
+	"github.com/laacin/inyorm/internal/ir/expr"
 )
 
 func (s *ExprSyntax) WriteTable(w core.Writer, tbl *expr.Table) {
