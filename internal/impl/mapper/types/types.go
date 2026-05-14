@@ -11,8 +11,13 @@ type TypeInfo struct {
 	Kind Kind
 	Ptr  int
 	Slc  int
-	Fis  []FieldInfo // nil if Kind != KindStruct
+	Fis  []fieldInfo // nil if Kind != KindStruct
 }
+
+func (t *TypeInfo) CanBeDeref() bool  { return t.Ptr <= 1 && t.Slc <= 1 }
+func (t *TypeInfo) IsPtr() bool       { return t.Ptr > 0 }
+func (t *TypeInfo) IsSlc() bool       { return t.Slc >= 0 }
+func (t *TypeInfo) IsSlcOfPtrs() bool { return t.Slc > 0 }
 
 // --- Valid app types
 type Kind int
@@ -56,15 +61,20 @@ func ReadInfo(typ reflect.Type) TypeInfo {
 		info.Slc = -1
 	}
 
-	if t.Implements(column) {
-		info.Kind = KindColumn
+	if reflect.PointerTo(t).Implements(column) {
+		if (info.Slc == -1 && info.Ptr == 1) || info.Slc == 1 {
+			info.Kind = KindColumn
+			return info
+		}
+
+		info.Kind = KindAny
 		return info
 	}
 
 	switch t.Kind() {
 	case reflect.Struct:
 		info.Kind = KindStruct
-		info.Fi = readStruct(t)
+		info.Fis = readStruct(t)
 
 	case reflect.Map:
 		info.Kind = KindMap
@@ -88,6 +98,6 @@ func ReadInfo(typ reflect.Type) TypeInfo {
 		info.Kind = KindAny
 	}
 
-	infoCache.Store(t, info)
+	infoCache.Store(typ, info)
 	return info
 }
