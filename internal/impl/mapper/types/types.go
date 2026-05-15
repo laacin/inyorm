@@ -8,10 +8,10 @@ import (
 )
 
 type TypeInfo struct {
-	Kind Kind
-	Ptr  int
-	Slc  int
-	Fis  []fieldInfo // nil if Kind != KindStruct
+	Kind   Kind
+	Ptr    int
+	Slc    int
+	Schema StructSchema // nil if Kind != KindStruct
 }
 
 func (t *TypeInfo) CanBeDeref() bool  { return t.Ptr <= 1 && t.Slc <= 1 }
@@ -74,7 +74,7 @@ func ReadInfo(typ reflect.Type) TypeInfo {
 	switch t.Kind() {
 	case reflect.Struct:
 		info.Kind = KindStruct
-		info.Fis = readStruct(t)
+		info.Schema = readStruct(t)
 
 	case reflect.Map:
 		info.Kind = KindMap

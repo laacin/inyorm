@@ -29,17 +29,17 @@ func newTest(t *testing.T, reference, v any) func(rows int, cols []string, vals 
 }
 
 type User struct {
-	Account   string `inyorm:"account"`
-	Age       int    `inyorm:"age"`
-	Firstname string `inyorm:"firstname"`
-	Lastname  string `inyorm:"lastname"`
+	Account   string
+	Age       int
+	Firstname string
+	Lastname  string
 }
 
 type UserPartial struct {
-	Account   string  `inyorm:"account"`
-	Age       int     `inyorm:"age"`
-	Firstname *string `inyorm:"firstname"`
-	Lastname  *string `inyorm:"lastname"`
+	Account   string
+	Age       int
+	Firstname *string
+	Lastname  *string
 }
 
 func TestRead(t *testing.T) {

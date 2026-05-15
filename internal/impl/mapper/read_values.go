@@ -30,9 +30,9 @@ func ReadValues(cols []string, values any) (*Result, error) {
 	switch info.Kind {
 	case types.KindStruct:
 		if info.IsSlc() {
-			return valsByStructSlc(cols, val, info)
+			return valsByStructSlc(cols, val, info.Schema)
 		}
-		return valsByStruct(cols, val, info)
+		return valsByStruct(cols, val, info.Schema)
 
 	case types.KindMap:
 		if info.IsSlc() {
@@ -56,16 +56,14 @@ func ReadValues(cols []string, values any) (*Result, error) {
 }
 
 // Readers
-func valsByStruct(cols []string, val reflect.Value, info types.TypeInfo) (*Result, error) {
-	if len(info.Fis)%len(cols) != 0 {
+func valsByStruct(cols []string, val reflect.Value, schema types.StructSchema) (*Result, error) {
+	if schema.Len()%len(cols) != 0 {
 		return nil, ErrColMismatch
 	}
 
-	m := mapIndex(info)
-	args := make([]any, 0, len(m))
-
+	args := make([]any, 0, schema.Len())
 	for _, col := range cols {
-		if idx, ok := m[col]; ok {
+		if idx, ok := schema.GetIndex(col); ok {
 			args = append(args, val.FieldByIndex(idx).Interface())
 			continue
 		}
@@ -79,20 +77,19 @@ func valsByStruct(cols []string, val reflect.Value, info types.TypeInfo) (*Resul
 	}, nil
 }
 
-func valsByStructSlc(cols []string, val reflect.Value, info types.TypeInfo) (*Result, error) {
-	if (len(info.Fis)*val.Len())%len(cols) != 0 {
+func valsByStructSlc(cols []string, val reflect.Value, schema types.StructSchema) (*Result, error) {
+	if (schema.Len()*val.Len())%len(cols) != 0 {
 		return nil, ErrColMismatch
 	}
 
-	m := mapIndex(info)
-	args := make([]any, 0, val.Len()*len(m))
+	args := make([]any, 0, val.Len()*schema.Len())
 
 	for i := range val.Len() {
 		elem, _ := types.DerefPtrVal(val.Index(i))
 
 		for _, col := range cols {
-			if idx, ok := m[col]; ok {
-				args = append(args, elem.FieldByIndex(idx).Interface())
+			if findex, ok := schema.GetIndex(col); ok {
+				args = append(args, elem.FieldByIndex(findex).Interface())
 				continue
 			}
 			return nil, ErrColNotFound(col)
@@ -185,14 +182,6 @@ func valsByPrimSlc(cols []string, val reflect.Value) (*Result, error) {
 }
 
 // Helpers
-func mapIndex(info types.TypeInfo) map[string][]int {
-	m := make(map[string][]int, len(info.Fis))
-	for _, fi := range info.Fis {
-		m[fi.Meta.Name] = fi.Index
-	}
-	return m
-}
-
 var primitives = []reflect.Kind{
 	reflect.Bool,
 

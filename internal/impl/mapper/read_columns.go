@@ -57,9 +57,9 @@ func (c collector) ToSlice() []string {
 }
 
 func colsByStruct(info types.TypeInfo, c collector) {
-	for _, fi := range info.Fis {
-		c.Add(fi.Meta.Name)
-	}
+	info.Schema.IterNames(func(s string) {
+		c.Add(s)
+	})
 }
 
 func colsByMap(v any, info types.TypeInfo, c collector) {
