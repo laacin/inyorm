@@ -65,7 +65,7 @@ func colsByStruct(info types.TypeInfo, c collector) {
 func colsByMap(v any, info types.TypeInfo, c collector) {
 	if info.IsSlc() {
 		if info.IsSlcOfPtrs() {
-			slc := unwrapSlc[*map[string]any](v, info.IsPtr())
+			slc := types.UnwrapSlc[*map[string]any](v, info.IsPtr())
 
 			for _, m := range slc {
 				if m != nil {
@@ -78,7 +78,7 @@ func colsByMap(v any, info types.TypeInfo, c collector) {
 			return
 		}
 
-		slc := unwrapSlc[map[string]any](v, info.IsPtr())
+		slc := types.UnwrapSlc[map[string]any](v, info.IsPtr())
 		for _, m := range slc {
 			for k := range m {
 				c.Add(k)
@@ -88,7 +88,7 @@ func colsByMap(v any, info types.TypeInfo, c collector) {
 		return
 	}
 
-	m := unwrap[map[string]any](v, info.IsPtr())
+	m := types.Unwrap[map[string]any](v, info.IsPtr())
 	for k := range m {
 		c.Add(k)
 	}
@@ -96,20 +96,20 @@ func colsByMap(v any, info types.TypeInfo, c collector) {
 
 func colsByCol(v any, info types.TypeInfo, c collector) {
 	if info.IsSlc() {
-		slc := unwrapSlc[*exprimpl.ColumnImpl](v, info.IsPtr())
+		slc := types.UnwrapSlc[*exprimpl.ColumnImpl](v, info.IsPtr())
 		for _, col := range slc {
 			c.Add(col.Name)
 		}
 
 		return
 	}
-	c.Add(unwrap[*exprimpl.ColumnImpl](v, false).Name)
+	c.Add(types.Unwrap[*exprimpl.ColumnImpl](v, false).Name)
 }
 
 func colsByString(v any, info types.TypeInfo, c collector) {
 	if info.IsSlc() {
 		if info.IsSlcOfPtrs() {
-			slc := unwrapSlc[*string](v, info.IsPtr())
+			slc := types.UnwrapSlc[*string](v, info.IsPtr())
 
 			for _, s := range slc {
 				if s != nil {
@@ -118,26 +118,10 @@ func colsByString(v any, info types.TypeInfo, c collector) {
 			}
 			return
 		}
-		for _, s := range unwrapSlc[string](v, info.IsPtr()) {
+		for _, s := range types.UnwrapSlc[string](v, info.IsPtr()) {
 			c.Add(s)
 		}
 		return
 	}
-	c.Add(unwrap[string](v, info.IsPtr()))
-}
-
-// --- Helpers
-
-func unwrap[T any](v any, ptr bool) T {
-	if ptr {
-		return *v.(*T)
-	}
-	return v.(T)
-}
-
-func unwrapSlc[T any](v any, ptr bool) []T {
-	if ptr {
-		return *v.(*[]T)
-	}
-	return v.([]T)
+	c.Add(types.Unwrap[string](v, info.IsPtr()))
 }

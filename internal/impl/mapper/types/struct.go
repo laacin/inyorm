@@ -18,7 +18,7 @@ func readStruct(t reflect.Type) []fieldInfo {
 	infos := []fieldInfo{}
 
 	for field := range t.Fields() {
-		typ, _ := derefPtrTyp(field.Type)
+		typ, _ := DerefPtrTyp(field.Type)
 
 		if field.Anonymous && typ.Kind() == reflect.Struct {
 			baseIndex := append([]int(nil), field.Index...)

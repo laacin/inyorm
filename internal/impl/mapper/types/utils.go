@@ -2,7 +2,21 @@ package types
 
 import "reflect"
 
-func derefPtrTyp(t reflect.Type) (reflect.Type, int) {
+func Unwrap[T any](v any, ptr bool) T {
+	if ptr {
+		return *v.(*T)
+	}
+	return v.(T)
+}
+
+func UnwrapSlc[T any](v any, ptr bool) []T {
+	if ptr {
+		return *v.(*[]T)
+	}
+	return v.([]T)
+}
+
+func DerefPtrTyp(t reflect.Type) (reflect.Type, int) {
 	count := 0
 	for t.Kind() == reflect.Pointer {
 		t = t.Elem()
@@ -11,7 +25,7 @@ func derefPtrTyp(t reflect.Type) (reflect.Type, int) {
 	return t, count
 }
 
-func derefPtrVal(v reflect.Value) (reflect.Value, int) {
+func DerefPtrVal(v reflect.Value) (reflect.Value, int) {
 	count := 0
 	for v.IsValid() && v.Kind() == reflect.Pointer && !v.IsNil() {
 		v = v.Elem()

@@ -51,11 +51,11 @@ func ReadInfo(typ reflect.Type) TypeInfo {
 
 	info := TypeInfo{}
 
-	t, c := derefPtrTyp(typ)
+	t, c := DerefPtrTyp(typ)
 	info.Ptr = c
 
 	if t.Kind() == reflect.Slice || t.Kind() == reflect.Array {
-		t, c = derefPtrTyp(t.Elem())
+		t, c = DerefPtrTyp(t.Elem())
 		info.Slc = c
 	} else {
 		info.Slc = -1
