@@ -57,14 +57,10 @@ func ReadValues(cols []string, values any) (*Result, error) {
 
 // Readers
 func valsByStruct(cols []string, val reflect.Value, schema types.StructSchema) (*Result, error) {
-	if schema.Len()%len(cols) != 0 {
-		return nil, ErrColMismatch
-	}
-
-	args := make([]any, 0, schema.Len())
-	for _, col := range cols {
+	args := make([]any, len(cols))
+	for i, col := range cols {
 		if idx, ok := schema.GetIndex(col); ok {
-			args = append(args, val.FieldByIndex(idx).Interface())
+			args[i] = val.FieldByIndex(idx).Interface()
 			continue
 		}
 		return nil, ErrColNotFound(col)
@@ -78,18 +74,14 @@ func valsByStruct(cols []string, val reflect.Value, schema types.StructSchema) (
 }
 
 func valsByStructSlc(cols []string, val reflect.Value, schema types.StructSchema) (*Result, error) {
-	if (schema.Len()*val.Len())%len(cols) != 0 {
-		return nil, ErrColMismatch
-	}
-
-	args := make([]any, 0, val.Len()*schema.Len())
+	args := make([]any, len(cols)*val.Len())
 
 	for i := range val.Len() {
 		elem, _ := types.DerefPtrVal(val.Index(i))
 
-		for _, col := range cols {
+		for ci, col := range cols {
 			if findex, ok := schema.GetIndex(col); ok {
-				args = append(args, elem.FieldByIndex(findex).Interface())
+				args[i*len(cols)+ci] = elem.FieldByIndex(findex).Interface()
 				continue
 			}
 			return nil, ErrColNotFound(col)
@@ -104,14 +96,15 @@ func valsByStructSlc(cols []string, val reflect.Value, schema types.StructSchema
 }
 
 func valsByMap(cols []string, val reflect.Value) (*Result, error) {
-	if len(cols) != val.Len() {
-		return nil, ErrColMismatch
-	}
-
 	m, _ := reflect.TypeAssert[map[string]any](val)
-	args := make([]any, 0, val.Len())
-	for _, col := range cols {
-		args = append(args, m[col])
+	args := make([]any, len(cols))
+
+	for i, col := range cols {
+		if v, ok := m[col]; ok {
+			args[i] = v
+			continue
+		}
+		return nil, ErrColNotFound(col)
 	}
 
 	return &Result{
@@ -122,22 +115,19 @@ func valsByMap(cols []string, val reflect.Value) (*Result, error) {
 }
 
 func valsByMapSlc(cols []string, val reflect.Value) (*Result, error) {
-	args := []any{}
+	args := make([]any, len(cols)*val.Len())
 
 	for i := range val.Len() {
 		elem, _ := types.DerefPtrVal(val.Index(i))
 		m, _ := reflect.TypeAssert[map[string]any](elem)
 
-		arg := make([]any, 0, len(m))
-		for _, col := range cols {
-			arg = append(arg, m[col])
+		for ci, col := range cols {
+			if rslt, ok := m[col]; ok {
+				args[i*len(cols)+ci] = rslt
+				continue
+			}
+			return nil, ErrColNotFound(col)
 		}
-
-		args = append(args, arg...)
-	}
-
-	if len(args)%len(cols) != 0 {
-		return nil, ErrColMismatch
 	}
 
 	return &Result{
@@ -148,10 +138,6 @@ func valsByMapSlc(cols []string, val reflect.Value) (*Result, error) {
 }
 
 func valsByPrim(cols []string, val reflect.Value) (*Result, error) {
-	if len(cols) != 1 {
-		return nil, ErrColMismatch
-	}
-
 	return &Result{
 		Rows:    1,
 		Columns: cols,
@@ -160,18 +146,15 @@ func valsByPrim(cols []string, val reflect.Value) (*Result, error) {
 }
 
 func valsByPrimSlc(cols []string, val reflect.Value) (*Result, error) {
-	if val.Len()%len(cols) != 0 {
-		return nil, ErrColMismatch
-	}
+	args := make([]any, val.Len())
 
-	args := make([]any, 0, val.Len())
 	for i := range val.Len() {
 		elem, _ := types.DerefPtrVal(val.Index(i))
 		if !slices.Contains(primitives, elem.Kind()) {
 			return nil, errors.New("[]any must contains only primitive types")
 		}
 
-		args = append(args, elem.Interface())
+		args[i] = elem.Interface()
 	}
 
 	return &Result{
