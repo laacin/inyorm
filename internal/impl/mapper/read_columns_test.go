@@ -273,4 +273,16 @@ func TestGetColumn(t *testing.T) {
 
 		run(t, v, exp)
 	})
+
+	t.Run("name_in_tag", func(t *testing.T) {
+		type Dummy struct {
+			Account  string `inyorm:"c:acc"`
+			Password string `inyorm:"c:pw"`
+		}
+
+		v := []any{Dummy{}}
+
+		exp := []string{"acc", "pw"}
+		run(t, v, exp)
+	})
 }
