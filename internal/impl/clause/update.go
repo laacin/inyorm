@@ -55,21 +55,14 @@ func (c *UpdateImpl) Build() (dml.Clause, error) {
 		return nil, errors.New("missing reference")
 	}
 
-	cols, err := mapper.GetColumns("inyorm", c.ref)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get columns: %w", err)
-	}
-
-	ignores, err := mapper.GetColumns("inyorm", c.ignores)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get columns: %w", err)
-	}
+	cols := mapper.ReadColumns(c.ref)
+	ignores := mapper.ReadColumns(c.ignores)
 
 	cols = slices.DeleteFunc(cols, func(col string) bool {
 		return slices.Contains(ignores, col)
 	})
 
-	result, err := mapper.Read("inyorm", cols, c.values)
+	result, err := mapper.ReadValues(cols, c.values)
 	if err != nil {
 		return nil, fmt.Errorf("failed to map value: %w", err)
 	}

@@ -33,7 +33,7 @@ func scan(
 		return errSQL(err)
 	}
 
-	return mapper.Scan(rows, tag, scan)
+	return mapper.Scan(rows, scan)
 }
 
 // TODO:

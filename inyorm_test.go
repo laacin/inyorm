@@ -309,8 +309,8 @@ func TestUpdate(t *testing.T) {
 	qe, _ := inyorm.New(std.JustDialect())
 
 	type Post struct {
-		Title       string `inyorm:"title"`
-		Description string `inyorm:"description"`
+		Title       string
+		Description string
 	}
 
 	t.Run("update_one", func(t *testing.T) {
