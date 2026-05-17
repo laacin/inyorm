@@ -24,6 +24,12 @@ func (w *WriterImpl) Char(v byte) {
 	w.sb.WriteByte(v)
 }
 
+func (w *WriterImpl) Wrap(fn func(string, core.Writer)) {
+	current := w.sb.String()
+	w.sb.Reset()
+	fn(current, w)
+}
+
 func (w *WriterImpl) Value(v any, mode core.WritingMode) {
 	Normalize(v).Write(w, w.Syntax, mode)
 }

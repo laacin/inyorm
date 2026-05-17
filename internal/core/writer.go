@@ -14,6 +14,7 @@ const (
 type Writer interface {
 	Write(string)
 	Char(byte)
+	Wrap(func(current string, w Writer))
 	Value(v any, mode WritingMode)
 
 	GetRef(ref string) (byte, bool)
