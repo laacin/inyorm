@@ -36,7 +36,7 @@ func (v *Parameter) Write(w core.InternalWriter, dial ValueSyntax, mode core.Wri
 		w.PushValue(v.Value)
 	}
 	w.IncValueCount()
-	dial.WritePlaceholder(w, w.ValueCount())
+	dial.WritePlaceholder(w)
 }
 func (v *Condition) Write(w core.InternalWriter, dial ValueSyntax, mode core.WritingMode) {
 	dial.WriteCondition(w, v, mode)

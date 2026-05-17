@@ -16,7 +16,7 @@ type ValueSyntax interface {
 	WriteWildcard(core.Writer)
 
 	// Specials
-	WritePlaceholder(core.Writer, int)
+	WritePlaceholder(core.Writer)
 	WriteConcat(core.Writer, *Concat)
 	WriteCondition(core.Writer, *Condition, core.WritingMode)
 	WriteCaseSwitch(core.Writer, *CaseSwitch, core.WritingMode)

@@ -5,7 +5,7 @@ import (
 	"github.com/laacin/inyorm/internal/ir/expr"
 )
 
-func (*ExprSyntax) WritePlaceholder(w core.Writer, count int) {
+func (*ExprSyntax) WritePlaceholder(w core.Writer) {
 	w.Char('?')
 }
 

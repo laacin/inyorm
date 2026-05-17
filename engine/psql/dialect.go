@@ -11,7 +11,7 @@ type PsqlDialect struct {
 	std.Dialect
 }
 
-func (dial *PsqlDialect) WritePlaceholder(w core.Writer, count int) {
+func (dial *PsqlDialect) WritePlaceholder(w core.Writer) {
 	w.Char('$')
-	w.Write(strconv.Itoa(count))
+	w.Write(strconv.Itoa(w.ValueCount()))
 }
