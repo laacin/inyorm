@@ -147,10 +147,10 @@ func TestGetColumn(t *testing.T) {
 		v := []any{
 			User{},
 			m,
-			col("id"),
+			col("yet"),
 		}
 
-		exp := []string{"account", "id"}
+		exp := []string{"account", "id", "yet"}
 
 		run(t, v, exp)
 	})

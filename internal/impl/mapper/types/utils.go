@@ -2,10 +2,8 @@ package types
 
 import (
 	"reflect"
-	"strings"
-	"unicode"
 
-	"github.com/laacin/inyorm/internal/ir/ddl"
+	"github.com/laacin/inyorm/internal/core"
 )
 
 func Unwrap[T any](v any, ptr bool) T {
@@ -40,53 +38,16 @@ func DerefPtrVal(v reflect.Value) (reflect.Value, int) {
 	return v, count
 }
 
-func toSnake(v string) string {
-	if v == "" {
-		return ""
-	}
+type StructSchema map[string]core.FieldResult
 
-	var b strings.Builder
-	runes := []rune(v)
-
-	for i, r := range runes {
-		if unicode.IsUpper(r) {
-			if i > 0 {
-				prev := runes[i-1]
-
-				if unicode.IsLower(prev) ||
-					(unicode.IsUpper(prev) &&
-						i+1 < len(runes) &&
-						unicode.IsLower(runes[i+1])) {
-					b.WriteByte('_')
-				}
-			}
-
-			b.WriteRune(unicode.ToLower(r))
-			continue
-		}
-
-		b.WriteRune(r)
-	}
-
-	return b.String()
-}
-
-type (
-	fieldSchema struct {
-		Meta  ddl.ColumnMeta
-		Index []int
-	}
-	StructSchema map[string]fieldSchema
-)
-
-func (s StructSchema) GetMeta(name string) (ddl.ColumnMeta, bool) {
-	fi, ok := s[name]
-	return fi.Meta, ok
+func (s StructSchema) Get(name string) (core.FieldResult, bool) {
+	r, ok := s[name]
+	return r, ok
 }
 
 func (s StructSchema) GetIndex(name string) ([]int, bool) {
-	if fi, ok := s[name]; ok {
-		return fi.Index, true
+	if r, ok := s[name]; ok {
+		return r.Index, true
 	}
 	return nil, false
 }
@@ -103,19 +64,15 @@ func (s StructSchema) IterNames(fn func(string)) {
 
 // internal methods
 func (s StructSchema) add(name, tag string, idx []int) {
-	meta := ddl.ParseTag(tag)
-	if meta.Name == "" {
-		meta.Name = toSnake(name)
-	}
-
-	s[meta.Name] = fieldSchema{Meta: meta, Index: idx}
+	r := core.ParseField(name, tag, idx)
+	s[r.Name] = r
 }
 
 func (s StructSchema) merge(other StructSchema, baseIndex []int) {
-	for name, fi := range other {
+	for name, r := range other {
 		if _, ok := s[name]; !ok {
-			fi.Index = append(baseIndex, fi.Index...)
-			s[name] = fi
+			r.Index = append(baseIndex, r.Index...)
+			s[name] = r
 		}
 	}
 }

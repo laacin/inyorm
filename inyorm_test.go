@@ -303,6 +303,20 @@ func TestInsert(t *testing.T) {
 		exp += "(?, ?), (?, ?), (?, ?), (?, ?), (?, ?), (?, ?)"
 		run(t, q, exp, args)
 	})
+
+	t.Run("ignore_values", func(t *testing.T) {
+		q, c := qe.NewInsert(context.Background(), "users")
+
+		q.InsertIgnore(User{}, c.Col("age")).Values(User{
+			Account: "acc123",
+			Age:     42,
+		})
+
+		args := []any{"acc123"}
+
+		exp := "INSERT INTO users (account) VALUES (?)"
+		run(t, q, exp, args)
+	})
 }
 
 func TestUpdate(t *testing.T) {

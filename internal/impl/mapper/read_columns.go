@@ -4,7 +4,6 @@ import (
 	"reflect"
 	"slices"
 
-	"github.com/laacin/inyorm/internal/impl/exprimpl"
 	"github.com/laacin/inyorm/internal/impl/mapper/types"
 )
 
@@ -96,14 +95,14 @@ func colsByMap(v any, info types.TypeInfo, c collector) {
 
 func colsByCol(v any, info types.TypeInfo, c collector) {
 	if info.IsSlc() {
-		slc := types.UnwrapSlc[*exprimpl.ColumnImpl](v, info.IsPtr())
+		slc := types.UnwrapSlc[interface{ BaseName() string }](v, info.IsPtr())
 		for _, col := range slc {
 			c.Add(col.BaseName())
 		}
 
 		return
 	}
-	c.Add(types.Unwrap[*exprimpl.ColumnImpl](v, false).BaseName())
+	c.Add(types.Unwrap[interface{ BaseName() string }](v, false).BaseName())
 }
 
 func colsByString(v any, info types.TypeInfo, c collector) {

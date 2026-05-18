@@ -61,7 +61,7 @@ func ReadInfo(typ reflect.Type) TypeInfo {
 		info.Slc = -1
 	}
 
-	if reflect.PointerTo(t).Implements(column) {
+	if reflect.PointerTo(t).Implements(column) { // TODO: handle []api.Column
 		if (info.Slc == -1 && info.Ptr == 1) || info.Slc == 1 {
 			info.Kind = KindColumn
 			return info

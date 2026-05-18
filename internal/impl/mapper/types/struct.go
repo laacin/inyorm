@@ -7,7 +7,7 @@ import (
 )
 
 func readStruct(t reflect.Type) StructSchema {
-	infos := StructSchema(map[string]fieldSchema{})
+	infos := StructSchema(map[string]core.FieldResult{})
 
 	for field := range t.Fields() {
 		typ, _ := DerefPtrTyp(field.Type)
