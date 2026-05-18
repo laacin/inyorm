@@ -1,6 +1,9 @@
 package clause
 
-import "github.com/laacin/inyorm/internal/ir/dml"
+import (
+	"github.com/laacin/inyorm/internal/core"
+	"github.com/laacin/inyorm/internal/ir/dml"
+)
 
 type FromImpl struct {
 	declared bool
@@ -22,6 +25,7 @@ func (c *FromImpl) Kind() dml.ClauseKind {
 	return dml.ClauseFrom
 }
 
-func (c *FromImpl) Build() (dml.Clause, error) {
-	return &c.emb, nil
+func (c *FromImpl) Build(w core.InternalWriter, dial dml.ClauseWriter) error {
+	dial.WriteFrom(w, &c.emb)
+	return nil
 }

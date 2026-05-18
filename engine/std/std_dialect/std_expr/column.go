@@ -22,8 +22,6 @@ func (s *ExprSyntax) WriteColBase(w core.Writer, col *expr.Column) {
 }
 
 func (s *ExprSyntax) WriteColExpr(w core.Writer, col *expr.Column) {
-	s.buildCol(w.New(), col)
-
 	if col.Value == "" {
 		s.WriteColBase(w, col)
 		return
@@ -33,8 +31,6 @@ func (s *ExprSyntax) WriteColExpr(w core.Writer, col *expr.Column) {
 }
 
 func (s *ExprSyntax) WriteColAlias(w core.Writer, col *expr.Column) {
-	s.buildCol(w.New(), col)
-
 	if col.Alias != "" {
 		w.Write(col.Alias)
 		return
@@ -49,8 +45,6 @@ func (s *ExprSyntax) WriteColAlias(w core.Writer, col *expr.Column) {
 }
 
 func (s *ExprSyntax) WriteColDef(w core.Writer, col *expr.Column) {
-	s.buildCol(w.New(), col)
-
 	if col.Value == "" {
 		s.WriteColBase(w, col)
 		return
@@ -64,65 +58,65 @@ func (s *ExprSyntax) WriteColDef(w core.Writer, col *expr.Column) {
 }
 
 // --- Helpers
-func (s *ExprSyntax) buildFirst(w core.Writer, col *expr.Column) {
-	if col.From != nil {
-		if col.From.Kind() == expr.ValueWildcard {
-			if ref, ok := w.GetRef(col.Ref); ok {
-				w.Char(ref)
-				w.Char('.')
-			}
-		}
-		w.Value(col.From, core.WriteExpr)
-		return
-	}
-
-	if col.Value != "" {
-		w.Write(col.Value)
-		return
-	}
-
-	s.WriteColBase(w, col)
-}
-
-// FIX: illegible
-func (s *ExprSyntax) buildCol(w core.Writer, col *expr.Column) {
-	if (col == nil) || (col.Exprs == nil && col.Aggr == nil && col.From == nil) {
-		return
-	}
-
-	s.buildFirst(w, col)
-	if col.Exprs != nil {
-		for _, e := range col.Exprs {
-			if scalar, ok := scalarMap[e.Kind]; ok {
-				wScalar(w, scalar)
-				continue
-			}
-
-			if arith, ok := arithMap[e.Kind]; ok {
-				wArith(w, arith, e.Value)
-				continue
-			}
-
-			if e.Kind == expr.ColArithWrap {
-				wWrap(w)
-				continue
-			}
-		}
-		col.Exprs = nil
-	}
-
-	if col.Aggr != nil {
-		if aggr, ok := aggrMap[col.Aggr.Kind]; ok {
-			wAggr(w, col.Aggr.Value, aggr)
-		}
-		col.Aggr = nil
-	}
-
-	col.Value = w.ToString()
-}
+// func (s *ExprSyntax) buildFirst(w core.Writer, col *expr.Column) {
+// 	if col.From != nil {
+// 		if col.From.Kind() == expr.ValueWildcard {
+// 			if ref, ok := w.GetRef(col.Ref); ok {
+// 				w.Char(ref)
+// 				w.Char('.')
+// 			}
+// 		}
+// 		w.Value(col.From, core.WriteExpr)
+// 		return
+// 	}
+//
+// 	if col.Value != "" {
+// 		w.Write(col.Value)
+// 		return
+// 	}
+//
+// 	s.WriteColBase(w, col)
+// }
+//
+// // FIX: illegible
+// func (s *ExprSyntax) buildCol(w core.Writer, col *expr.Column) {
+// 	if (col == nil) || (col.Exprs == nil && col.Aggr == nil && col.From == nil) {
+// 		return
+// 	}
+//
+// 	s.buildFirst(w, col)
+// 	if col.Exprs != nil {
+// 		for _, e := range col.Exprs {
+// 			if scalar, ok := scalarMap[e.Kind]; ok {
+// 				wScalar(w, scalar)
+// 				continue
+// 			}
+//
+// 			if arith, ok := arithMap[e.Kind]; ok {
+// 				wArith(w, arith, e.Value)
+// 				continue
+// 			}
+//
+// 			if e.Kind == expr.ColArithWrap {
+// 				wWrap(w)
+// 				continue
+// 			}
+// 		}
+// 		col.Exprs = nil
+// 	}
+//
+// 	if col.Aggr != nil {
+// 		if aggr, ok := aggrMap[col.Aggr.Kind]; ok {
+// 			wAggr(w, col.Aggr.Value, aggr)
+// 		}
+// 		col.Aggr = nil
+// 	}
+//
+// 	col.Value = w.ToString()
+// }
 
 // maps
-var aggrMap = map[expr.ColKindExpr]string{
+var aggrMap = map[expr.ColAggrKind]string{
 	expr.ColAggrCount: "COUNT",
 	expr.ColAggrSum:   "SUM",
 	expr.ColAggrMin:   "MIN",
@@ -130,7 +124,7 @@ var aggrMap = map[expr.ColKindExpr]string{
 	expr.ColAggrAvg:   "AVG",
 }
 
-var scalarMap = map[expr.ColKindExpr]string{
+var scalarMap = map[expr.ColScalarKind]string{
 	expr.ColScalarLower: "LOWER",
 	expr.ColScalarUpper: "UPPER",
 	expr.ColScalarTrim:  "TRIM",
@@ -138,7 +132,7 @@ var scalarMap = map[expr.ColKindExpr]string{
 	expr.ColScalarAbs:   "ABS",
 }
 
-var arithMap = map[expr.ColKindExpr]byte{
+var arithMap = map[expr.ColArithKind]byte{
 	expr.ColArithAdd: '+',
 	expr.ColArithSub: '-',
 	expr.ColArithMul: '*',
@@ -146,42 +140,39 @@ var arithMap = map[expr.ColKindExpr]byte{
 	expr.ColArithMod: '%',
 }
 
-func wArith(w core.Writer, arg byte, value any) {
+func (*ExprSyntax) WriteColArith(w core.Writer, arith *expr.ColArith) {
 	w.Char(' ')
-	w.Char(arg)
+	w.Char(arithMap[arith.Kind])
 	w.Char(' ')
-	w.Value(value, core.WriteExpr)
+	w.Value(arith.Value, core.WriteExpr)
 }
 
-func wScalar(w core.Writer, arg string) {
-	prev := w.ToString()
-	w.Reset()
-
-	w.Write(arg)
-	w.Char('(')
-	w.Write(prev)
-	w.Char(')')
+func (*ExprSyntax) WriteColScalar(w core.Writer, scalar *expr.ColScalar) {
+	w.Wrap(func(current string, w core.Writer) {
+		w.Write(scalarMap[scalar.Kind])
+		w.Char('(')
+		w.Write(current)
+		w.Char(')')
+	})
 }
 
-func wWrap(w core.Writer) {
-	prev := w.ToString()
-	w.Reset()
-
-	w.Char('(')
-	w.Write(prev)
-	w.Char(')')
+func (*ExprSyntax) WriteColWrap(w core.Writer) {
+	w.Wrap(func(current string, w core.Writer) {
+		w.Char('(')
+		w.Write(current)
+		w.Char(')')
+	})
 }
 
-func wAggr(w core.Writer, distinct any, aggr string) {
-	prev := w.ToString()
-	w.Reset()
-
-	w.Write(aggr)
-	w.Char('(')
-	if dist, ok := distinct.(bool); ok && dist {
-		w.Write("DISTINCT")
-		w.Char(' ')
-	}
-	w.Write(prev)
-	w.Char(')')
+func (*ExprSyntax) WriteColAggr(w core.Writer, aggr *expr.ColAggr) {
+	w.Wrap(func(current string, w core.Writer) {
+		w.Write(aggrMap[aggr.Kind])
+		w.Char('(')
+		if aggr.Distinct {
+			w.Write("DISTINCT")
+			w.Char(' ')
+		}
+		w.Write(current)
+		w.Char(')')
+	})
 }

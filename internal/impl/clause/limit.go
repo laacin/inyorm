@@ -1,6 +1,9 @@
 package clause
 
-import "github.com/laacin/inyorm/internal/ir/dml"
+import (
+	"github.com/laacin/inyorm/internal/core"
+	"github.com/laacin/inyorm/internal/ir/dml"
+)
 
 type LimitImpl struct {
 	declared bool
@@ -24,6 +27,7 @@ func (c *LimitImpl) Kind() dml.ClauseKind {
 	return dml.ClauseLimit
 }
 
-func (c *LimitImpl) Build() (dml.Clause, error) {
-	return &c.emb, nil
+func (c *LimitImpl) Build(w core.InternalWriter, dial dml.ClauseWriter) error {
+	dial.WriteLimit(w, &c.emb)
+	return nil
 }

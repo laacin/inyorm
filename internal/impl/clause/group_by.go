@@ -1,6 +1,9 @@
 package clause
 
-import "github.com/laacin/inyorm/internal/ir/dml"
+import (
+	"github.com/laacin/inyorm/internal/core"
+	"github.com/laacin/inyorm/internal/ir/dml"
+)
 
 type GroupByImpl struct {
 	declared bool
@@ -22,6 +25,7 @@ func (c *GroupByImpl) Kind() dml.ClauseKind {
 	return dml.ClauseGroupBy
 }
 
-func (c *GroupByImpl) Build() (dml.Clause, error) {
-	return &c.emb, nil
+func (c *GroupByImpl) Build(w core.InternalWriter, dial dml.ClauseWriter) error {
+	dial.WriteGroupBy(w, &c.emb)
+	return nil
 }

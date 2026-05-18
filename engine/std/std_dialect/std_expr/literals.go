@@ -36,7 +36,3 @@ func (*ExprSyntax) WriteBool(w core.Writer, v bool) {
 func (*ExprSyntax) WriteNull(w core.Writer) {
 	w.Write("NULL")
 }
-
-func (*ExprSyntax) WriteWildcard(w core.Writer) {
-	w.Char('*')
-}

@@ -1,73 +1,72 @@
 package expr
 
-import "github.com/laacin/inyorm/internal/core"
-
 type Table struct{ Value string }
-
-func (*Table) Kind() ValueKind { return ValueTable }
-
-func (t *Table) Write(w core.InternalWriter, dial ValueSyntax, mode core.WritingMode) {
-	w.SetRef(t.Value)
-	dial.WriteTable(w, t)
-}
 
 type Column struct {
 	Name  string // Column base name
 	Ref   string // Table reference
 	Alias string // Explicit alias
 	Value string // Column expression
-	From  Value
-	Exprs []ColExpr
-	Aggr  *ColExpr
-}
-
-func (c *Column) Kind() ValueKind { return ValueColumn }
-
-func (c *Column) Write(w core.InternalWriter, dial ValueSyntax, mode core.WritingMode) {
-	w.SetRef(c.Ref)
-
-	switch mode {
-	case core.WriteBase:
-		dial.WriteColBase(w, c)
-	case core.WriteExpr:
-		dial.WriteColExpr(w, c)
-	case core.WriteAlias:
-		dial.WriteColAlias(w, c)
-	case core.WriteDef:
-		dial.WriteColDef(w, c)
-	default:
-		dial.WriteColExpr(w, c)
-	}
 }
 
 // --- Tools for building
-type ColKindExpr int
+type (
+	ColAggrKind   int
+	ColScalarKind int
+	ColArithKind  int
+	ColWrapKind   int
+)
 
 const (
 	// Aggregation
-	ColAggrCount ColKindExpr = iota
+	ColAggrCount ColAggrKind = iota
 	ColAggrSum
 	ColAggrMin
 	ColAggrMax
 	ColAggrAvg
 
 	// Scalar
-	ColScalarLower
+	ColScalarLower ColScalarKind = iota
 	ColScalarUpper
 	ColScalarTrim
 	ColScalarRound
 	ColScalarAbs
 
 	// Arith
-	ColArithAdd
+	ColArithAdd ColArithKind = iota
 	ColArithSub
 	ColArithMul
 	ColArithDiv
 	ColArithMod
-	ColArithWrap
 )
 
-type ColExpr struct {
-	Kind  ColKindExpr
-	Value any // exists if is required. otherwise is nil
+type ColExpr struct{ Kind any }
+
+type ColAggr struct {
+	Kind     ColAggrKind
+	Distinct bool
+}
+
+type ColScalar struct {
+	Kind ColScalarKind
+}
+
+type ColArith struct {
+	Kind  ColArithKind
+	Value any
+}
+
+type ColWrap struct{}
+
+func (c *ColExpr) IsScalar() (*ColScalar, bool) {
+	v, ok := c.Kind.(*ColScalar)
+	return v, ok
+}
+func (c *ColExpr) IsArith() (*ColArith, bool) {
+	v, ok := c.Kind.(*ColArith)
+	return v, ok
+}
+func (c *ColExpr) IsWrap() bool {
+	_, ok := c.Kind.(*ColWrap)
+	return ok
 }

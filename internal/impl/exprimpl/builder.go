@@ -1,28 +1,27 @@
 package exprimpl
 
-import (
-	"github.com/laacin/inyorm/internal/api"
-	"github.com/laacin/inyorm/internal/ir/expr"
-)
+import "github.com/laacin/inyorm/internal/api"
 
 type ExprBuilderImpl struct{ DefaultRef string }
 
 func (e *ExprBuilderImpl) Table(name string) api.Table {
-	return &expr.Table{Value: name}
+	tbl := &TableImpl{}
+	return tbl.Start(name)
 }
 
 func (e *ExprBuilderImpl) Col(name string, ref ...string) api.Column {
-	col := expr.Column{Ref: getLast(e.DefaultRef, ref), Name: name}
-	return &ColumnImpl{Column: col}
+	col := &ColumnImpl{}
+	return col.Start(name, getLast(e.DefaultRef, ref))
 }
 
 func (e *ExprBuilderImpl) All(ref ...string) api.Column {
-	col := expr.Column{Ref: getLast(e.DefaultRef, ref), From: &expr.Wildcard{}}
-	return &ColumnImpl{Column: col}
+	col := &ColumnImpl{}
+	return col.Start("*", getLast(e.DefaultRef, ref))
 }
 
 func (e *ExprBuilderImpl) Param(value ...any) api.Parameter {
-	return &expr.Parameter{Store: len(value) > 0, Value: getLast(nil, value)}
+	param := &ParameterImpl{}
+	return param.Start(len(value) > 0, getLast(nil, value))
 }
 
 func (e *ExprBuilderImpl) Cond(ident any) api.Condition {
@@ -31,24 +30,24 @@ func (e *ExprBuilderImpl) Cond(ident any) api.Condition {
 }
 
 func (e *ExprBuilderImpl) Concat(values ...any) api.Column {
-	col := expr.Column{From: &expr.Concat{Values: values}}
-	return &ColumnImpl{Column: col}
+	col := &ColumnImpl{}
+	return col.StartFrom((&ConcatImpl{}).Start(values))
 }
 
 func (e *ExprBuilderImpl) Switch(cond any, fn func(api.Case)) api.Column {
 	cs := &CaseSwitchImpl{}
 	fn(cs)
 
-	col := expr.Column{From: cs.Build()}
-	return &ColumnImpl{Column: col}
+	col := ColumnImpl{}
+	return col.StartFrom(cs)
 }
 
 func (e *ExprBuilderImpl) Search(fn func(api.Case)) api.Column {
 	cs := &CaseSearchImpl{}
 	fn(cs)
 
-	col := expr.Column{From: cs.Build()}
-	return &ColumnImpl{Column: col}
+	col := &ColumnImpl{}
+	return col.StartFrom(cs)
 
 }
 

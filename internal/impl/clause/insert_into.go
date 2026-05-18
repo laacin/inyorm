@@ -6,9 +6,10 @@ import (
 	"slices"
 
 	"github.com/laacin/inyorm/internal/api"
+	"github.com/laacin/inyorm/internal/core"
+	"github.com/laacin/inyorm/internal/impl/exprimpl"
 	"github.com/laacin/inyorm/internal/impl/mapper"
 	"github.com/laacin/inyorm/internal/ir/dml"
-	"github.com/laacin/inyorm/internal/ir/expr"
 )
 
 type InsertIntoImpl struct {
@@ -50,9 +51,9 @@ func (c *InsertIntoImpl) Kind() dml.ClauseKind {
 	return dml.ClauseInsertInto
 }
 
-func (c *InsertIntoImpl) Build() (dml.Clause, error) {
+func (c *InsertIntoImpl) Build(w core.InternalWriter, dial dml.ClauseWriter) error {
 	if len(c.ref) < 1 {
-		return nil, errors.New("missing reference")
+		return errors.New("missing reference")
 	}
 
 	cols := mapper.ReadColumns(c.ref)
@@ -64,19 +65,18 @@ func (c *InsertIntoImpl) Build() (dml.Clause, error) {
 
 	result, err := mapper.ReadValues(cols, c.values)
 	if err != nil {
-		return nil, fmt.Errorf("failed to map value: %w", err)
+		return fmt.Errorf("failed to map value: %w", err)
 	}
 
 	params := make([]any, len(result.Args))
 	for i, arg := range result.Args {
-		params[i] = &expr.Parameter{
-			Store: true,
-			Value: arg,
-		}
+		params[i] = (&exprimpl.ParameterImpl{}).Start(true, arg)
 	}
 
 	c.emb.Cols = cols
 	c.emb.Rows = result.Rows
 	c.emb.Values = params
-	return &c.emb, nil
+
+	dial.WriteInsertInto(w, &c.emb)
+	return nil
 }

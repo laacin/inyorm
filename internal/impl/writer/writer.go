@@ -9,7 +9,7 @@ import (
 
 type WriterImpl struct {
 	sb      strings.Builder
-	Syntax  expr.Syntax
+	Syntax  expr.ExprWriter
 	Aliases *AliasStore
 	Params  *ParamStore
 }
@@ -31,7 +31,7 @@ func (w *WriterImpl) Wrap(fn func(string, core.Writer)) {
 }
 
 func (w *WriterImpl) Value(v any, mode core.WritingMode) {
-	Normalize(v).Write(w, w.Syntax, mode)
+	Normalize(v).Build(w, w.Syntax, mode)
 }
 
 func (w *WriterImpl) ValueCount() int {
@@ -45,7 +45,7 @@ func (w *WriterImpl) GetRef(ref string) (byte, bool) {
 	return w.Aliases.Get(ref)
 }
 
-func (w *WriterImpl) New() core.Writer {
+func (w *WriterImpl) New() core.InternalWriter {
 	return &WriterImpl{
 		Syntax:  w.Syntax,
 		Aliases: w.Aliases,

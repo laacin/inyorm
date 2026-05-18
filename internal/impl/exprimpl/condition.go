@@ -2,6 +2,7 @@ package exprimpl
 
 import (
 	"github.com/laacin/inyorm/internal/api"
+	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/ir/expr"
 )
 
@@ -67,8 +68,12 @@ func (c *ConditionImpl) Or(ident any) api.Condition {
 }
 
 // --- Build
-func (c *ConditionImpl) Build() expr.Value {
-	return &c.Condition
+func (c *ConditionImpl) Kind() expr.ExprKind {
+	return expr.ExprCondition
+}
+
+func (c *ConditionImpl) Build(w core.InternalWriter, dial expr.ExprWriter, mode core.WritingMode) {
+	dial.WriteCondition(w, &c.Condition, mode)
 }
 
 // --- Helpers

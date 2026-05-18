@@ -98,12 +98,12 @@ func colsByCol(v any, info types.TypeInfo, c collector) {
 	if info.IsSlc() {
 		slc := types.UnwrapSlc[*exprimpl.ColumnImpl](v, info.IsPtr())
 		for _, col := range slc {
-			c.Add(col.Name)
+			c.Add(col.BaseName())
 		}
 
 		return
 	}
-	c.Add(types.Unwrap[*exprimpl.ColumnImpl](v, false).Name)
+	c.Add(types.Unwrap[*exprimpl.ColumnImpl](v, false).BaseName())
 }
 
 func colsByString(v any, info types.TypeInfo, c collector) {

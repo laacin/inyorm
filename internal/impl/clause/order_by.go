@@ -2,6 +2,7 @@ package clause
 
 import (
 	"github.com/laacin/inyorm/internal/api"
+	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/ir/dml"
 )
 
@@ -34,11 +35,12 @@ func (c *OrderByImpl) Kind() dml.ClauseKind {
 	return dml.ClauseOrderBy
 }
 
-func (c *OrderByImpl) Build() (dml.Clause, error) {
+func (c *OrderByImpl) Build(w core.InternalWriter, dial dml.ClauseWriter) error {
 	c.emb.Orders = make([]dml.OrderSegment, len(c.segments))
 	for i, seg := range c.segments {
 		c.emb.Orders[i] = *seg
 	}
 
-	return &c.emb, nil
+	dial.WriteOrderBy(w, &c.emb)
+	return nil
 }

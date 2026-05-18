@@ -3,11 +3,11 @@ package dml
 import "github.com/laacin/inyorm/internal/core"
 
 type Syntax interface {
-	ClauseSyntax
+	ClauseWriter
 	StatementOrder
 }
 
-type ClauseSyntax interface {
+type ClauseWriter interface {
 	WriteSelect(core.Writer, *Select)
 	WriteFrom(core.Writer, *From)
 	WriteJoin(core.Writer, *Join)
@@ -28,4 +28,16 @@ type StatementOrder interface {
 	InsertOrder() []ClauseKind
 	UpdateOrder() []ClauseKind
 	DeleteOrder() []ClauseKind
+}
+
+// --- Internal
+type ClauseBuilder interface {
+	IsDeclared() bool
+	Kind() ClauseKind
+	Build(core.InternalWriter, ClauseWriter) error
+}
+
+type StatementBuilder interface {
+	Kind() StatementKind
+	Build() (*Statement, error)
 }

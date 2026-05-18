@@ -19,10 +19,6 @@ type Writer interface {
 
 	GetRef(ref string) (byte, bool)
 	ValueCount() int
-
-	New() Writer
-	ToString() string
-	Reset()
 }
 
 type InternalWriter interface {
@@ -30,6 +26,10 @@ type InternalWriter interface {
 	PushValue(v any)
 	IncValueCount()
 	SetRef(string)
+
+	New() InternalWriter
+	ToString() string
+	Reset()
 }
 
 type WriterFunc = func(Writer)

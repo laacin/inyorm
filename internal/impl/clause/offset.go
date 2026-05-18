@@ -1,6 +1,9 @@
 package clause
 
-import "github.com/laacin/inyorm/internal/ir/dml"
+import (
+	"github.com/laacin/inyorm/internal/core"
+	"github.com/laacin/inyorm/internal/ir/dml"
+)
 
 type OffsetImpl struct {
 	declared bool
@@ -24,6 +27,7 @@ func (c *OffsetImpl) Kind() dml.ClauseKind {
 	return dml.ClauseOffset
 }
 
-func (c *OffsetImpl) Build() (dml.Clause, error) {
-	return &c.emb, nil
+func (c *OffsetImpl) Build(w core.InternalWriter, dial dml.ClauseWriter) error {
+	dial.WriteOffset(w, &c.emb)
+	return nil
 }

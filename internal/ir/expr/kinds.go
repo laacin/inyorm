@@ -1,36 +1,23 @@
 package expr
 
-import "github.com/laacin/inyorm/internal/core"
-
-type ValueKind int
+type ExprKind int
 
 const (
 	// Literals
-	ValueString ValueKind = iota
-	ValueNumber
-	ValueFloat
-	ValueBool
-	ValueNull
+	ExprString ExprKind = iota
+	ExprNumber
+	ExprFloat
+	ExprBool
+	ExprNull
 
 	// Specials
-	ValueParameter
-	ValueWildcard
-	ValueCondition
-	ValueConcat
-	ValueCaseSwitch
-	ValueCaseSearch
+	ExprParameter
+	ExprCondition
+	ExprConcat
+	ExprCaseSwitch
+	ExprCaseSearch
 
 	// SQL Values
-	ValueTable
-	ValueColumn
+	ExprTable
+	ExprColumn
 )
-
-type Value interface {
-	Kind() ValueKind
-	Write(core.InternalWriter, ValueSyntax, core.WritingMode)
-}
-
-// Wrapper implementations must implement this
-type ValueBuilder interface {
-	Build() Value
-}

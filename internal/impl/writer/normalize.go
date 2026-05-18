@@ -2,17 +2,13 @@ package writer
 
 import "github.com/laacin/inyorm/internal/ir/expr"
 
-func Normalize(value any) expr.Value {
+func Normalize(value any) expr.ExprBuilder {
 	if value == nil {
 		return &expr.Null{}
 	}
 
-	if v, ok := value.(expr.Value); ok {
+	if v, ok := value.(expr.ExprBuilder); ok {
 		return v
-	}
-
-	if v, ok := value.(expr.ValueBuilder); ok {
-		return v.Build()
 	}
 
 	switch v := value.(type) {

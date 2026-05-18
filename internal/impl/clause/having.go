@@ -2,9 +2,9 @@ package clause
 
 import (
 	"github.com/laacin/inyorm/internal/api"
+	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/impl/exprimpl"
 	"github.com/laacin/inyorm/internal/ir/dml"
-	"github.com/laacin/inyorm/internal/ir/expr"
 )
 
 type HavingImpl struct {
@@ -15,8 +15,9 @@ type HavingImpl struct {
 
 func (c *HavingImpl) Having(ident any) api.Condition {
 	c.declared = true
-	c.cond = &exprimpl.ConditionImpl{}
-	return c.cond.Start(ident)
+	cond := &exprimpl.ConditionImpl{}
+	c.emb.Cond = cond
+	return cond.Start(ident)
 }
 
 // --- Build
@@ -29,7 +30,7 @@ func (c *HavingImpl) Kind() dml.ClauseKind {
 	return dml.ClauseHaving
 }
 
-func (c *HavingImpl) Build() (dml.Clause, error) {
-	c.emb.Cond = c.cond.Build().(*expr.Condition)
-	return &c.emb, nil
+func (c *HavingImpl) Build(w core.InternalWriter, dial dml.ClauseWriter) error {
+	dial.WriteHaving(w, &c.emb)
+	return nil
 }

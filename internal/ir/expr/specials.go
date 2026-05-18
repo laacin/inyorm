@@ -1,7 +1,5 @@
 package expr
 
-import "github.com/laacin/inyorm/internal/core"
-
 type (
 	Parameter struct {
 		Value any
@@ -22,34 +20,6 @@ type (
 		Els   any
 	}
 )
-
-// Kinds
-func (*Parameter) Kind() ValueKind  { return ValueParameter }
-func (*Condition) Kind() ValueKind  { return ValueCondition }
-func (*Concat) Kind() ValueKind     { return ValueConcat }
-func (*CaseSwitch) Kind() ValueKind { return ValueCaseSwitch }
-func (*CaseSearch) Kind() ValueKind { return ValueCaseSearch }
-
-// Writers
-func (v *Parameter) Write(w core.InternalWriter, dial ValueSyntax, mode core.WritingMode) {
-	if v.Store {
-		w.PushValue(v.Value)
-	}
-	w.IncValueCount()
-	dial.WritePlaceholder(w)
-}
-func (v *Condition) Write(w core.InternalWriter, dial ValueSyntax, mode core.WritingMode) {
-	dial.WriteCondition(w, v, mode)
-}
-func (v *Concat) Write(w core.InternalWriter, dial ValueSyntax, mode core.WritingMode) {
-	dial.WriteConcat(w, v)
-}
-func (v *CaseSwitch) Write(w core.InternalWriter, dial ValueSyntax, mode core.WritingMode) {
-	dial.WriteCaseSwitch(w, v, mode)
-}
-func (v *CaseSearch) Write(w core.InternalWriter, dial ValueSyntax, mode core.WritingMode) {
-	dial.WriteCaseSearch(w, v, mode)
-}
 
 // --- Condition utilities
 type (

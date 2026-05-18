@@ -14,5 +14,5 @@ type Engine struct {
 
 type Dialect interface {
 	dml.Syntax
-	expr.Syntax
+	expr.ExprWriter
 }

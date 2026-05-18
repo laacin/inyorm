@@ -2,6 +2,7 @@ package clause
 
 import (
 	"github.com/laacin/inyorm/internal/api"
+	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/ir/dml"
 )
 
@@ -31,6 +32,7 @@ func (c *SelectImpl) Kind() dml.ClauseKind {
 	return dml.ClauseSelect
 }
 
-func (c *SelectImpl) Build() (dml.Clause, error) {
-	return &c.emb, nil
+func (c *SelectImpl) Build(w core.InternalWriter, dial dml.ClauseWriter) error {
+	dial.WriteSelect(w, &c.emb)
+	return nil
 }

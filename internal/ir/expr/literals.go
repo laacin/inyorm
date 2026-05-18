@@ -3,38 +3,33 @@ package expr
 import "github.com/laacin/inyorm/internal/core"
 
 type (
-	String   string
-	Number   int
-	Float    float64
-	Bool     bool
-	Null     struct{}
-	Wildcard struct{}
+	String string
+	Number int
+	Float  float64
+	Bool   bool
+	Null   struct{}
 )
 
 // Kinds
-func (String) Kind() ValueKind   { return ValueString }
-func (Number) Kind() ValueKind   { return ValueNumber }
-func (Float) Kind() ValueKind    { return ValueFloat }
-func (Bool) Kind() ValueKind     { return ValueBool }
-func (Null) Kind() ValueKind     { return ValueNull }
-func (Wildcard) Kind() ValueKind { return ValueWildcard }
+func (String) Kind() ExprKind { return ExprString }
+func (Number) Kind() ExprKind { return ExprNumber }
+func (Float) Kind() ExprKind  { return ExprFloat }
+func (Bool) Kind() ExprKind   { return ExprBool }
+func (Null) Kind() ExprKind   { return ExprNull }
 
 // Writers
-func (v String) Write(w core.InternalWriter, dial ValueSyntax, mode core.WritingMode) {
+func (v String) Build(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
 	dial.WriteString(w, string(v))
 }
-func (v Number) Write(w core.InternalWriter, dial ValueSyntax, mode core.WritingMode) {
+func (v Number) Build(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
 	dial.WriteNumber(w, int(v))
 }
-func (v Float) Write(w core.InternalWriter, dial ValueSyntax, mode core.WritingMode) {
+func (v Float) Build(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
 	dial.WriteFloat(w, float64(v))
 }
-func (v Bool) Write(w core.InternalWriter, dial ValueSyntax, mode core.WritingMode) {
+func (v Bool) Build(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
 	dial.WriteBool(w, bool(v))
 }
-func (Null) Write(w core.InternalWriter, dial ValueSyntax, mode core.WritingMode) {
+func (Null) Build(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
 	dial.WriteNull(w)
-}
-func (v *Wildcard) Write(w core.InternalWriter, dial ValueSyntax, mode core.WritingMode) {
-	dial.WriteWildcard(w)
 }

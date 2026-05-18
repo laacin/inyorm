@@ -2,52 +2,69 @@ package exprimpl
 
 import (
 	"github.com/laacin/inyorm/internal/api"
+	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/ir/expr"
 )
 
-type ColumnImpl struct{ expr.Column }
+type ColumnImpl struct {
+	emb   expr.Column
+	from  expr.ExprBuilder
+	aggr  *expr.ColAggr
+	exprs []expr.ColExpr
+}
+
+// new
+func (c *ColumnImpl) StartFrom(from expr.ExprBuilder) api.Column {
+	c.from = from
+	return c
+}
+func (c *ColumnImpl) Start(name, ref string) api.Column {
+	c.emb.Name = name
+	c.emb.Ref = ref
+	return c
+}
 
 func (c *ColumnImpl) Count(distinct ...bool) api.Column {
 	dist := len(distinct) > 0 && distinct[0]
-	c.Aggr = &expr.ColExpr{
-		Kind:  expr.ColAggrCount,
-		Value: dist,
+	c.aggr = &expr.ColAggr{
+		Kind:     expr.ColAggrCount,
+		Distinct: dist,
 	}
 	return c
 }
 
 func (c *ColumnImpl) Sum(distinct ...bool) api.Column {
 	dist := len(distinct) > 0 && distinct[0]
-	c.Aggr = &expr.ColExpr{
-		Kind:  expr.ColAggrSum,
-		Value: dist,
+	c.aggr = &expr.ColAggr{
+		Kind:     expr.ColAggrSum,
+		Distinct: dist,
 	}
 	return c
 }
 
 func (c *ColumnImpl) Min(distinct ...bool) api.Column {
 	dist := len(distinct) > 0 && distinct[0]
-	c.Aggr = &expr.ColExpr{
-		Kind:  expr.ColAggrMin,
-		Value: dist,
+	c.aggr = &expr.ColAggr{
+		Kind:     expr.ColAggrMin,
+		Distinct: dist,
 	}
 	return c
 }
 
 func (c *ColumnImpl) Max(distinct ...bool) api.Column {
 	dist := len(distinct) > 0 && distinct[0]
-	c.Aggr = &expr.ColExpr{
-		Kind:  expr.ColAggrMax,
-		Value: dist,
+	c.aggr = &expr.ColAggr{
+		Kind:     expr.ColAggrMax,
+		Distinct: dist,
 	}
 	return c
 }
 
 func (c *ColumnImpl) Avg(distinct ...bool) api.Column {
 	dist := len(distinct) > 0 && distinct[0]
-	c.Aggr = &expr.ColExpr{
-		Kind:  expr.ColAggrAvg,
-		Value: dist,
+	c.aggr = &expr.ColAggr{
+		Kind:     expr.ColAggrAvg,
+		Distinct: dist,
 	}
 	return c
 }
@@ -55,98 +72,152 @@ func (c *ColumnImpl) Avg(distinct ...bool) api.Column {
 // --- Arith
 
 func (c *ColumnImpl) Add(v any) api.Column {
-	c.Exprs = append(c.Exprs, expr.ColExpr{
+	c.exprs = append(c.exprs, expr.ColExpr{Kind: expr.ColArith{
 		Kind:  expr.ColArithAdd,
 		Value: v,
-	})
+	}})
 	return c
 }
 
 func (c *ColumnImpl) Sub(v any) api.Column {
-	c.Exprs = append(c.Exprs, expr.ColExpr{
+	c.exprs = append(c.exprs, expr.ColExpr{Kind: expr.ColArith{
 		Kind:  expr.ColArithSub,
 		Value: v,
-	})
+	}})
 	return c
 }
 
 func (c *ColumnImpl) Mul(v any) api.Column {
-	c.Exprs = append(c.Exprs, expr.ColExpr{
+	c.exprs = append(c.exprs, expr.ColExpr{Kind: expr.ColArith{
 		Kind:  expr.ColArithMul,
 		Value: v,
-	})
+	}})
 	return c
 }
 
 func (c *ColumnImpl) Div(v any) api.Column {
-	c.Exprs = append(c.Exprs, expr.ColExpr{
+	c.exprs = append(c.exprs, expr.ColExpr{Kind: expr.ColArith{
 		Kind:  expr.ColArithDiv,
 		Value: v,
-	})
+	}})
 	return c
 }
 
 func (c *ColumnImpl) Mod(v any) api.Column {
-	c.Exprs = append(c.Exprs, expr.ColExpr{
+	c.exprs = append(c.exprs, expr.ColExpr{Kind: expr.ColArith{
 		Kind:  expr.ColArithMod,
 		Value: v,
-	})
+	}})
 	return c
 }
 
 func (c *ColumnImpl) Wrap() api.Column {
-	c.Exprs = append(c.Exprs, expr.ColExpr{
-		Kind: expr.ColArithWrap,
-	})
+	c.exprs = append(c.exprs, expr.ColExpr{Kind: expr.ColWrap{}})
 	return c
 }
 
 // --- Scalar
 
 func (c *ColumnImpl) Lower() api.Column {
-	c.Exprs = append(c.Exprs, expr.ColExpr{
+	c.exprs = append(c.exprs, expr.ColExpr{Kind: expr.ColScalar{
 		Kind: expr.ColScalarLower,
-	})
+	}})
 	return c
 }
 
 func (c *ColumnImpl) Upper() api.Column {
-	c.Exprs = append(c.Exprs, expr.ColExpr{
+	c.exprs = append(c.exprs, expr.ColExpr{Kind: expr.ColScalar{
 		Kind: expr.ColScalarUpper,
-	})
+	}})
 	return c
 }
 
 func (c *ColumnImpl) Trim() api.Column {
-	c.Exprs = append(c.Exprs, expr.ColExpr{
+	c.exprs = append(c.exprs, expr.ColExpr{Kind: expr.ColScalar{
 		Kind: expr.ColScalarTrim,
-	})
+	}})
 	return c
 }
 
 func (c *ColumnImpl) Round() api.Column {
-	c.Exprs = append(c.Exprs, expr.ColExpr{
+	c.exprs = append(c.exprs, expr.ColExpr{Kind: expr.ColScalar{
 		Kind: expr.ColScalarRound,
-	})
+	}})
 	return c
 }
 
 func (c *ColumnImpl) Abs() api.Column {
-	c.Exprs = append(c.Exprs, expr.ColExpr{
+	c.exprs = append(c.exprs, expr.ColExpr{Kind: expr.ColScalar{
 		Kind: expr.ColScalarAbs,
-	})
+	}})
 	return c
 }
 
 // --- Alias
 
 func (c *ColumnImpl) As(value string) api.Column {
-	c.Alias = value
+	c.emb.Alias = value
 	return c
 }
 
 // --- Build
+func (c *ColumnImpl) BaseName() string { return c.emb.Name }
 
-func (c *ColumnImpl) Build() expr.Value {
-	return &c.Column
+func (c *ColumnImpl) Kind() expr.ExprKind {
+	return expr.ExprColumn
+}
+
+func (c *ColumnImpl) Build(w core.InternalWriter, dial expr.ExprWriter, mode core.WritingMode) {
+	w.SetRef(c.emb.Ref)
+
+	if c != nil && (c.aggr != nil || c.exprs != nil || c.from != nil) {
+		nw := w.New()
+
+		if c.from != nil {
+			nw.Value(c.from, mode)
+		} else {
+			dial.WriteColBase(nw, &c.emb)
+		}
+
+		if c.exprs != nil {
+			for _, e := range c.exprs {
+				if scalar, ok := e.IsScalar(); ok {
+					dial.WriteColScalar(nw, scalar)
+					continue
+				}
+
+				if arith, ok := e.IsArith(); ok {
+					dial.WriteColArith(nw, arith)
+					continue
+				}
+
+				if e.IsWrap() {
+					dial.WriteColWrap(nw)
+					continue
+				}
+			}
+			c.exprs = nil
+		}
+
+		if c.aggr != nil {
+			dial.WriteColAggr(nw, c.aggr)
+			c.aggr = nil
+		}
+
+		c.emb.Value = nw.ToString()
+	}
+
+	switch mode {
+	case core.WriteBase:
+		dial.WriteColBase(w, &c.emb)
+
+	case core.WriteExpr:
+		dial.WriteColExpr(w, &c.emb)
+
+	case core.WriteAlias:
+		dial.WriteColAlias(w, &c.emb)
+
+	case core.WriteDef:
+		dial.WriteColDef(w, &c.emb)
+	}
 }

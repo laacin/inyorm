@@ -2,16 +2,15 @@ package clause
 
 import (
 	"github.com/laacin/inyorm/internal/api"
+	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/impl/exprimpl"
 	"github.com/laacin/inyorm/internal/ir/dml"
-	"github.com/laacin/inyorm/internal/ir/expr"
 )
 
 type JoinImpl struct {
 	declared bool
 	emb      dml.Join
 	current  *dml.JoinSegment
-	conds    []*exprimpl.ConditionImpl
 }
 
 func (c *JoinImpl) Join(table any) api.JoinNext {
@@ -38,13 +37,12 @@ func (c *JoinImpl) Full() api.JoinEnd {
 func (c *JoinImpl) Cross() {
 	c.current.Type = dml.JoinCross
 	c.emb.Joins = append(c.emb.Joins, *c.current)
-	c.conds = append(c.conds, nil)
 }
 
 func (c *JoinImpl) On(ident any) api.Condition {
 	cond := &exprimpl.ConditionImpl{}
+	c.current.Cond = cond
 	c.emb.Joins = append(c.emb.Joins, *c.current)
-	c.conds = append(c.conds, cond)
 	return cond.Start(ident)
 }
 
@@ -58,12 +56,7 @@ func (c *JoinImpl) Kind() dml.ClauseKind {
 	return dml.ClauseJoin
 }
 
-func (c *JoinImpl) Build() (dml.Clause, error) {
-	for i, cond := range c.conds {
-		if cond == nil {
-			c.emb.Joins[i].Cond = nil
-		}
-		c.emb.Joins[i].Cond = cond.Build().(*expr.Condition)
-	}
-	return &c.emb, nil
+func (c *JoinImpl) Build(w core.InternalWriter, dial dml.ClauseWriter) error {
+	dial.WriteJoin(w, &c.emb)
+	return nil
 }

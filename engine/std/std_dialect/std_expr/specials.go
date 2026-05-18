@@ -55,14 +55,14 @@ func (*ExprSyntax) WriteCondition(w core.Writer, cond *expr.Condition, mode core
 	w.Char(')')
 }
 
-func (*ExprSyntax) WriteConcat(w core.Writer, con *expr.Concat) {
+func (*ExprSyntax) WriteConcat(w core.Writer, con *expr.Concat, mode core.WritingMode) {
 	w.Write("CONCAT")
 	w.Char('(')
 	for i, val := range con.Values {
 		if i > 0 {
 			w.Write(", ")
 		}
-		w.Value(val, core.WriteExpr)
+		w.Value(val, mode)
 	}
 	w.Char(')')
 }
@@ -74,17 +74,17 @@ func (*ExprSyntax) WriteCaseSwitch(w core.Writer, cas *expr.CaseSwitch, mode cor
 
 	for _, when := range cas.Whens {
 		w.Write(" WHEN ")
-		w.Value(when.When, core.WriteExpr)
+		w.Value(when.When, mode)
 
 		w.Write(" THEN ")
-		w.Value(when.Then, core.WriteExpr)
+		w.Value(when.Then, mode)
 		w.Char(' ')
 	}
 
 	if cas.Els != nil {
 		w.Write("ELSE")
 		w.Char(' ')
-		w.Value(cas.Els, core.WriteExpr)
+		w.Value(cas.Els, mode)
 		w.Char(' ')
 	}
 
@@ -96,16 +96,16 @@ func (*ExprSyntax) WriteCaseSearch(w core.Writer, cas *expr.CaseSearch, mode cor
 	w.Char(' ')
 
 	for _, when := range cas.Whens {
-		w.Value(when.When, core.WriteExpr)
+		w.Value(when.When, mode)
 		w.Write(" THEN ")
-		w.Value(when.Then, core.WriteExpr)
+		w.Value(when.Then, mode)
 		w.Char(' ')
 	}
 
 	if cas.Els != nil {
 		w.Write("ELSE")
 		w.Char(' ')
-		w.Value(cas.Els, core.WriteExpr)
+		w.Value(cas.Els, mode)
 		w.Char(' ')
 	}
 

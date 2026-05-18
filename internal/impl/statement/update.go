@@ -5,10 +5,10 @@ import (
 
 	"github.com/laacin/inyorm/internal/impl/clause"
 	"github.com/laacin/inyorm/internal/impl/exec"
+	"github.com/laacin/inyorm/internal/impl/exprimpl"
 	"github.com/laacin/inyorm/internal/impl/writer"
 	"github.com/laacin/inyorm/internal/ir"
 	"github.com/laacin/inyorm/internal/ir/dml"
-	"github.com/laacin/inyorm/internal/ir/expr"
 )
 
 type UpdateStmtImpl struct {
@@ -33,7 +33,7 @@ func (s *UpdateStmtImpl) Kind() dml.StatementKind {
 }
 
 func (s *UpdateStmtImpl) Build() (*dml.Statement, error) {
-	s.UpdateImpl.Table(&expr.Table{Value: s.DefaultRef})
+	s.UpdateImpl.Table((&exprimpl.TableImpl{}).Start(s.DefaultRef))
 
 	// --- Load clauses
 	clauses := []dml.ClauseBuilder{
@@ -41,15 +41,10 @@ func (s *UpdateStmtImpl) Build() (*dml.Statement, error) {
 		&s.WhereImpl,
 	}
 
-	clauseMap := make(map[dml.ClauseKind]dml.Clause)
+	clauseMap := make(map[dml.ClauseKind]dml.ClauseBuilder)
 	for _, cls := range clauses {
 		if cls.IsDeclared() {
-			builded, err := cls.Build()
-			if err != nil {
-				return nil, err
-			}
-
-			clauseMap[cls.Kind()] = builded
+			clauseMap[cls.Kind()] = cls
 		}
 	}
 
@@ -68,12 +63,15 @@ func (s *UpdateStmtImpl) Build() (*dml.Statement, error) {
 
 	first := true
 	for _, ord := range s.Dialect.UpdateOrder() {
-		if clause, ok := clauseMap[ord]; ok {
+		if cls, ok := clauseMap[ord]; ok {
 			if !first {
 				w.Char(' ')
 			}
 			first = false
-			clause.Write(w, s.Dialect)
+
+			if err := cls.Build(w, s.Dialect); err != nil {
+				return nil, err
+			}
 		}
 	}
 

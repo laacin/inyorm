@@ -1,6 +1,9 @@
 package clause
 
-import "github.com/laacin/inyorm/internal/ir/dml"
+import (
+	"github.com/laacin/inyorm/internal/core"
+	"github.com/laacin/inyorm/internal/ir/dml"
+)
 
 type DeleteImpl struct {
 	declared bool
@@ -21,6 +24,7 @@ func (c *DeleteImpl) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *DeleteImpl) Build() (dml.Clause, error) {
-	return &c.emb, nil
+func (c *DeleteImpl) Build(w core.InternalWriter, dial dml.ClauseWriter) error {
+	dial.WriteDelete(w, &c.emb)
+	return nil
 }

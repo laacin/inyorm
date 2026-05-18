@@ -9,7 +9,7 @@ func (*DmlSyntax) WriteInsertInto(w core.Writer, cls *dml.InsertInto) {
 	w.Write("INSERT INTO")
 	w.Char(' ')
 
-	w.Value(cls.Table, core.WriteDef)
+	w.Value(cls.Table, core.WriteBase)
 	w.Char(' ')
 
 	w.Char('(')
@@ -34,7 +34,7 @@ func (*DmlSyntax) WriteInsertInto(w core.Writer, cls *dml.InsertInto) {
 			if ci > 0 {
 				w.Write(", ")
 			}
-			w.Value(cls.Values[row*perRow+ci], core.WriteDef)
+			w.Value(cls.Values[row*perRow+ci], core.WriteBase)
 		}
 		w.Char(')')
 	}
@@ -151,7 +151,7 @@ func (*DmlSyntax) WriteUpdate(w core.Writer, cls *dml.Update) {
 	w.Write("UPDATE")
 	w.Char(' ')
 
-	w.Value(cls.Table, core.WriteDef)
+	w.Value(cls.Table, core.WriteBase)
 	w.Write(" SET ")
 
 	for i, col := range cls.Cols {
@@ -161,7 +161,7 @@ func (*DmlSyntax) WriteUpdate(w core.Writer, cls *dml.Update) {
 
 		w.Write(col)
 		w.Write(" = ")
-		w.Value(cls.Values[i], core.WriteDef)
+		w.Value(cls.Values[i], core.WriteBase)
 	}
 }
 
