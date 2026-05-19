@@ -38,3 +38,9 @@ func (m StructInfo) GetIndex(name string) ([]int, bool) {
 	r, ok := m[name]
 	return r.Index, ok
 }
+
+func (m StructInfo) IterNames(fn func(string)) {
+	for name := range m {
+		fn(name)
+	}
+}
