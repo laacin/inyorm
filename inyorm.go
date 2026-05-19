@@ -6,8 +6,6 @@ import (
 
 	"github.com/laacin/inyorm/internal/impl/exprimpl"
 	"github.com/laacin/inyorm/internal/impl/statement"
-	"github.com/laacin/inyorm/internal/impl/table"
-	"github.com/laacin/inyorm/internal/impl/writer"
 	"github.com/laacin/inyorm/internal/ir"
 )
 

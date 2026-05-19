@@ -28,11 +28,11 @@ func run(t *testing.T, q any, exp string, vals []any) {
 	}
 }
 
-func runQ(t *testing.T, have, exp string) {
-	if have != exp {
-		t.Errorf("mismatch query:\nExpect:\n%s\nHave:\n%s", exp, have)
-	}
-}
+// func runQ(t *testing.T, have, exp string) {
+// 	if have != exp {
+// 		t.Errorf("mismatch query:\nExpect:\n%s\nHave:\n%s", exp, have)
+// 	}
+// }
 
 func TestSelect(t *testing.T) {
 	qe, _ := inyorm.New(std.JustDialect())
@@ -404,50 +404,5 @@ func TestDelete(t *testing.T) {
 
 		exp := "DELETE FROM comments WHERE (id = ?)"
 		run(t, q, exp, []any{12310})
-	})
-}
-
-func TestCreateTable(t *testing.T) {
-	qe, _ := inyorm.New(std.JustDialect())
-
-	t.Run("simple_table", func(t *testing.T) {
-		result := qe.NewTable(context.Background(), "users", func(tb inyorm.TableBuilder, e inyorm.ExprBuilder) {
-			tb.Int("id").PrimaryKey().AutoIncrement()
-			tb.Text("account").Unique()
-			tb.Int("age").Nullable()
-		})
-
-		exp := "CREATE TABLE IF NOT EXISTS users ("
-		exp += "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-		exp += "account TEXT UNIQUE NOT NULL, "
-		exp += "age INTEGER"
-		exp += ");"
-
-		runQ(t, result, exp)
-	})
-
-	t.Run("with_constraints", func(t *testing.T) {
-		result := qe.NewTable(context.Background(), "posts", func(tb inyorm.TableBuilder, e inyorm.ExprBuilder) {
-			tb.Text("id").PrimaryKey()
-			tb.Text("author_id")
-			tb.Text("title").Nullable()
-
-			tb.Cons().ForeignKey("author_id").To("id", "users").OnDel("cascade")
-			tb.Cons().Default("title").Value("untitled")
-			tb.Cons().Check(e.Col("title")).Not().Equal("word")
-			tb.Cons().Index("title")
-		})
-
-		exp := "CREATE TABLE IF NOT EXISTS posts ("
-		exp += "id TEXT PRIMARY KEY, "
-		exp += "author_id TEXT NOT NULL, "
-		exp += "title TEXT DEFAULT 'untitled', "
-		exp += "FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE, "
-		exp += "CHECK (title <> 'word')"
-		exp += ");"
-		exp += "\n"
-		exp += "CREATE INDEX ON posts(title)"
-
-		runQ(t, result, exp)
 	})
 }
