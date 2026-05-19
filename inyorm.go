@@ -6,6 +6,8 @@ import (
 
 	"github.com/laacin/inyorm/internal/impl/exprimpl"
 	"github.com/laacin/inyorm/internal/impl/statement"
+	"github.com/laacin/inyorm/internal/impl/table"
+	"github.com/laacin/inyorm/internal/impl/writer"
 	"github.com/laacin/inyorm/internal/ir"
 )
 
@@ -16,6 +18,18 @@ func New(eng *Engine) (*DB, error) {
 		return nil, eng.Err
 	}
 	return &DB{eng}, nil
+}
+
+// --- DDL Statements
+
+func (db *DB) NewTable(ctx context.Context, name string, fn func(tb TableBuilder, e ExprBuilder)) string {
+	tb := &table.TableBuilderImpl{}
+	fn(tb.Start(name), &exprimpl.ExprBuilderImpl{DefaultRef: name})
+
+	w := &writer.WriterImpl{Syntax: db.eng.Dialect}
+
+	tb.Build(w, db.eng.Dialect)
+	return w.ToString()
 }
 
 // --- DML Statements

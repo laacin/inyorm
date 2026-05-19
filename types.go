@@ -50,4 +50,7 @@ type (
 	InsertStatement = api.InsertStmt
 	UpdateStatement = api.UpdateStmt
 	DeleteStatement = api.DeleteStmt
+
+	// DDL
+	TableBuilder = api.TableBuilder
 )
