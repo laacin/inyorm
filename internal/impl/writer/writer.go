@@ -45,22 +45,6 @@ func (w *WriterImpl) GetRef(ref string) (byte, bool) {
 	return w.Aliases.Get(ref)
 }
 
-func (w *WriterImpl) New() core.InternalWriter {
-	return &WriterImpl{
-		Syntax:  w.Syntax,
-		Aliases: w.Aliases,
-		Params:  w.Params,
-	}
-}
-
-func (w *WriterImpl) ToString() string {
-	return w.sb.String()
-}
-
-func (w *WriterImpl) Reset() {
-	w.sb.Reset()
-}
-
 // --- Internal writer
 
 func (w *WriterImpl) PushValue(v any) {
@@ -76,4 +60,20 @@ func (w *WriterImpl) SetRef(ref string) {
 		return
 	}
 	w.Aliases.Set(ref)
+}
+
+func (w *WriterImpl) New() core.InternalWriter {
+	return &WriterImpl{
+		Syntax:  w.Syntax,
+		Aliases: w.Aliases,
+		Params:  w.Params,
+	}
+}
+
+func (w *WriterImpl) ToString() string {
+	return w.sb.String()
+}
+
+func (w *WriterImpl) Reset() {
+	w.sb.Reset()
 }
