@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"slices"
 
+	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/impl/mapper/types"
 )
 
@@ -56,7 +57,7 @@ func ReadValues(cols []string, values any) (*Result, error) {
 }
 
 // Readers
-func valsByStruct(cols []string, val reflect.Value, schema types.StructSchema) (*Result, error) {
+func valsByStruct(cols []string, val reflect.Value, schema core.StructInfo) (*Result, error) {
 	args := make([]any, len(cols))
 	for i, col := range cols {
 		if idx, ok := schema.GetIndex(col); ok {
@@ -73,7 +74,7 @@ func valsByStruct(cols []string, val reflect.Value, schema types.StructSchema) (
 	}, nil
 }
 
-func valsByStructSlc(cols []string, val reflect.Value, schema types.StructSchema) (*Result, error) {
+func valsByStructSlc(cols []string, val reflect.Value, schema core.StructInfo) (*Result, error) {
 	args := make([]any, len(cols)*val.Len())
 
 	for i := range val.Len() {

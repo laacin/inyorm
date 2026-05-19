@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/impl/mapper/types"
 	"github.com/laacin/inyorm/internal/ir/driver"
 )
@@ -38,7 +39,7 @@ func Scan(rows driver.Rows, scanner any) error {
 }
 
 // --- Scanners
-func scanByStruct(rows driver.Rows, value any, schema types.StructSchema) error {
+func scanByStruct(rows driver.Rows, value any, schema core.StructInfo) error {
 	if !rows.Next() {
 		return nil
 	}
@@ -65,7 +66,7 @@ func scanByStruct(rows driver.Rows, value any, schema types.StructSchema) error 
 	return rows.Scan(addrs...)
 }
 
-func scanByStructSlc(rows driver.Rows, value any, schema types.StructSchema) error {
+func scanByStructSlc(rows driver.Rows, value any, schema core.StructInfo) error {
 	cols, _ := rows.Columns()
 
 	args := make([]any, len(cols))

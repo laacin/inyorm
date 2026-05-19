@@ -6,20 +6,20 @@ import (
 	"github.com/laacin/inyorm/internal/core"
 )
 
-func readStruct(t reflect.Type) StructSchema {
-	infos := StructSchema(map[string]core.FieldResult{})
+func readStruct(t reflect.Type) core.StructInfo {
+	info := core.NewStructInfo()
 
 	for field := range t.Fields() {
 		typ, _ := DerefPtrTyp(field.Type)
 
 		if field.Anonymous && typ.Kind() == reflect.Struct {
 			baseIndex := append([]int(nil), field.Index...)
-			infos.merge(readStruct(typ), baseIndex)
+			info.Merge(baseIndex, readStruct(typ))
 			continue
 		}
 
-		infos.add(field.Name, field.Tag.Get(core.TAG), field.Index)
+		info.Add(field.Name, field.Tag.Get(core.TAG), field.Index)
 	}
 
-	return infos
+	return info
 }
