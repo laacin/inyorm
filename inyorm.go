@@ -18,6 +18,14 @@ func New(eng *Engine) (*DB, error) {
 	return &DB{eng}, nil
 }
 
+// --- DDL Statements
+
+func (db *DB) NewCreateTable(ctx context.Context, name string) (TableBuilder, ExprBuilder) {
+	stmt := &statement.CreateTableStmtImpl{}
+	e := &exprimpl.ExprBuilderImpl{}
+	return stmt.Start(ctx, db.eng, name), e.Start(name)
+}
+
 // --- DML Statements
 
 func (db *DB) NewSelect(ctx context.Context, table string) (SelectStatement, ExprBuilder) {

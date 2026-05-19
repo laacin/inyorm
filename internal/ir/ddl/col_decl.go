@@ -11,9 +11,10 @@ const (
 )
 
 type ColDecl struct {
-	Name string
-	Kind ColKind
-	Meta ColMeta
+	Name    string
+	Kind    ColKind
+	Meta    ColMeta
+	Default *ConsDefault
 }
 
 // --- Dependencies

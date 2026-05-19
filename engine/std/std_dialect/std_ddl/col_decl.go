@@ -5,33 +5,19 @@ import (
 	"github.com/laacin/inyorm/internal/ir/ddl"
 )
 
-func (s *DllSyntax) WriteTableDecl(w core.Writer, t *ddl.TableDecl) {
+func (s *DdlSyntax) WriteTableDecl(w core.Writer, t *ddl.TableDecl) {
 	w.Write("CREATE TABLE IF NOT EXISTS")
 	w.Char(' ')
 	w.Write(t.Name)
 
-	inlineCons := map[string]core.WriterFunc{}
 	lazyCons := []core.WriterFunc{}
-	outCons := []core.WriterFunc{}
-
 	for _, c := range t.Cons {
 		if cons, ok := c.IsForeignKey(); ok {
 			lazyCons = append(lazyCons, func(w core.Writer) { s.WriteConsForeignKey(w, cons) })
 			continue
 		}
-
 		if cons, ok := c.IsCheck(); ok {
 			lazyCons = append(lazyCons, func(w core.Writer) { s.WriteConsCheck(w, cons) })
-			continue
-		}
-
-		if cons, ok := c.IsIndex(); ok {
-			outCons = append(outCons, func(w core.Writer) { s.WriteConsIndex(w, cons) })
-			continue
-		}
-
-		if cons, ok := c.IsDefault(); ok {
-			inlineCons[cons.Column] = func(w core.Writer) { s.WriteConsDefault(w, cons) }
 			continue
 		}
 	}
@@ -43,32 +29,24 @@ func (s *DllSyntax) WriteTableDecl(w core.Writer, t *ddl.TableDecl) {
 			w.Write(", ")
 		}
 		s.WriteColDecl(w, &c)
-
-		if cons, ok := inlineCons[c.Name]; ok {
-			w.Char(' ')
-			cons(w)
-		}
 	}
 
-	for _, cons := range lazyCons {
+	for _, c := range t.Cons {
 		w.Write(", ")
-		cons(w)
-	}
-	w.Write(");")
 
-	if len(outCons) > 0 {
-		w.Char('\n')
-
-		for i, cons := range outCons {
-			if i > 0 {
-				w.Write(";\n")
-			}
-			cons(w)
+		if cons, ok := c.IsForeignKey(); ok {
+			s.WriteConsForeignKey(w, cons)
+			continue
+		}
+		if cons, ok := c.IsCheck(); ok {
+			s.WriteConsCheck(w, cons)
+			continue
 		}
 	}
+	w.Write(")")
 }
 
-func (s *DllSyntax) WriteColDecl(w core.Writer, c *ddl.ColDecl) {
+func (s *DdlSyntax) WriteColDecl(w core.Writer, c *ddl.ColDecl) {
 	w.Write(c.Name)
 	w.Char(' ')
 	w.Write(mapColKind[c.Kind])
@@ -99,35 +77,45 @@ func (s *DllSyntax) WriteColDecl(w core.Writer, c *ddl.ColDecl) {
 		w.Char(' ')
 		s.WriteMetaNotNull(w)
 	}
+
+	if c.Default != nil {
+		w.Char(' ')
+		s.WriteMetaDefault(w, c.Default)
+	}
 }
 
-func (*DllSyntax) WriteColText(w core.Writer) {
+func (*DdlSyntax) WriteColText(w core.Writer) {
 	w.Write("TEXT")
 }
-func (*DllSyntax) WriteColInt(w core.Writer) {
+func (*DdlSyntax) WriteColInt(w core.Writer) {
 	w.Write("INTEGER")
 }
-func (*DllSyntax) WriteColFloat(w core.Writer) {
+func (*DdlSyntax) WriteColFloat(w core.Writer) {
 	w.Write("DOUBLE")
 }
-func (*DllSyntax) WriteColBool(w core.Writer) {
+func (*DdlSyntax) WriteColBool(w core.Writer) {
 	w.Write("BOOLEAN")
 }
 
-func (*DllSyntax) WriteMetaPrimaryKey(w core.Writer) {
+func (*DdlSyntax) WriteMetaPrimaryKey(w core.Writer) {
 	w.Write("PRIMARY KEY")
 }
-func (*DllSyntax) WriteMetaAutoIncrement(w core.Writer) {
+func (*DdlSyntax) WriteMetaAutoIncrement(w core.Writer) {
 	w.Write("AUTOINCREMENT")
 }
-func (*DllSyntax) WriteMetaUnique(w core.Writer) {
+func (*DdlSyntax) WriteMetaUnique(w core.Writer) {
 	w.Write("UNIQUE")
 }
-func (*DllSyntax) WriteMetaNotNull(w core.Writer) {
+func (*DdlSyntax) WriteMetaNotNull(w core.Writer) {
 	w.Write("NOT NULL")
 }
+func (*DdlSyntax) WriteMetaDefault(w core.Writer, cons *ddl.ConsDefault) {
+	w.Write("DEFAULT")
+	w.Char(' ')
+	w.Value(cons.Value, core.WriteBase)
+}
 
-func (*DllSyntax) WriteConsForeignKey(w core.Writer, cons *ddl.ConsDecl[ddl.ConsForeignKey]) {
+func (*DdlSyntax) WriteConsForeignKey(w core.Writer, cons *ddl.ConsDecl[ddl.ConsForeignKey]) {
 	w.Write("FOREIGN KEY")
 	w.Char(' ')
 
@@ -153,7 +141,7 @@ func (*DllSyntax) WriteConsForeignKey(w core.Writer, cons *ddl.ConsDecl[ddl.Cons
 	}
 }
 
-func (*DllSyntax) WriteConsIndex(w core.Writer, cons *ddl.ConsDecl[ddl.ConsIndex]) {
+func (*DdlSyntax) WriteConsIndex(w core.Writer, cons *ddl.ConsDecl[ddl.ConsIndex]) {
 	w.Write("CREATE INDEX")
 	w.Write(" ON ")
 
@@ -163,16 +151,10 @@ func (*DllSyntax) WriteConsIndex(w core.Writer, cons *ddl.ConsDecl[ddl.ConsIndex
 	w.Char(')')
 }
 
-func (*DllSyntax) WriteConsCheck(w core.Writer, cons *ddl.ConsDecl[ddl.ConsCheck]) {
+func (*DdlSyntax) WriteConsCheck(w core.Writer, cons *ddl.ConsDecl[ddl.ConsCheck]) {
 	w.Write("CHECK")
 	w.Char(' ')
 	w.Value(cons.Value.Cond, core.WriteBase)
-}
-
-func (*DllSyntax) WriteConsDefault(w core.Writer, cons *ddl.ConsDecl[ddl.ConsDefault]) {
-	w.Write("DEFAULT")
-	w.Char(' ')
-	w.Value(cons.Value.Value, core.WriteBase)
 }
 
 var mapOnAct = map[ddl.OnAction]string{

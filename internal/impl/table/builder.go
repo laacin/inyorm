@@ -38,10 +38,15 @@ func (t *TableBuilderImpl) Bool(name string) api.ColDecl {
 	return c.Start(name, ddl.ColKindBool)
 }
 
-func (t *TableBuilderImpl) Cons() api.ConsDecl {
+func (t *TableBuilderImpl) ForeignKey(col string) api.ForeignKey {
 	c := &ConsDeclImpl{}
 	t.cons = append(t.cons, c)
-	return c.Start(t.name)
+	return c.ForeignKey(col, t.name)
+}
+func (t *TableBuilderImpl) Check(ident any) api.Condition {
+	c := &ConsDeclImpl{}
+	t.cons = append(t.cons, c)
+	return c.Check(ident)
 }
 
 // --- Build

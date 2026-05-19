@@ -1,3 +1,3 @@
 package std_ddl
 
-type DllSyntax struct{}
+type DdlSyntax struct{}

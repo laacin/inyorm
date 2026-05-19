@@ -4,6 +4,11 @@ import "github.com/laacin/inyorm/internal/api"
 
 type ExprBuilderImpl struct{ DefaultRef string }
 
+func (e *ExprBuilderImpl) Start(defaultTable string) *ExprBuilderImpl {
+	e.DefaultRef = defaultTable
+	return e
+}
+
 func (e *ExprBuilderImpl) Table(name string) api.Table {
 	tbl := &TableImpl{}
 	return tbl.Start(name)

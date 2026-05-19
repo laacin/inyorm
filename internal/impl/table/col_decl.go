@@ -35,6 +35,10 @@ func (c *ColDeclImpl) Nullable() api.ColDecl {
 	c.emb.Meta.NotNull = false
 	return c
 }
+func (c *ColDeclImpl) Default(value any) api.ColDecl {
+	c.emb.Default = &ddl.ConsDefault{Value: value}
+	return c
+}
 
 // --- Build
 

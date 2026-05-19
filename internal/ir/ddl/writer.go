@@ -15,10 +15,10 @@ type TableWriter interface {
 	WriteMetaAutoIncrement(core.Writer)
 	WriteMetaUnique(core.Writer)
 	WriteMetaNotNull(core.Writer)
+	WriteMetaDefault(core.Writer, *ConsDefault)
 
 	WriteConsForeignKey(core.Writer, *ConsDecl[ConsForeignKey])
 	WriteConsIndex(core.Writer, *ConsDecl[ConsIndex])
-	WriteConsDefault(core.Writer, *ConsDecl[ConsDefault])
 	WriteConsCheck(core.Writer, *ConsDecl[ConsCheck])
 }
 

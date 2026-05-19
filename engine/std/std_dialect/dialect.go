@@ -9,5 +9,5 @@ import (
 type Dialect struct {
 	std_expr.ExprSyntax
 	std_dml.DmlSyntax
-	std_ddl.DllSyntax
+	std_ddl.DdlSyntax
 }

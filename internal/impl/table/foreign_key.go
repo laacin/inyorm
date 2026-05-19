@@ -7,17 +7,17 @@ import (
 
 type ConsForeignKeyImpl struct{ emb ddl.ConsForeignKey }
 
-func (fk *ConsForeignKeyImpl) To(col, table string) api.ForeignKeyNext {
-	fk.emb.ToTable = table
-	fk.emb.ToColumn = col
-	return fk
+func (c *ConsForeignKeyImpl) To(col, table string) api.ForeignKeyNext {
+	c.emb.ToTable = table
+	c.emb.ToColumn = col
+	return c
 }
 
-func (fk *ConsForeignKeyImpl) OnDel(key string) api.ForeignKeyNext {
-	fk.emb.OnDelete = ddl.SetOnAct(key)
-	return fk
+func (c *ConsForeignKeyImpl) OnDel(key string) api.ForeignKeyNext {
+	c.emb.OnDelete = ddl.SetOnAct(key)
+	return c
 }
-func (fk *ConsForeignKeyImpl) OnUpd(key string) api.ForeignKeyNext {
-	fk.emb.OnUpdate = ddl.SetOnAct(key)
-	return fk
+func (c *ConsForeignKeyImpl) OnUpd(key string) api.ForeignKeyNext {
+	c.emb.OnUpdate = ddl.SetOnAct(key)
+	return c
 }
