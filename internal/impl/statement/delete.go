@@ -3,6 +3,7 @@ package statement
 import (
 	"context"
 
+	"github.com/laacin/inyorm/internal/api"
 	"github.com/laacin/inyorm/internal/impl/clause"
 	"github.com/laacin/inyorm/internal/impl/exec"
 	"github.com/laacin/inyorm/internal/impl/exprimpl"
@@ -22,11 +23,11 @@ type DeleteStmtImpl struct {
 	*exec.Executor
 }
 
-func NewDeleteStatement(ctx context.Context, eng *ir.Engine, ref string) *DeleteStmtImpl {
-	stmt := &DeleteStmtImpl{Dialect: eng.Dialect, DefaultRef: ref}
-	exec := &exec.Executor{Ctx: ctx, Statement: stmt, Driver: eng.Driver}
-	stmt.Executor = exec
-	return stmt
+func (s *DeleteStmtImpl) Start(ctx context.Context, eng *ir.Engine, ref string) api.DeleteStmt {
+	s.DefaultRef = ref
+	s.Dialect = eng.Dialect
+	s.Executor = &exec.Executor{Ctx: ctx, Statement: s, Driver: eng.Driver}
+	return s
 }
 
 func (s *DeleteStmtImpl) Kind() dml.StatementKind {

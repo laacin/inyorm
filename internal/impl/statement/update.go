@@ -3,6 +3,7 @@ package statement
 import (
 	"context"
 
+	"github.com/laacin/inyorm/internal/api"
 	"github.com/laacin/inyorm/internal/impl/clause"
 	"github.com/laacin/inyorm/internal/impl/exec"
 	"github.com/laacin/inyorm/internal/impl/exprimpl"
@@ -21,11 +22,11 @@ type UpdateStmtImpl struct {
 	*exec.Executor
 }
 
-func NewUpdateStatement(ctx context.Context, eng *ir.Engine, ref string) *UpdateStmtImpl {
-	stmt := &UpdateStmtImpl{Dialect: eng.Dialect, DefaultRef: ref}
-	exec := &exec.Executor{Ctx: ctx, Statement: stmt, Driver: eng.Driver}
-	stmt.Executor = exec
-	return stmt
+func (s *UpdateStmtImpl) Start(ctx context.Context, eng *ir.Engine, ref string) api.UpdateStmt {
+	s.DefaultRef = ref
+	s.Dialect = eng.Dialect
+	s.Executor = &exec.Executor{Ctx: ctx, Statement: s, Driver: eng.Driver}
+	return s
 }
 
 func (s *UpdateStmtImpl) Kind() dml.StatementKind {

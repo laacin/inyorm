@@ -3,6 +3,7 @@ package statement
 import (
 	"context"
 
+	"github.com/laacin/inyorm/internal/api"
 	"github.com/laacin/inyorm/internal/impl/clause"
 	"github.com/laacin/inyorm/internal/impl/exec"
 	"github.com/laacin/inyorm/internal/impl/exprimpl"
@@ -28,11 +29,11 @@ type SelectStmtImpl struct {
 	*exec.Executor
 }
 
-func NewSelectStatement(ctx context.Context, eng *ir.Engine, ref string) *SelectStmtImpl {
-	stmt := &SelectStmtImpl{Dialect: eng.Dialect, DefaultRef: ref}
-	exec := &exec.Executor{Ctx: ctx, Statement: stmt, Driver: eng.Driver}
-	stmt.Executor = exec
-	return stmt
+func (s *SelectStmtImpl) Start(ctx context.Context, eng *ir.Engine, ref string) api.SelectStmt {
+	s.DefaultRef = ref
+	s.Dialect = eng.Dialect
+	s.Executor = &exec.Executor{Ctx: ctx, Statement: s, Driver: eng.Driver}
+	return s
 }
 
 func (s *SelectStmtImpl) Kind() dml.StatementKind {

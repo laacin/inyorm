@@ -20,42 +20,30 @@ func New(eng *Engine) (*DB, error) {
 	return &DB{eng}, nil
 }
 
-// --- DDL Statements
-
-func (db *DB) NewTable(ctx context.Context, name string, fn func(tb TableBuilder, e ExprBuilder)) string {
-	tb := &table.TableBuilderImpl{}
-	fn(tb.Start(name), &exprimpl.ExprBuilderImpl{DefaultRef: name})
-
-	w := &writer.WriterImpl{Syntax: db.eng.Dialect}
-
-	tb.Build(w, db.eng.Dialect)
-	return w.ToString()
-}
-
 // --- DML Statements
 
 func (db *DB) NewSelect(ctx context.Context, table string) (SelectStatement, ExprBuilder) {
-	stmt := statement.NewSelectStatement(ctx, db.eng, table)
-	exprBuilder := &exprimpl.ExprBuilderImpl{DefaultRef: table}
-	return stmt, exprBuilder
+	stmt := &statement.SelectStmtImpl{}
+	e := &exprimpl.ExprBuilderImpl{}
+	return stmt.Start(ctx, db.eng, table), e.Start(table)
 }
 
 func (db *DB) NewInsert(ctx context.Context, table string) (InsertStatement, ExprBuilder) {
-	stmt := statement.NewInsertStatement(ctx, db.eng, table)
-	exprBuilder := &exprimpl.ExprBuilderImpl{DefaultRef: table}
-	return stmt, exprBuilder
+	stmt := &statement.InsertStmtImpl{}
+	e := &exprimpl.ExprBuilderImpl{}
+	return stmt.Start(ctx, db.eng, table), e.Start(table)
 }
 
 func (db *DB) NewUpdate(ctx context.Context, table string) (UpdateStatement, ExprBuilder) {
-	stmt := statement.NewUpdateStatement(ctx, db.eng, table)
-	exprBuilder := &exprimpl.ExprBuilderImpl{DefaultRef: table}
-	return stmt, exprBuilder
+	stmt := &statement.UpdateStmtImpl{}
+	e := &exprimpl.ExprBuilderImpl{}
+	return stmt.Start(ctx, db.eng, table), e.Start(table)
 }
 
 func (db *DB) NewDelete(ctx context.Context, table string) (DeleteStatement, ExprBuilder) {
-	stmt := statement.NewDeleteStatement(ctx, db.eng, table)
-	exprBuilder := &exprimpl.ExprBuilderImpl{DefaultRef: table}
-	return stmt, exprBuilder
+	stmt := &statement.DeleteStmtImpl{}
+	e := &exprimpl.ExprBuilderImpl{}
+	return stmt.Start(ctx, db.eng, table), e.Start(table)
 }
 
 // --- Connection
