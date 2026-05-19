@@ -5,53 +5,58 @@ import (
 	"unicode"
 )
 
+// TAG MAIN NAME
 const TAG = "inyorm"
+
+// --- Seps
+const (
+	KeySep = ","
+	ValSep = ":"
+)
 
 // ---- Tag keys
 const (
-	SKIP = "skip"
-	COL  = "c"
-	TBL  = "t"
+	KeySkip = "skip"
+	KeyCol  = "col"
 )
 
-type FieldSchema struct {
-	Skip  bool
-	Name  string
-	Index []int
+type TagResult struct {
+	Skip bool
+	Name string
 }
 
-func NewFieldSchema(name, tag string, idx []int) FieldSchema {
-	info := FieldSchema{Index: idx}
+func ParseTag(fieldName, tag string) TagResult {
+	result := TagResult{}
 
-	for seq := range strings.SplitSeq(tag, ",") {
+	for seq := range strings.SplitSeq(tag, KeySep) {
 		seq = strings.TrimSpace(seq)
 
-		if strings.ToLower(seq) == "skip" {
-			info.Skip = true
+		if strings.ToLower(seq) == KeySkip {
+			result.Skip = true
 			continue
 		}
 
-		if strings.ToLower(seq) == "col" {
-			info.Name = name
+		if strings.ToLower(seq) == KeyCol {
+			result.Name = fieldName
 			continue
 		}
 
-		keyVal := strings.Split(seq, ":")
+		keyVal := strings.Split(seq, ValSep)
 		if len(keyVal) < 2 {
 			continue
 		}
 
 		key, val := keyVal[0], keyVal[1]
-		if strings.ToLower(key) == "col" {
-			info.Name = val
+		if strings.ToLower(key) == KeyCol {
+			result.Name = val
 			continue
 		}
 	}
 
-	if info.Name == "" {
-		info.Name = toSnake(name)
+	if result.Name == "" {
+		result.Name = toSnake(fieldName)
 	}
-	return info
+	return result
 }
 
 // Helpers
