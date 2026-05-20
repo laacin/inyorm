@@ -57,5 +57,6 @@ type (
 
 // --- DDL
 type (
-	TableBuilder = api.TableBuilder
+	CreateTable = api.CreateTable
+	CreateIndex = api.CreateIndex
 )

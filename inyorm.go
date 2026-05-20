@@ -20,7 +20,7 @@ func New(eng *Engine) (*DB, error) {
 
 // --- DDL Statements
 
-func (db *DB) NewCreateTable(ctx context.Context, name string) (TableBuilder, ExprBuilder) {
+func (db *DB) NewCreateTable(ctx context.Context, name string) (CreateTable, ExprBuilder) {
 	stmt := &statement.CreateTableStmtImpl{}
 	e := &exprimpl.ExprBuilderImpl{}
 	return stmt.Start(ctx, db.eng, name), e.Start(name)

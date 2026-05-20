@@ -12,7 +12,7 @@ type TableBuilderImpl struct {
 	cons []*ConsDeclImpl
 }
 
-func (t *TableBuilderImpl) Start(name string) api.TableBuilder {
+func (t *TableBuilderImpl) Start(name string) api.CreateTable {
 	t.name = name
 	return t
 }

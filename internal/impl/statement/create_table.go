@@ -16,7 +16,7 @@ type CreateTableStmtImpl struct {
 	table.TableBuilderImpl
 }
 
-func (s *CreateTableStmtImpl) Start(ctx context.Context, eng *ir.Engine, ref string) api.TableBuilder {
+func (s *CreateTableStmtImpl) Start(ctx context.Context, eng *ir.Engine, ref string) api.CreateTable {
 	s.DefaultRef = ref
 	s.Dialect = eng.Dialect
 	s.TableBuilderImpl.Start(ref)
