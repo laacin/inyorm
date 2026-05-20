@@ -39,10 +39,10 @@ func TestSelect(t *testing.T) {
 	qe, _ := inyorm.New(std.JustDialect())
 
 	t.Run("simple", func(t *testing.T) {
-		q, c := qe.NewSelect(context.Background(), "users")
+		q, e := qe.NewSelect(context.Background(), "users")
 
-		q.Select(c.All())
-		q.Where(c.Col("id")).Equal(c.Param("uuid"))
+		q.Select(e.All())
+		q.Where(e.Col("id")).Equal(e.Param("uuid"))
 		q.Limit(1)
 
 		exp := "SELECT * FROM users WHERE (id = ?) LIMIT 1"
@@ -51,19 +51,19 @@ func TestSelect(t *testing.T) {
 	})
 
 	t.Run("pagination", func(t *testing.T) {
-		q, c := qe.NewSelect(context.Background(), "users")
+		q, e := qe.NewSelect(context.Background(), "users")
 
 		var (
-			id      = c.Col("id")
-			age     = c.Col("age")
-			banned  = c.Col("banned")
-			foreign = c.Col("user_id", "posts")
+			id      = e.Col("id")
+			age     = e.Col("age")
+			banned  = e.Col("banned")
+			foreign = e.Col("user_id", "posts")
 		)
 
-		q.Select(c.All())
-		q.From(c.Table("users"))
-		q.Join(c.Table("posts")).On(foreign).Equal(id)
-		q.Where(banned).IsNull().And(age).Greater(c.Param(17))
+		q.Select(e.All())
+		q.From(e.Table("users"))
+		q.Join(e.Table("posts")).On(foreign).Equal(id)
+		q.Where(banned).IsNull().And(age).Greater(e.Param(17))
 		q.OrderBy(age).Desc()
 		q.Limit(100)
 		q.Offset(20)
@@ -79,44 +79,44 @@ func TestSelect(t *testing.T) {
 	})
 
 	t.Run("complex", func(t *testing.T) {
-		q, c := qe.NewSelect(context.Background(), "users")
+		q, e := qe.NewSelect(context.Background(), "users")
 
 		var (
-			banned  = c.Col("banned")
-			fname   = c.Col("firstname")
-			lname   = c.Col("lastname")
-			age     = c.Col("age")
-			postNum = c.Col("id", "posts").Count()
-			role    = c.Col("name", "roles")
-			lastLog = c.Col("last_login")
+			banned  = e.Col("banned")
+			fname   = e.Col("firstname")
+			lname   = e.Col("lastname")
+			age     = e.Col("age")
+			postNum = e.Col("id", "posts").Count()
+			role    = e.Col("name", "roles")
+			lastLog = e.Col("last_login")
 
-			id        = c.Col("id")
-			postsFk   = c.Col("user_id", "posts")
-			interUser = c.Col("user_id", "user_roles")
-			interRole = c.Col("role_id", "user_roles")
-			roleId    = c.Col("id", "roles")
+			id        = e.Col("id")
+			postsFk   = e.Col("user_id", "posts")
+			interUser = e.Col("user_id", "user_roles")
+			interRole = e.Col("role_id", "user_roles")
+			roleId    = e.Col("id", "roles")
 		)
 
-		success := c.Concat(
+		success := e.Concat(
 			"with role: ", role,
 			" has ", postNum, " posts and",
 			" his last login was: ", lastLog,
 		)
 
-		info := c.Search(func(cs api.Case) {
-			cs.When(c.Cond(banned).IsNull().And(banned)).Then(success)
-			cs.Else(c.Concat("was banned at: ", banned))
+		info := e.Search(func(cs api.Case) {
+			cs.When(e.Cond(banned).IsNull().And(banned)).Then(success)
+			cs.Else(e.Concat("was banned at: ", banned))
 		})
 
-		result := c.Concat("User: ", fname, " ", lname, " ", info).As("user_info")
+		result := e.Concat("User: ", fname, " ", lname, " ", info).As("user_info")
 
 		q.Select(result)
-		q.From(c.Table("users"))
-		q.Join(c.Table("posts")).On(postsFk).Equal(id)
-		q.Join(c.Table("user_roles")).On(interUser).Equal(id)
-		q.Join(c.Table("roles")).On(roleId).Equal(interRole)
-		q.Where(age).Greater(c.Param(17)).And(age).Less(c.Param(30))
-		q.GroupBy(c.Col("id", "posts"))
+		q.From(e.Table("users"))
+		q.Join(e.Table("posts")).On(postsFk).Equal(id)
+		q.Join(e.Table("user_roles")).On(interUser).Equal(id)
+		q.Join(e.Table("roles")).On(roleId).Equal(interRole)
+		q.Where(age).Greater(e.Param(17)).And(age).Less(e.Param(30))
+		q.GroupBy(e.Col("id", "posts"))
 		q.Having(postNum).Greater(10)
 		q.OrderBy(age).Desc()
 		q.Limit(100)
@@ -143,12 +143,12 @@ func TestSelect(t *testing.T) {
 	})
 
 	t.Run("complex_with_helper", func(t *testing.T) {
-		q, c := qe.NewSelect(context.Background(), "users")
+		q, e := qe.NewSelect(context.Background(), "users")
 
 		// helper
 		isNull := func(cond inyorm.Column, then, els any) inyorm.Column {
-			return c.Search(func(cs inyorm.Case) {
-				cond := c.Cond(cond).IsNull()
+			return e.Search(func(cs inyorm.Case) {
+				cond := e.Cond(cond).IsNull()
 				cs.When(cond).Then(then)
 				cs.Else(els)
 			})
@@ -156,35 +156,35 @@ func TestSelect(t *testing.T) {
 
 		var (
 			// base columns
-			fname     = c.Col("firstname")
-			lname     = c.Col("lastname")
-			lastLogin = c.Col("last_login")
-			banned    = c.Col("banned")
-			roleName  = c.Col("name", "roles")
-			age       = c.Col("age")
-			active    = c.Col("active")
+			fname     = e.Col("firstname")
+			lname     = e.Col("lastname")
+			lastLogin = e.Col("last_login")
+			banned    = e.Col("banned")
+			roleName  = e.Col("name", "roles")
+			age       = e.Col("age")
+			active    = e.Col("active")
 
 			// summary columns
-			posts    = c.Col("id", "posts").Count()
-			comments = c.Col("id", "comments").Count()
+			posts    = e.Col("id", "posts").Count()
+			comments = e.Col("id", "comments").Count()
 			role     = isNull(roleName, "No role", roleName)
 			lastLog  = isNull(lastLogin, "Never", lastLogin)
-			status   = isNull(banned, "Active", c.Concat("Banned at: ", banned))
+			status   = isNull(banned, "Active", e.Concat("Banned at: ", banned))
 
 			// join keys
-			userId        = c.Col("id")
-			roleId        = c.Col("id", "roles")
-			postUserFk    = c.Col("user_id", "posts")
-			commentUserFk = c.Col("user_id", "comments")
+			userId        = e.Col("id")
+			roleId        = e.Col("id", "roles")
+			postUserFk    = e.Col("user_id", "posts")
+			commentUserFk = e.Col("user_id", "comments")
 
-			interUserFk = c.Col("user_id", "user_roles")
-			interRoleFk = c.Col("role_id", "user_roles")
+			interUserFk = e.Col("user_id", "user_roles")
+			interRoleFk = e.Col("role_id", "user_roles")
 
 			// select columns
-			totalPost    = c.Col("id", "posts").Count(true).As("total_posts")
-			totalComment = c.Col("id", "comments").Count(true).As("total_comments")
-			lastPost     = c.Col("created_at", "posts").Max().As("last_post_date")
-			summary      = c.Concat(
+			totalPost    = e.Col("id", "posts").Count(true).As("total_posts")
+			totalComment = e.Col("id", "comments").Count(true).As("total_comments")
+			lastPost     = e.Col("created_at", "posts").Max().As("last_post_date")
+			summary      = e.Concat(
 				"User: ", fname, " ", lname, " | ",
 				"Role: ", role, " | ",
 				"Posts: ", posts, " | ",
@@ -197,10 +197,10 @@ func TestSelect(t *testing.T) {
 		// statement building
 		q.Select(summary, totalPost, totalComment, lastPost)
 
-		q.Join(c.Table("user_roles")).Left().On(interUserFk).Equal(userId)
-		q.Join(c.Table("roles")).Left().On(roleId).Equal(interRoleFk)
-		q.Join(c.Table("posts")).Left().On(postUserFk).Equal(userId)
-		q.Join(c.Table("comments")).Left().On(commentUserFk).Equal(userId)
+		q.Join(e.Table("user_roles")).Left().On(interUserFk).Equal(userId)
+		q.Join(e.Table("roles")).Left().On(roleId).Equal(interRoleFk)
+		q.Join(e.Table("posts")).Left().On(postUserFk).Equal(userId)
+		q.Join(e.Table("comments")).Left().On(commentUserFk).Equal(userId)
 
 		q.Where(age).Between(18, 60).And(active).Equal(true)
 
@@ -284,7 +284,7 @@ func TestInsert(t *testing.T) {
 	})
 
 	t.Run("omit_values", func(t *testing.T) {
-		q, c := qe.NewInsert(context.Background(), "users")
+		q, e := qe.NewInsert(context.Background(), "users")
 
 		vals := []map[string]any{
 			{"account": "acc1", "age": 10, "active": true, "score": 100, "country": "AR"},
@@ -295,7 +295,7 @@ func TestInsert(t *testing.T) {
 			{"account": "acc6", "age": 60, "active": true, "score": 600, "country": "JP"},
 		}
 
-		q.Insert(c.Col("score"), c.Col("age")).Values(&vals)
+		q.Insert(e.Col("score"), e.Col("age")).Values(&vals)
 
 		args := []any{
 			10, 100,
@@ -312,9 +312,9 @@ func TestInsert(t *testing.T) {
 	})
 
 	t.Run("ignore_values", func(t *testing.T) {
-		q, c := qe.NewInsert(context.Background(), "users")
+		q, e := qe.NewInsert(context.Background(), "users")
 
-		q.InsertIgnore(User{}, c.Col("age")).Values(User{
+		q.InsertIgnore(User{}, e.Col("age")).Values(User{
 			Account: "acc123",
 			Age:     42,
 		})
@@ -335,24 +335,24 @@ func TestUpdate(t *testing.T) {
 	}
 
 	t.Run("update_one", func(t *testing.T) {
-		q, c := qe.NewUpdate(context.Background(), "posts")
+		q, e := qe.NewUpdate(context.Background(), "posts")
 		q.Update(&Post{}).Values(Post{
 			Title:       "something else",
 			Description: "little description",
 		})
-		q.Where(c.Col("id")).Equal(c.Param(10))
+		q.Where(e.Col("id")).Equal(e.Param(10))
 
 		exp := "UPDATE posts SET description = ?, title = ? WHERE (id = ?)"
 		run(t, q, exp, []any{"little description", "something else", 10})
 	})
 
 	t.Run("with_cols", func(t *testing.T) {
-		q, c := qe.NewUpdate(context.Background(), "posts")
+		q, e := qe.NewUpdate(context.Background(), "posts")
 
-		q.Update(c.Col("title"), c.Col("description")).Values(Post{
+		q.Update(e.Col("title"), e.Col("description")).Values(Post{
 			Title: "asd", Description: "dep",
 		})
-		q.Where(c.Col("id")).Equal(c.Param(10))
+		q.Where(e.Col("id")).Equal(e.Param(10))
 
 		exp := "UPDATE posts SET description = ?, title = ? WHERE (id = ?)"
 		run(t, q, exp, []any{"dep", "asd", 10})
@@ -372,7 +372,7 @@ func TestUpdate(t *testing.T) {
 	})
 
 	t.Run("omit_values", func(t *testing.T) {
-		q, c := qe.NewUpdate(context.Background(), "users")
+		q, e := qe.NewUpdate(context.Background(), "users")
 		vals := map[string]any{
 			"account":  "acc123",
 			"age":      56,
@@ -382,9 +382,9 @@ func TestUpdate(t *testing.T) {
 		}
 
 		var (
-			name = c.Col("name")
-			acc  = c.Col("account")
-			age  = c.Col("age")
+			name = e.Col("name")
+			acc  = e.Col("account")
+			age  = e.Col("age")
 		)
 
 		q.Update(name, acc, age).Values(vals)
@@ -398,10 +398,10 @@ func TestDelete(t *testing.T) {
 	qe, _ := inyorm.New(std.JustDialect())
 
 	t.Run("delete_one", func(t *testing.T) {
-		q, c := qe.NewDelete(context.Background(), "comments")
+		q, e := qe.NewDelete(context.Background(), "comments")
 
 		q.Delete()
-		q.Where(c.Col("id")).Equal(c.Param(12310))
+		q.Where(e.Col("id")).Equal(e.Param(12310))
 
 		exp := "DELETE FROM comments WHERE (id = ?)"
 		run(t, q, exp, []any{12310})

@@ -5,13 +5,11 @@ import (
 	"github.com/laacin/inyorm/internal/ir"
 )
 
+// --- Main types
+type Engine = ir.Engine
+
+// --- Expressions
 type (
-	Engine = ir.Engine
-
-	// Values
-	Value   = api.Value
-	Scanner = api.Scanner
-
 	Parameter     = api.Parameter
 	Table         = api.Table
 	Column        = api.Column
@@ -20,13 +18,18 @@ type (
 	Case          = api.Case
 	CaseNext      = api.CaseNext
 
-	// Executor
+	// Builder
+	ExprBuilder = api.ExprBuilder[Case]
+)
+
+// --- Executor
+type (
 	Prepare  = api.Prepare
 	Executor = api.Executor
+)
 
-	// Expression Builder
-	ExprBuilder = api.ExprBuilder[Case]
-
+// --- DML
+type (
 	// Clauses
 	Select      = api.Select
 	SelectNext  = api.SelectNext
@@ -50,7 +53,9 @@ type (
 	InsertStatement = api.InsertStmt
 	UpdateStatement = api.UpdateStmt
 	DeleteStatement = api.DeleteStmt
+)
 
-	// DDL
+// --- DDL
+type (
 	TableBuilder = api.TableBuilder
 )

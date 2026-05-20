@@ -36,7 +36,7 @@ func (c *ColDeclImpl) Nullable() api.ColDecl {
 	return c
 }
 func (c *ColDeclImpl) Default(value any) api.ColDecl {
-	c.emb.Default = &ddl.ConsDefault{Value: value}
+	c.emb.Meta.Default = value
 	return c
 }
 

@@ -2,8 +2,12 @@ package ddl
 
 import "github.com/laacin/inyorm/internal/core"
 
+type Syntax interface {
+	TableWriter
+}
+
 type TableWriter interface {
-	WriteTableDecl(core.Writer, *TableDecl)
+	WriteCreateTable(core.Writer, *TableDecl)
 	WriteColDecl(core.Writer, *ColDecl)
 
 	WriteColText(core.Writer)
@@ -15,11 +19,11 @@ type TableWriter interface {
 	WriteMetaAutoIncrement(core.Writer)
 	WriteMetaUnique(core.Writer)
 	WriteMetaNotNull(core.Writer)
-	WriteMetaDefault(core.Writer, *ConsDefault)
+	WriteMetaDefault(core.Writer, any)
 
 	WriteConsForeignKey(core.Writer, *ConsDecl[ConsForeignKey])
-	WriteConsIndex(core.Writer, *ConsDecl[ConsIndex])
 	WriteConsCheck(core.Writer, *ConsDecl[ConsCheck])
+	WriteConsIndex(core.Writer, *ConsDecl[ConsIndex])
 }
 
 // --- Internal

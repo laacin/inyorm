@@ -72,84 +72,59 @@ func (c *ColumnImpl) Avg(distinct ...bool) api.Column {
 // --- Arith
 
 func (c *ColumnImpl) Add(v any) api.Column {
-	c.exprs = append(c.exprs, expr.ColExpr{Kind: expr.ColArith{
-		Kind:  expr.ColArithAdd,
-		Value: v,
-	}})
+	c.exprs = append(c.exprs, newArith(expr.ColArithAdd, v))
 	return c
 }
 
 func (c *ColumnImpl) Sub(v any) api.Column {
-	c.exprs = append(c.exprs, expr.ColExpr{Kind: expr.ColArith{
-		Kind:  expr.ColArithSub,
-		Value: v,
-	}})
+	c.exprs = append(c.exprs, newArith(expr.ColArithSub, v))
 	return c
 }
 
 func (c *ColumnImpl) Mul(v any) api.Column {
-	c.exprs = append(c.exprs, expr.ColExpr{Kind: expr.ColArith{
-		Kind:  expr.ColArithMul,
-		Value: v,
-	}})
+	c.exprs = append(c.exprs, newArith(expr.ColArithMul, v))
 	return c
 }
 
 func (c *ColumnImpl) Div(v any) api.Column {
-	c.exprs = append(c.exprs, expr.ColExpr{Kind: expr.ColArith{
-		Kind:  expr.ColArithDiv,
-		Value: v,
-	}})
+	c.exprs = append(c.exprs, newArith(expr.ColArithDiv, v))
 	return c
 }
 
 func (c *ColumnImpl) Mod(v any) api.Column {
-	c.exprs = append(c.exprs, expr.ColExpr{Kind: expr.ColArith{
-		Kind:  expr.ColArithMod,
-		Value: v,
-	}})
+	c.exprs = append(c.exprs, newArith(expr.ColArithMod, v))
 	return c
 }
 
 func (c *ColumnImpl) Wrap() api.Column {
-	c.exprs = append(c.exprs, expr.ColExpr{Kind: expr.ColWrap{}})
+	c.exprs = append(c.exprs, newWrap())
 	return c
 }
 
 // --- Scalar
 
 func (c *ColumnImpl) Lower() api.Column {
-	c.exprs = append(c.exprs, expr.ColExpr{Kind: expr.ColScalar{
-		Kind: expr.ColScalarLower,
-	}})
+	c.exprs = append(c.exprs, newScalar(expr.ColScalarLower))
 	return c
 }
 
 func (c *ColumnImpl) Upper() api.Column {
-	c.exprs = append(c.exprs, expr.ColExpr{Kind: expr.ColScalar{
-		Kind: expr.ColScalarUpper,
-	}})
+	c.exprs = append(c.exprs, newScalar(expr.ColScalarUpper))
 	return c
 }
 
 func (c *ColumnImpl) Trim() api.Column {
-	c.exprs = append(c.exprs, expr.ColExpr{Kind: expr.ColScalar{
-		Kind: expr.ColScalarTrim,
-	}})
+	c.exprs = append(c.exprs, newScalar(expr.ColScalarTrim))
 	return c
 }
 
 func (c *ColumnImpl) Round() api.Column {
-	c.exprs = append(c.exprs, expr.ColExpr{Kind: expr.ColScalar{
-		Kind: expr.ColScalarRound,
-	}})
+	c.exprs = append(c.exprs, newScalar(expr.ColScalarRound))
 	return c
 }
 
 func (c *ColumnImpl) Abs() api.Column {
-	c.exprs = append(c.exprs, expr.ColExpr{Kind: expr.ColScalar{
-		Kind: expr.ColScalarAbs,
-	}})
+	c.exprs = append(c.exprs, newScalar(expr.ColScalarAbs))
 	return c
 }
 
@@ -220,4 +195,28 @@ func (c *ColumnImpl) Build(w core.InternalWriter, dial expr.ExprWriter, mode cor
 	case core.WriteDef:
 		dial.WriteColDef(w, &c.emb)
 	}
+}
+
+// helpers
+func newArith(kind expr.ColArithKind, value any) expr.ColExpr {
+	return expr.ColExpr{
+		Kind: expr.ColKindArith,
+		Value: expr.ColArith{
+			Kind:  kind,
+			Value: value,
+		},
+	}
+}
+
+func newScalar(kind expr.ColScalarKind) expr.ColExpr {
+	return expr.ColExpr{
+		Kind: expr.ColKindScalar,
+		Value: expr.ColScalar{
+			Kind: kind,
+		},
+	}
+}
+
+func newWrap() expr.ColExpr {
+	return expr.ColExpr{Kind: expr.ColKindWrap}
 }

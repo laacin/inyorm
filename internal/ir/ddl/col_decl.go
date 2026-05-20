@@ -11,10 +11,9 @@ const (
 )
 
 type ColDecl struct {
-	Name    string
-	Kind    ColKind
-	Meta    ColMeta
-	Default *ConsDefault
+	Name string
+	Kind ColKind
+	Meta ColMeta
 }
 
 // --- Dependencies
@@ -23,4 +22,5 @@ type ColMeta struct {
 	AutoIncrement bool
 	Unique        bool
 	NotNull       bool
+	Default       any
 }

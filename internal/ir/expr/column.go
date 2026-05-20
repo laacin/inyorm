@@ -11,6 +11,8 @@ type Column struct {
 
 // --- Tools for building
 type (
+	ColExprKind int
+
 	ColAggrKind   int
 	ColScalarKind int
 	ColArithKind  int
@@ -18,6 +20,12 @@ type (
 )
 
 const (
+	// Kind
+	ColKindAggr ColExprKind = iota
+	ColKindScalar
+	ColKindArith
+	ColKindWrap
+
 	// Aggregation
 	ColAggrCount ColAggrKind = iota
 	ColAggrSum
@@ -40,7 +48,10 @@ const (
 	ColArithMod
 )
 
-type ColExpr struct{ Kind any }
+type ColExpr struct {
+	Kind  ColExprKind
+	Value any
+}
 
 type ColAggr struct {
 	Kind     ColAggrKind
@@ -56,17 +67,20 @@ type ColArith struct {
 	Value any
 }
 
-type ColWrap struct{}
-
 func (c *ColExpr) IsScalar() (*ColScalar, bool) {
-	v, ok := c.Kind.(*ColScalar)
-	return v, ok
+	if c.Kind == ColKindScalar {
+		v, ok := c.Value.(*ColScalar)
+		return v, ok
+	}
+	return nil, false
 }
 func (c *ColExpr) IsArith() (*ColArith, bool) {
-	v, ok := c.Kind.(*ColArith)
-	return v, ok
+	if c.Kind == ColKindArith {
+		v, ok := c.Value.(*ColArith)
+		return v, ok
+	}
+	return nil, false
 }
 func (c *ColExpr) IsWrap() bool {
-	_, ok := c.Kind.(*ColWrap)
-	return ok
+	return c.Kind == ColKindWrap
 }

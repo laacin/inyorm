@@ -62,7 +62,7 @@ func (t *TableBuilderImpl) Build(w core.InternalWriter, dial ddl.TableWriter) {
 		cons[i] = c.emb
 	}
 
-	dial.WriteTableDecl(w, &ddl.TableDecl{
+	dial.WriteCreateTable(w, &ddl.TableDecl{
 		Name: t.name,
 		Cols: cols,
 		Cons: cons,

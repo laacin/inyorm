@@ -8,7 +8,6 @@ const (
 	ConsKindIndex ConsKind = iota
 	ConsKindForeignKey
 	ConsKindCheck
-	ConsKindDefault
 )
 
 type ConsDecl[T any] struct {
@@ -35,13 +34,6 @@ func (c *ConsDecl[T]) IsForeignKey() (*ConsDecl[ConsForeignKey], bool) {
 func (c *ConsDecl[T]) IsCheck() (*ConsDecl[ConsCheck], bool) {
 	if c.Kind == ConsKindCheck {
 		return assertConsDecl[ConsCheck](c), true
-	}
-	return nil, false
-}
-
-func (c *ConsDecl[T]) IsDefault() (*ConsDecl[ConsDefault], bool) {
-	if c.Kind == ConsKindDefault {
-		return assertConsDecl[ConsDefault](c), true
 	}
 	return nil, false
 }
