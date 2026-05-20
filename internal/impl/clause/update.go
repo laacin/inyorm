@@ -20,24 +20,21 @@ type UpdateImpl struct {
 	values   any
 }
 
-func (c *UpdateImpl) Update(reference ...any) api.Values {
+func (c *UpdateImpl) Update(reference ...any) api.Ignore {
 	c.declared = true
 	c.ref = reference
 	return c
 }
 
-func (c *UpdateImpl) UpdateIgnore(reference any, ignores ...any) api.Values {
-	c.declared = true
-	c.ref = []any{reference}
+func (c *UpdateImpl) Ignore(ignores ...any) {
 	c.ignores = ignores
-	return c
 }
 
 func (c *UpdateImpl) Values(values any) {
 	c.values = values
 }
 
-func (c *UpdateImpl) Table(table any) {
+func (c *UpdateImpl) Into(table any) {
 	c.emb.Table = table
 }
 

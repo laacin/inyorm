@@ -15,6 +15,11 @@ func (c *FromImpl) From(from any) {
 	c.emb.Value = from
 }
 
+func (c *FromImpl) Into(into any) {
+	c.declared = true
+	c.emb.Value = into
+}
+
 // --- Build
 
 func (c *FromImpl) IsDeclared() bool {

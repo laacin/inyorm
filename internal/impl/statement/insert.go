@@ -1,41 +1,31 @@
 package statement
 
 import (
-	"context"
-
 	"github.com/laacin/inyorm/internal/api"
 	"github.com/laacin/inyorm/internal/impl/clause"
-	"github.com/laacin/inyorm/internal/impl/exec"
-	"github.com/laacin/inyorm/internal/impl/exprimpl"
 	"github.com/laacin/inyorm/internal/impl/writer"
 	"github.com/laacin/inyorm/internal/ir"
 	"github.com/laacin/inyorm/internal/ir/dml"
 )
 
-type InsertStmtImpl struct {
+type InsertQueryImpl struct {
 	DefaultRef string
 	Dialect    ir.Dialect
 
 	clause.InsertIntoImpl
-
-	*exec.Executor
 }
 
-func (s *InsertStmtImpl) Start(ctx context.Context, eng *ir.Engine, ref string) api.InsertStmt {
+func (s *InsertQueryImpl) Start(dial ir.Dialect, ref string) api.InsertQuery {
+	s.Dialect = dial
 	s.DefaultRef = ref
-	s.Dialect = eng.Dialect
-	s.Executor = &exec.Executor{Ctx: ctx, Statement: s, Driver: eng.Driver}
 	return s
 }
 
-func (s *InsertStmtImpl) Kind() dml.StatementKind {
-	return dml.StatementInsert
+func (s *InsertQueryImpl) Kind() dml.QueryKind {
+	return dml.QueryInsert
 }
 
-func (s *InsertStmtImpl) Build() (*dml.Statement, error) {
-	// Auto-FROM
-	s.InsertIntoImpl.Table((&exprimpl.TableImpl{}).Start(s.DefaultRef))
-
+func (s *InsertQueryImpl) Build() (string, []any, error) {
 	// --- Load clauses
 	clauses := []dml.ClauseBuilder{
 		&s.InsertIntoImpl,
@@ -70,7 +60,7 @@ func (s *InsertStmtImpl) Build() (*dml.Statement, error) {
 			first = false
 
 			if err := cls.Build(w, s.Dialect); err != nil {
-				return nil, err
+				return "", nil, err
 			}
 		}
 	}
@@ -78,11 +68,8 @@ func (s *InsertStmtImpl) Build() (*dml.Statement, error) {
 	// --- Validate values
 
 	if err := parameters.Validate(); err != nil {
-		return nil, err
+		return "", nil, err
 	}
 
-	return &dml.Statement{
-		Query:  w.ToString(),
-		Values: parameters.Values(),
-	}, nil
+	return w.ToString(), parameters.Values(), nil
 }

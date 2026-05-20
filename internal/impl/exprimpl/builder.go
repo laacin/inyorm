@@ -29,6 +29,12 @@ func (e *ExprBuilderImpl) Param(value ...any) api.Parameter {
 	return param.Start(len(value) > 0, getLast(nil, value))
 }
 
+// TODO:
+func (e *ExprBuilderImpl) Lazy(id ...string) api.Parameter {
+	param := &ParameterImpl{}
+	return param.Start(len(id) > 0, getLast("", id))
+}
+
 func (e *ExprBuilderImpl) Cond(ident any) api.Condition {
 	cond := &ConditionImpl{}
 	return cond.Start(ident)

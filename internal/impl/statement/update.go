@@ -1,41 +1,32 @@
 package statement
 
 import (
-	"context"
-
 	"github.com/laacin/inyorm/internal/api"
 	"github.com/laacin/inyorm/internal/impl/clause"
-	"github.com/laacin/inyorm/internal/impl/exec"
-	"github.com/laacin/inyorm/internal/impl/exprimpl"
 	"github.com/laacin/inyorm/internal/impl/writer"
 	"github.com/laacin/inyorm/internal/ir"
 	"github.com/laacin/inyorm/internal/ir/dml"
 )
 
-type UpdateStmtImpl struct {
+type UpdateQueryImpl struct {
 	DefaultRef string
 	Dialect    ir.Dialect
 
 	clause.UpdateImpl
 	clause.WhereImpl
-
-	*exec.Executor
 }
 
-func (s *UpdateStmtImpl) Start(ctx context.Context, eng *ir.Engine, ref string) api.UpdateStmt {
+func (s *UpdateQueryImpl) Start(dial ir.Dialect, ref string) api.UpdateQuery {
+	s.Dialect = dial
 	s.DefaultRef = ref
-	s.Dialect = eng.Dialect
-	s.Executor = &exec.Executor{Ctx: ctx, Statement: s, Driver: eng.Driver}
 	return s
 }
 
-func (s *UpdateStmtImpl) Kind() dml.StatementKind {
-	return dml.StatementSelect
+func (s *UpdateQueryImpl) Kind() dml.QueryKind {
+	return dml.QueryUpdate
 }
 
-func (s *UpdateStmtImpl) Build() (*dml.Statement, error) {
-	s.UpdateImpl.Table((&exprimpl.TableImpl{}).Start(s.DefaultRef))
-
+func (s *UpdateQueryImpl) Build() (string, []any, error) {
 	// --- Load clauses
 	clauses := []dml.ClauseBuilder{
 		&s.UpdateImpl,
@@ -71,7 +62,7 @@ func (s *UpdateStmtImpl) Build() (*dml.Statement, error) {
 			first = false
 
 			if err := cls.Build(w, s.Dialect); err != nil {
-				return nil, err
+				return "", nil, err
 			}
 		}
 	}
@@ -79,11 +70,8 @@ func (s *UpdateStmtImpl) Build() (*dml.Statement, error) {
 	// --- Validate values
 
 	if err := parameters.Validate(); err != nil {
-		return nil, err
+		return "", nil, err
 	}
 
-	return &dml.Statement{
-		Query:  w.ToString(),
-		Values: parameters.Values(),
-	}, nil
+	return w.ToString(), parameters.Values(), nil
 }

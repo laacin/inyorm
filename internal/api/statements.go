@@ -1,8 +1,9 @@
 package api
 
-// SelectStmt represents a full SELECT statement
-type SelectStmt interface {
-	Executor
+import "context"
+
+// SelectQuery represents a full SELECT statement
+type SelectQuery interface {
 	Select
 	From
 	Join
@@ -14,23 +15,40 @@ type SelectStmt interface {
 	Offset
 }
 
-// InsertStmt represents a full INSERT statement
-type InsertStmt interface {
-	Executor
+// InsertQuery represents a full INSERT statement
+type InsertQuery interface {
 	Insert
+	Into
+	Values
 }
 
-// UpdateStmt represents a full UPDATE statement
-type UpdateStmt interface {
-	Executor
+// UpdateQuery represents a full UPDATE statement
+type UpdateQuery interface {
 	Update
+	Into
+	Values
 	Where
 }
 
-// DeleteStmt represents a full DELETE statement
-type DeleteStmt interface {
-	Executor
+// DeleteQuery represents a full DELETE statement
+type DeleteQuery interface {
 	Delete
 	From
 	Where
+}
+
+type Statement interface {
+	Runner
+	Prepare() PrepStatement
+	Bind(...any) Statement
+}
+
+type PrepStatement interface {
+	BindPrep(...any) PrepStatement
+	Values(...any) Runner
+}
+
+type Runner interface {
+	Raw() (string, []any, error)
+	Run(...context.Context) error
 }

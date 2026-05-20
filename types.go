@@ -17,15 +17,12 @@ type (
 	ConditionNext = api.ConditionNext
 	Case          = api.Case
 	CaseNext      = api.CaseNext
-
-	// Builder
-	ExprBuilder = api.ExprBuilder[Case]
 )
 
-// --- Executor
+// --- Statement
 type (
-	Prepare  = api.Prepare
-	Executor = api.Executor
+	Statement = api.Statement
+	Runner    = api.Runner
 )
 
 // --- DML
@@ -48,15 +45,16 @@ type (
 	Update      = api.Update
 	Delete      = api.Delete
 
-	// Statements
-	SelectStatement = api.SelectStmt
-	InsertStatement = api.InsertStmt
-	UpdateStatement = api.UpdateStmt
-	DeleteStatement = api.DeleteStmt
+	// Queries
+	SelectQuery = api.SelectQuery
+	InsertQuery = api.InsertQuery
+	UpdateQuery = api.UpdateQuery
+	DeleteQuery = api.DeleteQuery
 )
 
 // --- DDL
 type (
+	// Queries
 	CreateTable = api.CreateTable
 	CreateIndex = api.CreateIndex
 )

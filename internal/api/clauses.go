@@ -34,6 +34,10 @@ type From interface {
 	From(table Value)
 }
 
+type Into interface {
+	Into(table Value)
+}
+
 // ----- JOIN
 
 // Join represents the JOIN clause,
@@ -177,12 +181,7 @@ type Insert interface {
 	//   - any type where columns can be read dynamically
 	//
 	// Example SQL: INSERT INTO `table` (`columns`) VALUES (...)
-	Insert(reference ...Value) Values
-
-	// InsertIgnore behaves like Insert, but ignores specified columns from the reference.
-	//
-	// Useful when passing a struct with many fields and excluding some of them.
-	InsertIgnore(reference Value, ignores ...Value) Values
+	Insert(reference ...Value) Ignore
 }
 
 // Update represents the UPDATE clause, defining data to update in a table.
@@ -196,12 +195,7 @@ type Update interface {
 	//   - any type where columns can be read dynamically
 	//
 	// Example SQL: UPDATE `table` SET `column` = ...
-	Update(reference ...Value) Values
-
-	// UpdateIgnore behaves like Update, but ignores specified columns from the reference.
-	//
-	// Useful when passing a struct with many fields and excluding some of them.
-	UpdateIgnore(reference Value, ignores ...Value) Values
+	Update(reference ...Value) Ignore
 }
 
 // Values represents the VALUES clause for INSERT or the assignment values for UPDATE.
@@ -211,6 +205,10 @@ type Values interface {
 	// Always provide the raw values; placeholders ("?") are handled internally.
 	// You can omit this call if using prepared columns without values.
 	Values(values Value)
+}
+
+type Ignore interface {
+	Ignore(ignores ...Value)
 }
 
 // Delete represents the DELETE clause.

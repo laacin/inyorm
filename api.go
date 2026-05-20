@@ -15,22 +15,6 @@ type InyormBuilder interface {
 	RunTx(context.Context, ...Runner) error
 }
 
-// --- Splits
-type Statement interface {
-	Runner
-	Prepare() PrepStatement
-	Bind(...any) Statement
-}
-
-type PrepStatement interface {
-	Bind(...any) PrepStatement
-	Values(...any) Runner
-}
-
-type Runner interface {
-	Run(...context.Context) error
-}
-
 // --- Queries
 
 type Expr interface {

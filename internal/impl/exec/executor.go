@@ -4,32 +4,31 @@ import (
 	"context"
 
 	"github.com/laacin/inyorm/internal/core"
-	"github.com/laacin/inyorm/internal/ir/dml"
 	"github.com/laacin/inyorm/internal/ir/driver"
 )
 
 type Executor struct {
 	Ctx       context.Context
 	Driver    driver.Driver
-	Statement dml.StatementBuilder
+	Statement interface{ Build() (string, []any, error) }
 }
 
 func (e *Executor) Run(scanner ...any) error {
 	qty := len(scanner)
-	result, err := e.Statement.Build()
+	query, values, err := e.Statement.Build()
 	if err != nil {
 		return err
 	}
 
 	if qty == 0 {
-		return run(e.Ctx, e.Driver, result.Query, result.Values)
+		return run(e.Ctx, e.Driver, query, values)
 	}
 
 	if qty == 1 {
-		return scan(e.Ctx, e.Driver, core.TAG, result.Query, result.Values, scanner[0])
+		return scan(e.Ctx, e.Driver, core.TAG, query, values, scanner[0])
 	}
 
-	return scan(e.Ctx, e.Driver, core.TAG, result.Query, result.Values, scanner)
+	return scan(e.Ctx, e.Driver, core.TAG, query, values, scanner)
 }
 
 // TODO:

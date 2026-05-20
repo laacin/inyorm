@@ -1,40 +1,34 @@
 package statement
 
 import (
-	"context"
-
 	"github.com/laacin/inyorm/internal/api"
 	"github.com/laacin/inyorm/internal/impl/clause"
-	"github.com/laacin/inyorm/internal/impl/exec"
 	"github.com/laacin/inyorm/internal/impl/exprimpl"
 	"github.com/laacin/inyorm/internal/impl/writer"
 	"github.com/laacin/inyorm/internal/ir"
 	"github.com/laacin/inyorm/internal/ir/dml"
 )
 
-type DeleteStmtImpl struct {
+type DeleteQueryImpl struct {
 	DefaultRef string
 	Dialect    ir.Dialect
 
 	clause.DeleteImpl
 	clause.FromImpl
 	clause.WhereImpl
-
-	*exec.Executor
 }
 
-func (s *DeleteStmtImpl) Start(ctx context.Context, eng *ir.Engine, ref string) api.DeleteStmt {
+func (s *DeleteQueryImpl) Start(dial ir.Dialect, ref string) api.DeleteQuery {
+	s.Dialect = dial
 	s.DefaultRef = ref
-	s.Dialect = eng.Dialect
-	s.Executor = &exec.Executor{Ctx: ctx, Statement: s, Driver: eng.Driver}
 	return s
 }
 
-func (s *DeleteStmtImpl) Kind() dml.StatementKind {
-	return dml.StatementDelete
+func (s *DeleteQueryImpl) Kind() dml.QueryKind {
+	return dml.QueryDelete
 }
 
-func (s *DeleteStmtImpl) Build() (*dml.Statement, error) {
+func (s *DeleteQueryImpl) Build() (string, []any, error) {
 	// Auto-FROM
 	if !s.FromImpl.IsDeclared() && s.DefaultRef != "" {
 		s.FromImpl.From((&exprimpl.TableImpl{}).Start(s.DefaultRef))
@@ -76,7 +70,7 @@ func (s *DeleteStmtImpl) Build() (*dml.Statement, error) {
 			first = false
 
 			if err := cls.Build(w, s.Dialect); err != nil {
-				return nil, err
+				return "", nil, err
 			}
 		}
 	}
@@ -84,11 +78,8 @@ func (s *DeleteStmtImpl) Build() (*dml.Statement, error) {
 	// --- Validate values
 
 	if err := parameters.Validate(); err != nil {
-		return nil, err
+		return "", nil, err
 	}
 
-	return &dml.Statement{
-		Query:  w.ToString(),
-		Values: parameters.Values(),
-	}, nil
+	return w.ToString(), parameters.Values(), nil
 }

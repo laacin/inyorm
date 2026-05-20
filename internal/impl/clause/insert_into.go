@@ -20,24 +20,21 @@ type InsertIntoImpl struct {
 	values   any
 }
 
-func (c *InsertIntoImpl) Insert(reference ...any) api.Values {
+func (c *InsertIntoImpl) Insert(reference ...any) api.Ignore {
 	c.declared = true
 	c.ref = reference
 	return c
 }
 
-func (c *InsertIntoImpl) InsertIgnore(reference any, ignores ...any) api.Values {
-	c.declared = true
-	c.ref = []any{reference}
+func (c *InsertIntoImpl) Ignore(ignores ...any) {
 	c.ignores = ignores
-	return c
 }
 
 func (c *InsertIntoImpl) Values(values any) {
 	c.values = values
 }
 
-func (c *InsertIntoImpl) Table(table any) {
+func (c *InsertIntoImpl) Into(table any) {
 	c.emb.Table = table
 }
 

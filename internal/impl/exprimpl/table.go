@@ -20,6 +20,10 @@ func (t *TableImpl) Kind() expr.ExprKind {
 	return expr.ExprTable
 }
 
+func (t *TableImpl) GetRef() string {
+	return t.emb.Value
+}
+
 func (t *TableImpl) Build(w core.InternalWriter, dial expr.ExprWriter, mode core.WritingMode) {
 	w.SetRef(t.emb.Value)
 	dial.WriteTable(w, &t.emb)

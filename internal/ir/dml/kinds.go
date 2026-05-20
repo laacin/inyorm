@@ -24,11 +24,11 @@ const (
 	ClauseDelete
 )
 
-type StatementKind int
+type QueryKind int
 
 const (
-	StatementSelect StatementKind = iota
-	StatementInsert
-	StatementUpdate
-	StatementDelete
+	QuerySelect QueryKind = iota
+	QueryInsert
+	QueryUpdate
+	QueryDelete
 )

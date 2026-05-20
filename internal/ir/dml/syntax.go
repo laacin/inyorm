@@ -4,7 +4,7 @@ import "github.com/laacin/inyorm/internal/core"
 
 type Syntax interface {
 	ClauseWriter
-	StatementOrder
+	QueryOrder
 }
 
 type ClauseWriter interface {
@@ -19,11 +19,13 @@ type ClauseWriter interface {
 	WriteOffset(core.Writer, *Offset)
 
 	WriteInsertInto(core.Writer, *InsertInto)
+
 	WriteUpdate(core.Writer, *Update)
+
 	WriteDelete(core.Writer, *Delete)
 }
 
-type StatementOrder interface {
+type QueryOrder interface {
 	SelectOrder() []ClauseKind
 	InsertOrder() []ClauseKind
 	UpdateOrder() []ClauseKind
@@ -37,7 +39,7 @@ type ClauseBuilder interface {
 	Build(core.InternalWriter, ClauseWriter) error
 }
 
-type StatementBuilder interface {
-	Kind() StatementKind
-	Build() (*Statement, error)
+type QueryBuilder interface {
+	Kind() QueryKind
+	Build() (string, []any, error)
 }

@@ -1,18 +1,16 @@
 package statement
 
 import (
-	"context"
+	"errors"
 
 	"github.com/laacin/inyorm/internal/api"
 	"github.com/laacin/inyorm/internal/impl/clause"
-	"github.com/laacin/inyorm/internal/impl/exec"
-	"github.com/laacin/inyorm/internal/impl/exprimpl"
 	"github.com/laacin/inyorm/internal/impl/writer"
 	"github.com/laacin/inyorm/internal/ir"
 	"github.com/laacin/inyorm/internal/ir/dml"
 )
 
-type SelectStmtImpl struct {
+type SelectQueryImpl struct {
 	DefaultRef string
 	Dialect    ir.Dialect
 
@@ -25,25 +23,26 @@ type SelectStmtImpl struct {
 	clause.OrderByImpl
 	clause.LimitImpl
 	clause.OffsetImpl
-
-	*exec.Executor
 }
 
-func (s *SelectStmtImpl) Start(ctx context.Context, eng *ir.Engine, ref string) api.SelectStmt {
+func (s *SelectQueryImpl) Start(dial ir.Dialect, ref string) api.SelectQuery {
+	s.Dialect = dial
 	s.DefaultRef = ref
-	s.Dialect = eng.Dialect
-	s.Executor = &exec.Executor{Ctx: ctx, Statement: s, Driver: eng.Driver}
 	return s
 }
 
-func (s *SelectStmtImpl) Kind() dml.StatementKind {
-	return dml.StatementSelect
+func (s *SelectQueryImpl) Kind() dml.QueryKind {
+	return dml.QuerySelect
 }
 
-func (s *SelectStmtImpl) Build() (*dml.Statement, error) {
-	// Auto-FROM
-	if !s.FromImpl.IsDeclared() && s.DefaultRef != "" {
-		s.FromImpl.From((&exprimpl.TableImpl{}).Start(s.DefaultRef))
+func (s *SelectQueryImpl) Build() (string, []any, error) {
+	// --- Guards
+
+	if !s.SelectImpl.IsDeclared() {
+		return "", nil, errors.New("clause 'SELECT' must be declared")
+	}
+	if !s.FromImpl.IsDeclared() {
+		return "", nil, errors.New("clause 'FROM' must be declared")
 	}
 
 	// --- Load clauses
@@ -97,7 +96,7 @@ func (s *SelectStmtImpl) Build() (*dml.Statement, error) {
 			first = false
 
 			if err := cls.Build(w, s.Dialect); err != nil {
-				return nil, err
+				return "", nil, err
 			}
 		}
 	}
@@ -105,11 +104,8 @@ func (s *SelectStmtImpl) Build() (*dml.Statement, error) {
 	// --- Validate values
 
 	if err := parameters.Validate(); err != nil {
-		return nil, err
+		return "", nil, err
 	}
 
-	return &dml.Statement{
-		Query:  w.ToString(),
-		Values: parameters.Values(),
-	}, nil
+	return w.ToString(), parameters.Values(), nil
 }
