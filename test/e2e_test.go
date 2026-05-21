@@ -2,8 +2,6 @@ package test
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -27,30 +25,11 @@ type Post struct {
 }
 
 func Test(t *testing.T) {
-	cwd, err := os.Getwd()
+	db, err := inyorm.New(sqlite.Open(tmpSqliteFilePath))
 	if err != nil {
 		panic(err)
 	}
-
-	path := filepath.Join(cwd, "data_test.db")
-	if !strings.HasSuffix(path, "inyorm/test/data_test.db") {
-		panic("Wrong path")
-	}
-
-	db, err := inyorm.New(sqlite.Open(path))
-	if err != nil {
-		panic(err)
-	}
-
-	defer func() {
-		if err := db.Close(); err != nil {
-			panic(err)
-		}
-
-		if err := os.Remove(path); err != nil {
-			panic(err)
-		}
-	}()
+	defer End(db, deleteSqliteFile)
 
 	t.Run("create_table", func(t *testing.T) {
 		stmt := db.CreateTable("users", func(q inyorm.CreateTable, e inyorm.Expr) {
