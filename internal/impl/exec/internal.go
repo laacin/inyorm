@@ -23,7 +23,6 @@ func run(
 func scan(
 	ctx context.Context,
 	driver core.Driver,
-	tag string,
 	query string,
 	args []any,
 	scan any,

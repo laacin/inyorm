@@ -34,4 +34,6 @@ type Rows interface {
 	Columns() ([]string, error)
 	Next() bool
 	Scan(...any) error
+	Close() error
+	Err() error
 }

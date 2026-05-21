@@ -39,8 +39,10 @@ func Scan(rows core.Rows, scanner any) error {
 
 // --- Scanners
 func scanByStruct(rows core.Rows, value any, schema core.StructInfo) error {
+	defer rows.Close()
+
 	if !rows.Next() {
-		return nil
+		return rows.Err()
 	}
 
 	cols, _ := rows.Columns()
@@ -62,12 +64,17 @@ func scanByStruct(rows core.Rows, value any, schema core.StructInfo) error {
 		addrs[i] = field.Addr().Interface()
 	}
 
-	return rows.Scan(addrs...)
+	if err := rows.Scan(addrs...); err != nil {
+		return err
+	}
+
+	return rows.Err()
 }
 
 func scanByStructSlc(rows core.Rows, value any, schema core.StructInfo) error {
-	cols, _ := rows.Columns()
+	defer rows.Close()
 
+	cols, _ := rows.Columns()
 	args := make([]any, len(cols))
 
 	slc, _ := types.DerefPtrVal(reflect.ValueOf(value))
@@ -130,17 +137,19 @@ func scanByStructSlc(rows core.Rows, value any, schema core.StructInfo) error {
 		slc.Set(slc.Slice(0, i))
 	}
 
-	return nil
+	return rows.Err()
 }
 
 func scanByMap(rows core.Rows, value any) error {
+	defer rows.Close()
+
 	mp, ok := value.(map[string]any)
 	if !ok {
 		return errors.New("map scanning must receive map[string]any or *[]map[string]any")
 	}
 
 	if !rows.Next() {
-		return nil
+		return rows.Err()
 	}
 
 	cols, _ := rows.Columns()
@@ -159,10 +168,12 @@ func scanByMap(rows core.Rows, value any) error {
 		mp[col] = tmp[i]
 	}
 
-	return nil
+	return rows.Err()
 }
 
 func scanByMapSlc(rows core.Rows, value any) error {
+	defer rows.Close()
+
 	maps, ok := value.(*[]map[string]any)
 	if !ok {
 		return errors.New("map scanning must receive map[string]any or *[]map[string]any")
@@ -204,10 +215,12 @@ func scanByMapSlc(rows core.Rows, value any) error {
 		*maps = (*maps)[:i]
 	}
 
-	return nil
+	return rows.Err()
 }
 
 func scanByPrim(rows core.Rows, value any) error {
+	defer rows.Close()
+
 	if !rows.Next() {
 		return nil
 	}
@@ -230,10 +243,17 @@ func scanByPrim(rows core.Rows, value any) error {
 		}
 		args[i] = new(any)
 	}
-	return rows.Scan(args...)
+
+	if err := rows.Scan(args...); err != nil {
+		return err
+	}
+
+	return rows.Err()
 }
 
 func scanByPrimSlc(rows core.Rows, value any) error {
+	defer rows.Close()
+
 	vals, err := normalizePrimSlc(value)
 	if err != nil {
 		return err
@@ -258,7 +278,7 @@ func scanByPrimSlc(rows core.Rows, value any) error {
 		}
 	}
 
-	return nil
+	return rows.Err()
 }
 
 // helpers

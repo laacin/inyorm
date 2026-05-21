@@ -144,6 +144,10 @@ func (p *SQLPrepared) Query(
 	}, nil
 }
 
+func (p *SQLPrepared) Close() error {
+	return p.stmt.Close()
+}
+
 func (r *SQLRows) Columns() ([]string, error) {
 	return r.rows.Columns()
 }
@@ -154,4 +158,12 @@ func (r *SQLRows) Next() bool {
 
 func (r *SQLRows) Scan(args ...any) error {
 	return r.rows.Scan(args...)
+}
+
+func (r *SQLRows) Err() error {
+	return r.rows.Err()
+}
+
+func (r *SQLRows) Close() error {
+	return r.rows.Close()
 }
