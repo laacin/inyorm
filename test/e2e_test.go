@@ -37,13 +37,13 @@ func Test(t *testing.T) {
 		panic("Wrong path")
 	}
 
-	qe, err := inyorm.New(sqlite.Open(path))
+	db, err := inyorm.New(sqlite.Open(path))
 	if err != nil {
 		panic(err)
 	}
 
 	defer func() {
-		if err := qe.Close(); err != nil {
+		if err := db.Close(); err != nil {
 			panic(err)
 		}
 
@@ -53,7 +53,7 @@ func Test(t *testing.T) {
 	}()
 
 	t.Run("create_table", func(t *testing.T) {
-		stmt := qe.CreateTable("users", func(q inyorm.CreateTable, e inyorm.Expr) {
+		stmt := db.CreateTable("users", func(q inyorm.CreateTable, e inyorm.Expr) {
 			q.Int("id").PrimaryKey().AutoIncrement()
 			q.Text("account").Unique()
 			q.Text("password")
@@ -66,7 +66,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("insert_values", func(t *testing.T) {
-		stmt := qe.Insert("users", func(q inyorm.InsertQuery, e inyorm.Expr) {
+		stmt := db.Insert("users", func(q inyorm.InsertQuery, e inyorm.Expr) {
 			q.Insert(User{})
 			q.Into(e.Table("users"))
 			q.Values(User{
@@ -83,7 +83,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("get_values", func(t *testing.T) {
-		stmt := qe.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
+		stmt := db.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
 			q.Select(e.All())
 			q.From(e.Table("users"))
 			q.Where(e.Col("id")).Equal(e.Param(1))
@@ -106,7 +106,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("create_table_with_constraints", func(t *testing.T) {
-		stmt := qe.CreateTable("posts", func(q inyorm.CreateTable, e inyorm.Expr) {
+		stmt := db.CreateTable("posts", func(q inyorm.CreateTable, e inyorm.Expr) {
 			q.Int("id").PrimaryKey().AutoIncrement()
 			q.Int("author_id")
 			q.Text("title").Unique().Default("untitled")
@@ -122,7 +122,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("insert_post", func(t *testing.T) {
-		stmt := qe.Insert("posts", func(q inyorm.InsertQuery, e inyorm.Expr) {
+		stmt := db.Insert("posts", func(q inyorm.InsertQuery, e inyorm.Expr) {
 			q.Insert(Post{}).Ignore(e.Col("id"), e.Col("title"), e.Col("description"))
 			q.Into(e.Table("posts"))
 			q.Values(Post{AuthorID: 1})
@@ -134,7 +134,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("get_post_with_relation", func(t *testing.T) {
-		stmt := qe.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
+		stmt := db.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
 			q.Select(e.All(), e.Col("title", "posts"), e.Col("description", "posts"))
 			q.From(e.Table("users"))
 			q.Join(e.Table("posts")).On(e.Col("author_id", "posts")).Equal(e.Col("id"))
@@ -168,7 +168,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("update_post", func(t *testing.T) {
-		stmt := qe.Update("posts", func(q inyorm.UpdateQuery, e inyorm.Expr) {
+		stmt := db.Update("posts", func(q inyorm.UpdateQuery, e inyorm.Expr) {
 			q.Update(e.Col("description"))
 			q.Into(e.Table("posts"))
 			q.Where(e.Col("author_id")).Equal(e.Param(1))
@@ -181,7 +181,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("try_to_insert_invalid_post", func(t *testing.T) {
-		stmt := qe.Insert("posts", func(q inyorm.InsertQuery, e inyorm.Expr) {
+		stmt := db.Insert("posts", func(q inyorm.InsertQuery, e inyorm.Expr) {
 			q.Insert(Post{}).Ignore(e.Col("id"))
 			q.Into(e.Table("posts"))
 			q.Values(Post{
@@ -204,7 +204,7 @@ func Test(t *testing.T) {
 			posts[i].Description = fmt.Sprintf("Desc %d", i)
 		}
 
-		stmt := qe.Insert("posts", func(q inyorm.InsertQuery, e inyorm.Expr) {
+		stmt := db.Insert("posts", func(q inyorm.InsertQuery, e inyorm.Expr) {
 			q.Insert(Post{}).Ignore(e.Col("id"))
 			q.Into(e.Table("posts"))
 			q.Values(posts)
@@ -216,7 +216,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("get_post_count", func(t *testing.T) {
-		stmt := qe.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
+		stmt := db.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
 			q.Select(e.Col("id", "posts").Count())
 			q.From(e.Table("users"))
 			q.Join(e.Table("posts")).On(e.Col("author_id", "posts")).Equal(e.Col("id"))
@@ -235,7 +235,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("get_custom_summary", func(t *testing.T) {
-		stmt := qe.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
+		stmt := db.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
 			summary := e.Concat("The user with ID: ", e.Col("id"), ", Has: ", e.Col("id", "posts").Count(), " Posts.")
 
 			q.Select(summary)
@@ -271,7 +271,7 @@ func Test(t *testing.T) {
 			expect[i].Description = fmt.Sprintf("Desc %d", i-1)
 		}
 
-		stmt := qe.Select("posts", func(q inyorm.SelectQuery, e inyorm.Expr) {
+		stmt := db.Select("posts", func(q inyorm.SelectQuery, e inyorm.Expr) {
 			q.Select(e.All())
 			q.From(e.Table("posts"))
 		})
@@ -289,7 +289,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("delete_all_posts", func(t *testing.T) {
-		stmt := qe.Delete("posts", func(q inyorm.DeleteQuery, e inyorm.Expr) {
+		stmt := db.Delete("posts", func(q inyorm.DeleteQuery, e inyorm.Expr) {
 			q.Delete()
 			q.From(e.Table("posts"))
 			q.Where(e.Col("author_id")).Equal(1)
@@ -301,7 +301,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("expect_zero_values", func(t *testing.T) {
-		stmt := qe.Select("posts", func(q inyorm.SelectQuery, e inyorm.Expr) {
+		stmt := db.Select("posts", func(q inyorm.SelectQuery, e inyorm.Expr) {
 			q.Select(e.All())
 			q.From(e.Table("posts"))
 		})
