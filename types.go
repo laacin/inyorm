@@ -10,9 +10,10 @@ type Engine = ir.Engine
 
 // --- Expressions
 type (
-	Parameter     = api.Parameter
+	// Parameter     = api.Parameter
 	Table         = api.Table
 	Column        = api.Column
+	Parameter     = api.Parameter
 	Condition     = api.Condition
 	ConditionNext = api.ConditionNext
 	Case          = api.Case

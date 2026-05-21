@@ -4,12 +4,11 @@ import (
 	"context"
 
 	"github.com/laacin/inyorm/internal/core"
-	"github.com/laacin/inyorm/internal/ir/driver"
 )
 
 type Executor struct {
 	Ctx       context.Context
-	Driver    driver.Driver
+	Driver    core.Driver
 	Statement interface{ Build() (string, []any, error) }
 }
 

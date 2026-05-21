@@ -1,32 +1,29 @@
 package statement
 
 import (
-	"context"
-
-	"github.com/laacin/inyorm/internal/api"
 	"github.com/laacin/inyorm/internal/impl/table"
 	"github.com/laacin/inyorm/internal/impl/writer"
 	"github.com/laacin/inyorm/internal/ir"
 )
 
-type CreateTableStmtImpl struct {
+type CreateTableQueryImpl struct {
 	DefaultRef string
 	Dialect    ir.Dialect
 
 	table.TableBuilderImpl
 }
 
-func (s *CreateTableStmtImpl) Start(ctx context.Context, eng *ir.Engine, ref string) api.CreateTable {
+func (s *CreateTableQueryImpl) Start(dial ir.Dialect, ref string) *CreateTableQueryImpl {
 	s.DefaultRef = ref
-	s.Dialect = eng.Dialect
+	s.Dialect = dial
 	s.TableBuilderImpl.Start(ref)
 	return s
 }
 
 // --- Build
 
-func (s *CreateTableStmtImpl) Build() string {
+func (s *CreateTableQueryImpl) Build() (string, []any, error) {
 	w := &writer.WriterImpl{Syntax: s.Dialect}
 	s.TableBuilderImpl.Build(w, s.Dialect)
-	return w.ToString()
+	return w.ToString(), nil, nil
 }

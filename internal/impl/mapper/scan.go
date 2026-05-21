@@ -7,10 +7,9 @@ import (
 
 	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/impl/mapper/types"
-	"github.com/laacin/inyorm/internal/ir/driver"
 )
 
-func Scan(rows driver.Rows, scanner any) error {
+func Scan(rows core.Rows, scanner any) error {
 	info := types.ReadInfo(reflect.TypeOf(scanner))
 
 	if !info.IsPtr() && info.Kind != types.KindMap {
@@ -39,7 +38,7 @@ func Scan(rows driver.Rows, scanner any) error {
 }
 
 // --- Scanners
-func scanByStruct(rows driver.Rows, value any, schema core.StructInfo) error {
+func scanByStruct(rows core.Rows, value any, schema core.StructInfo) error {
 	if !rows.Next() {
 		return nil
 	}
@@ -66,7 +65,7 @@ func scanByStruct(rows driver.Rows, value any, schema core.StructInfo) error {
 	return rows.Scan(addrs...)
 }
 
-func scanByStructSlc(rows driver.Rows, value any, schema core.StructInfo) error {
+func scanByStructSlc(rows core.Rows, value any, schema core.StructInfo) error {
 	cols, _ := rows.Columns()
 
 	args := make([]any, len(cols))
@@ -134,7 +133,7 @@ func scanByStructSlc(rows driver.Rows, value any, schema core.StructInfo) error 
 	return nil
 }
 
-func scanByMap(rows driver.Rows, value any) error {
+func scanByMap(rows core.Rows, value any) error {
 	mp, ok := value.(map[string]any)
 	if !ok {
 		return errors.New("map scanning must receive map[string]any or *[]map[string]any")
@@ -163,7 +162,7 @@ func scanByMap(rows driver.Rows, value any) error {
 	return nil
 }
 
-func scanByMapSlc(rows driver.Rows, value any) error {
+func scanByMapSlc(rows core.Rows, value any) error {
 	maps, ok := value.(*[]map[string]any)
 	if !ok {
 		return errors.New("map scanning must receive map[string]any or *[]map[string]any")
@@ -208,7 +207,7 @@ func scanByMapSlc(rows driver.Rows, value any) error {
 	return nil
 }
 
-func scanByPrim(rows driver.Rows, value any) error {
+func scanByPrim(rows core.Rows, value any) error {
 	if !rows.Next() {
 		return nil
 	}
@@ -234,7 +233,7 @@ func scanByPrim(rows driver.Rows, value any) error {
 	return rows.Scan(args...)
 }
 
-func scanByPrimSlc(rows driver.Rows, value any) error {
+func scanByPrimSlc(rows core.Rows, value any) error {
 	vals, err := normalizePrimSlc(value)
 	if err != nil {
 		return err

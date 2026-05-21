@@ -30,7 +30,7 @@ func (e *ExprBuilderImpl) Param(value ...any) api.Parameter {
 }
 
 // TODO:
-func (e *ExprBuilderImpl) Lazy(id ...string) api.Parameter {
+func (e *ExprBuilderImpl) Lazy(id ...any) api.Parameter {
 	param := &ParameterImpl{}
 	return param.Start(len(id) > 0, getLast("", id))
 }

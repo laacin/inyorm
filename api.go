@@ -21,7 +21,7 @@ type Expr interface {
 	Table(name string) Table
 	Col(name string, table ...string) Column
 	All(table ...string) Column
-	Lazy(id ...string) Parameter
+	Lazy(ref ...any) Parameter
 	Param(value ...any) Parameter
 	Cond(ident any) Condition
 	Concat(v ...any) Column

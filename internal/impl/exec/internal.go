@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/impl/mapper"
-	"github.com/laacin/inyorm/internal/ir/driver"
 )
 
 func run(
 	ctx context.Context,
-	driver driver.Driver,
+	driver core.Driver,
 	query string,
 	args []any,
 ) error {
@@ -22,7 +22,7 @@ func run(
 
 func scan(
 	ctx context.Context,
-	driver driver.Driver,
+	driver core.Driver,
 	tag string,
 	query string,
 	args []any,
