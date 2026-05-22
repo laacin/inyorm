@@ -71,6 +71,22 @@ func (s *StatementImpl) Run(context ...context.Context) error {
 	return mapper.Scan(rows, s.bind)
 }
 
+func (s *StatementImpl) RunTx(ctx context.Context, tx core.Transaction) error {
+	if s.Err != nil {
+		return s.Err
+	}
+	if s.bind == nil {
+		return tx.Exec(ctx, s.Query, s.Vals...)
+	}
+
+	rows, err := tx.Query(ctx, s.Query, s.Vals...)
+	if err != nil {
+		return err
+	}
+
+	return mapper.Scan(rows, s.bind)
+}
+
 // --- Prepare
 func (s *StatementImpl) Prepare() api.PrepStatement {
 	return s
