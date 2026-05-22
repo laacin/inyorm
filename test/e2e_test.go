@@ -1,8 +1,8 @@
 package test
 
 import (
+	"context"
 	"fmt"
-	"reflect"
 	"strings"
 	"testing"
 
@@ -22,6 +22,13 @@ type Post struct {
 	AuthorID    int
 	Title       string
 	Description string
+}
+
+type Profile struct {
+	ID        int
+	Firstname string
+	Lastname  string
+	Bio       string
 }
 
 func Test(t *testing.T) {
@@ -69,19 +76,17 @@ func Test(t *testing.T) {
 			q.Limit(1)
 		})
 
-		var u User
-		if err := stmt.Bind(&u).Run(); err != nil {
+		var user User
+		if err := stmt.Bind(&user).Run(); err != nil {
 			t.Fatal(err)
 		}
 
-		if !reflect.DeepEqual(u, User{
+		AssertEqual(t, user, User{
 			ID:       1,
 			Account:  "acc123",
 			Password: "mysecret",
 			Age:      21,
-		}) {
-			t.Fatal("mismatch binding result")
-		}
+		})
 	})
 
 	t.Run("create_table_with_constraints", func(t *testing.T) {
@@ -132,7 +137,7 @@ func Test(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if !reflect.DeepEqual(data, Data{
+		AssertEqual(t, data, Data{
 			User: User{
 				ID:       1,
 				Account:  "acc123",
@@ -141,9 +146,7 @@ func Test(t *testing.T) {
 			},
 			Title:       "untitled",
 			Description: nil,
-		}) {
-			t.Fatal("mismatch binding result")
-		}
+		})
 	})
 
 	t.Run("update_post", func(t *testing.T) {
@@ -261,9 +264,7 @@ func Test(t *testing.T) {
 		}
 
 		for i := range posts {
-			if !reflect.DeepEqual(posts[i], expect[i]) {
-				t.Fatalf("mismatch results.\nexpect: %v\ngot: %v", expect[i], posts[i])
-			}
+			AssertEqual(t, posts[i], expect[i])
 		}
 	})
 
@@ -293,5 +294,122 @@ func Test(t *testing.T) {
 		if len(posts) > 0 {
 			t.Fatalf("expect zero values. got: %d", len(posts))
 		}
+	})
+
+	t.Run("create_table_profile", func(t *testing.T) {
+		stmt := db.CreateTable("profiles", func(q inyorm.CreateTable, e inyorm.Expr) {
+			q.Int("id").PrimaryKey()
+			q.Text("firstname")
+			q.Text("lastname")
+			q.Text("bio").Nullable()
+
+			q.ForeignKey("id").To("id", "users").OnDel("cascade")
+		})
+
+		if err := stmt.Run(); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	t.Run("run_tx", func(t *testing.T) {
+		stmt1 := db.Insert("users", func(q inyorm.InsertQuery, e inyorm.Expr) {
+			q.Insert(User{})
+			q.Into(e.Table("users"))
+			q.Values(User{
+				ID:       2,
+				Account:  "myacc321",
+				Password: "myPassword321",
+				Age:      32,
+			})
+		})
+
+		stmt2 := db.Insert("profiles", func(q inyorm.InsertQuery, e inyorm.Expr) {
+			q.Insert(Profile{})
+			q.Into(e.Table("profiles"))
+			q.Values(Profile{
+				ID:        2,
+				Firstname: "john",
+				Lastname:  "doe",
+				Bio:       "this is my bio",
+			})
+		})
+
+		if err := db.RunTx(context.Background(), stmt1, stmt2); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	t.Run("get_tx_values", func(t *testing.T) {
+		stmt := db.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
+			q.Select(e.All(), e.All("profiles"))
+			q.From(e.Table("users"))
+			q.Join(e.Table("profiles")).On(e.Col("id", "profiles")).Equal(e.Col("id"))
+			q.Where(e.Col("id")).Equal(e.Param(2))
+			q.Limit(1)
+		})
+
+		type ProfileNoID struct {
+			Firstname string
+			Lastname  string
+			Bio       string
+		}
+
+		type Data struct {
+			User
+			ProfileNoID // BUG: <- column name conflicts cause only one embedded struct to bind correctly
+		}
+		var data Data
+		if err := stmt.Bind(&data).Run(); err != nil {
+			t.Fatal(err)
+		}
+
+		AssertEqual(t, data, Data{
+			User: User{
+				ID:       2,
+				Account:  "myacc321",
+				Password: "myPassword321",
+				Age:      32,
+			},
+			ProfileNoID: ProfileNoID{
+				Firstname: "john",
+				Lastname:  "doe",
+				Bio:       "this is my bio",
+			},
+		})
+	})
+
+	t.Run("bind_between_tx", func(t *testing.T) {
+		var user1, user2 User
+
+		stmt1 := db.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
+			q.Select(e.All())
+			q.From(e.Table("users"))
+			q.Where(e.Col("id")).Equal(e.Param(1))
+			q.Limit(1)
+		}).Bind(&user1)
+
+		stmt2 := db.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
+			q.Select(e.All())
+			q.From(e.Table("users"))
+			q.Where(e.Col("id")).Equal(e.Param(2))
+			q.Limit(1)
+		}).Bind(&user2)
+
+		if err := db.RunTx(context.Background(), stmt1, stmt2); err != nil {
+			t.Fatal(err)
+		}
+
+		AssertEqual(t, user1, User{
+			ID:       1,
+			Account:  "acc123",
+			Password: "mysecret",
+			Age:      21,
+		})
+		AssertEqual(t, user2, User{
+			ID:       2,
+			Account:  "myacc321",
+			Password: "myPassword321",
+			Age:      32,
+		})
 	})
 }
