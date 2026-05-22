@@ -9,16 +9,6 @@ import (
 )
 
 // --- COMMON HELPERS
-
-func Start(eng *inyorm.Engine) *inyorm.DB {
-	db, err := inyorm.New(eng)
-	if err != nil {
-		panic(err)
-	}
-
-	return db
-}
-
 func End(db *inyorm.DB, cb ...func() error) {
 	if err := db.Close(); err != nil {
 		panic(err)
