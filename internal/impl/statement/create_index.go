@@ -1,22 +1,29 @@
 package statement
 
-// type CreateIndexStmtImpl struct {
-// 	DefaultRef string
-// 	Dialect    ir.Dialect
-//
-// 	table.ConsDeclImpl
-// }
-//
-// func (s *CreateIndexStmtImpl) Start(ctx context.Context, eng *ir.Engine, ref string) api.CreateIndex {
-// 	s.DefaultRef = ref
-// 	s.Dialect = eng.Dialect
-// 	return s
-// }
-//
-// // --- Build
-//
-// func (s *CreateIndexStmtImpl) Build() string {
-// 	w := &writer.WriterImpl{Syntax: s.Dialect}
-// 	// s.TableBuilderImpl.Build(w, s.Dialect)
-// 	return w.ToString()
-// }
+import (
+	"github.com/laacin/inyorm/bkp/table"
+	"github.com/laacin/inyorm/internal/impl/writer"
+	"github.com/laacin/inyorm/internal/ir"
+)
+
+type CreateIndexQueryImpl struct {
+	DefaultRef string
+	Dialect    ir.Dialect
+
+	table.ConsDeclImpl
+}
+
+func (s *CreateIndexQueryImpl) Start(dial ir.Dialect, ref string) *CreateIndexQueryImpl {
+	s.DefaultRef = ref
+	s.Dialect = dial
+	return s
+}
+
+// --- Build
+
+func (s *CreateIndexQueryImpl) Build() string {
+	w := &writer.WriterImpl{Syntax: s.Dialect}
+
+	// s.TableBuilderImpl.Build(w, s.Dialect)
+	return w.ToString()
+}

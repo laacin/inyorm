@@ -13,6 +13,9 @@ type MockRows struct {
 	i    int
 }
 
+func (m *MockRows) Close() error { return nil }
+func (m *MockRows) Err() error   { return nil }
+
 func (m *MockRows) Columns() ([]string, error) {
 	return m.Cols, nil
 }
