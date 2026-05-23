@@ -11,15 +11,15 @@ type SelectQuery struct {
 	Ref  string
 	Dial Dialect
 
-	dml.SelectBuilder
-	dml.FromBuilder
-	dml.JoinBuilder
-	dml.WhereBuilder
-	dml.GroupByBuilder
-	dml.HavingBuilder
-	dml.OrderByBuilder
-	dml.LimitBuilder
-	dml.OffsetBuilder
+	dml.ClauseSelect
+	dml.ClauseFrom
+	dml.ClauseJoin
+	dml.ClauseWhere
+	dml.ClauseGroupBy
+	dml.ClauseHaving
+	dml.ClauseOrderBy
+	dml.ClauseLimit
+	dml.ClauseOffset
 }
 
 // start
@@ -39,24 +39,24 @@ func (*SelectQuery) Kind() QueryKind {
 func (q *SelectQuery) Build() (*QueryResult, error) {
 	// --- Guards
 
-	if !q.SelectBuilder.IsDeclared() {
+	if !q.ClauseSelect.IsDeclared() {
 		return nil, errors.New("clause 'SELECT' must be declared")
 	}
-	if !q.FromBuilder.IsDeclared() {
+	if !q.ClauseFrom.IsDeclared() {
 		return nil, errors.New("clause 'FROM' must be declared")
 	}
 
 	// --- Load clauses
 	clauses := []dml.ClauseBuilder{
-		&q.SelectBuilder,
-		&q.FromBuilder,
-		&q.JoinBuilder,
-		&q.WhereBuilder,
-		&q.GroupByBuilder,
-		&q.HavingBuilder,
-		&q.OrderByBuilder,
-		&q.LimitBuilder,
-		&q.OffsetBuilder,
+		&q.ClauseSelect,
+		&q.ClauseFrom,
+		&q.ClauseJoin,
+		&q.ClauseWhere,
+		&q.ClauseGroupBy,
+		&q.ClauseHaving,
+		&q.ClauseOrderBy,
+		&q.ClauseLimit,
+		&q.ClauseOffset,
 	}
 
 	clauseMap := make(map[dml.ClauseKind]dml.ClauseBuilder)
@@ -75,7 +75,7 @@ func (q *SelectQuery) Build() (*QueryResult, error) {
 
 	// --- Set table references if Join exists
 
-	if q.JoinBuilder.IsDeclared() {
+	if q.ClauseJoin.IsDeclared() {
 		aliases = &writer.AliasStore{}
 	}
 

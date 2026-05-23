@@ -8,35 +8,31 @@ import (
 
 // --- Entity
 
-type Having struct{ Cond expr.ExprBuilder }
-
-// --- Builder
-
-type HavingBuilder struct {
+type ClauseHaving struct {
 	declared bool
-	emb      Having
+	Cond     expr.ExprBuilder
 }
 
 // --- PUB API
 
-func (b *HavingBuilder) Having(ident any) api.Cond {
-	b.declared = true
-	cond := &expr.CondBuilder{}
-	b.emb.Cond = cond
+func (c *ClauseHaving) Having(ident any) api.Cond {
+	c.declared = true
+	cond := &expr.Cond{}
+	c.Cond = cond
 	return cond.Start(ident)
 }
 
 // --- Build
 
-func (*HavingBuilder) Kind() ClauseKind {
-	return ClauseHaving
+func (*ClauseHaving) Kind() ClauseKind {
+	return ClauseKindHaving
 }
 
-func (b *HavingBuilder) IsDeclared() bool {
-	return b != nil && b.declared
+func (c *ClauseHaving) IsDeclared() bool {
+	return c != nil && c.declared
 }
 
-func (b *HavingBuilder) Build(w core.InternalWriter, dial ClauseWriter) error {
-	dial.WriteHaving(w, &b.emb)
+func (c *ClauseHaving) Build(w core.InternalWriter, dial ClauseWriter) error {
+	dial.WriteHaving(w, c)
 	return nil
 }

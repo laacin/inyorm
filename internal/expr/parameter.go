@@ -9,27 +9,23 @@ type Param struct {
 	Store bool
 }
 
-// --- Builder
-
-type ParamBuilder struct{ emb Param }
-
 // start
 
-func (p *ParamBuilder) Start(store bool, value any) *ParamBuilder {
-	p.emb.Store = store
-	p.emb.Value = value
+func (p *Param) Start(store bool, value any) *Param {
+	p.Store = store
+	p.Value = value
 	return p
 }
 
 // --- Build
 
-func (p *ParamBuilder) Kind() ExprKind {
+func (p *Param) Kind() ExprKind {
 	return ExprParam
 }
 
-func (p *ParamBuilder) Build(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
-	if p.emb.Store {
-		w.PushValue(p.emb.Value)
+func (p *Param) Build(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
+	if p.Store {
+		w.PushValue(p.Value)
 	}
 	w.IncValueCount()
 	dial.WritePlaceholder(w)

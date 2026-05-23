@@ -6,41 +6,35 @@ import (
 )
 
 // --- Entity
-type Select struct {
-	Distinct bool
-	Values   []any
-}
-
-// --- Builder
-
-type SelectBuilder struct {
+type ClauseSelect struct {
 	declared bool
-	emb      Select
+	Dist     bool
+	Values   []any
 }
 
 // --- PUB API
 
-func (b *SelectBuilder) Select(vals ...any) api.SelectNext {
-	b.declared = true
-	b.emb.Values = vals
-	return b
+func (c *ClauseSelect) Select(vals ...any) api.SelectNext {
+	c.declared = true
+	c.Values = vals
+	return c
 }
 
-func (b *SelectBuilder) Distinct() {
-	b.emb.Distinct = true
+func (c *ClauseSelect) Distinct() {
+	c.Dist = true
 }
 
 // --- Build
 
-func (*SelectBuilder) Kind() ClauseKind {
-	return ClauseSelect
+func (*ClauseSelect) Kind() ClauseKind {
+	return ClauseKindSelect
 }
 
-func (b *SelectBuilder) IsDeclared() bool {
-	return b != nil && b.declared
+func (c *ClauseSelect) IsDeclared() bool {
+	return c != nil && c.declared
 }
 
-func (b *SelectBuilder) Build(w core.InternalWriter, dial ClauseWriter) error {
-	dial.WriteSelect(w, &b.emb)
+func (c *ClauseSelect) Build(w core.InternalWriter, dial ClauseWriter) error {
+	dial.WriteSelect(w, c)
 	return nil
 }

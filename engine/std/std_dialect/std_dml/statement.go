@@ -4,35 +4,35 @@ import "github.com/laacin/inyorm/internal/query/dml"
 
 func (*DmlSyntax) SelectOrder() []dml.ClauseKind {
 	return []dml.ClauseKind{
-		dml.ClauseSelect,
-		dml.ClauseFrom,
-		dml.ClauseJoin,
-		dml.ClauseWhere,
-		dml.ClauseGroupBy,
-		dml.ClauseHaving,
-		dml.ClauseOrderBy,
-		dml.ClauseLimit,
-		dml.ClauseOffset,
+		dml.ClauseKindSelect,
+		dml.ClauseKindFrom,
+		dml.ClauseKindJoin,
+		dml.ClauseKindWhere,
+		dml.ClauseKindGroupBy,
+		dml.ClauseKindHaving,
+		dml.ClauseKindOrderBy,
+		dml.ClauseKindLimit,
+		dml.ClauseKindOffset,
 	}
 }
 
 func (*DmlSyntax) InsertOrder() []dml.ClauseKind {
 	return []dml.ClauseKind{
-		dml.ClauseInsert,
+		dml.ClauseKindInsert,
 	}
 }
 
 func (*DmlSyntax) UpdateOrder() []dml.ClauseKind {
 	return []dml.ClauseKind{
-		dml.ClauseUpdate,
-		dml.ClauseWhere,
+		dml.ClauseKindUpdate,
+		dml.ClauseKindWhere,
 	}
 }
 
 func (*DmlSyntax) DeleteOrder() []dml.ClauseKind {
 	return []dml.ClauseKind{
-		dml.ClauseDelete,
-		dml.ClauseFrom,
-		dml.ClauseWhere,
+		dml.ClauseKindDelete,
+		dml.ClauseKindFrom,
+		dml.ClauseKindWhere,
 	}
 }

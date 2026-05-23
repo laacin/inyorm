@@ -5,7 +5,7 @@ import (
 	"github.com/laacin/inyorm/internal/query/dml"
 )
 
-func (*DmlSyntax) WriteInsertInto(w core.Writer, cls *dml.Insert) {
+func (*DmlSyntax) WriteInsertInto(w core.Writer, cls *dml.ClauseInsert) {
 	w.Write("INSERT INTO")
 	w.Char(' ')
 
@@ -21,7 +21,7 @@ func (*DmlSyntax) WriteInsertInto(w core.Writer, cls *dml.Insert) {
 	}
 	w.Char(')')
 
-	perRow := len(cls.Values) / cls.Rows
+	perRow := len(cls.Vals) / cls.Rows
 
 	w.Write(" VALUES ")
 	for row := range cls.Rows {
@@ -34,17 +34,17 @@ func (*DmlSyntax) WriteInsertInto(w core.Writer, cls *dml.Insert) {
 			if ci > 0 {
 				w.Write(", ")
 			}
-			w.Value(cls.Values[row*perRow+ci], core.WriteBase)
+			w.Value(cls.Vals[row*perRow+ci], core.WriteBase)
 		}
 		w.Char(')')
 	}
 }
 
-func (*DmlSyntax) WriteSelect(w core.Writer, cls *dml.Select) {
+func (*DmlSyntax) WriteSelect(w core.Writer, cls *dml.ClauseSelect) {
 	w.Write("SELECT")
 	w.Char(' ')
 
-	if cls.Distinct {
+	if cls.Dist {
 		w.Write("DISTINCT")
 		w.Char(' ')
 	}
@@ -57,7 +57,7 @@ func (*DmlSyntax) WriteSelect(w core.Writer, cls *dml.Select) {
 	}
 }
 
-func (*DmlSyntax) WriteFrom(w core.Writer, cls *dml.From) {
+func (*DmlSyntax) WriteFrom(w core.Writer, cls *dml.ClauseFrom) {
 	w.Write("FROM")
 	w.Char(' ')
 	w.Value(cls.Value, core.WriteDef)
@@ -70,7 +70,7 @@ var joinKindMap = map[dml.JoinKind]string{
 	dml.JoinCross: "CROSS",
 }
 
-func (*DmlSyntax) WriteJoin(w core.Writer, cls *dml.Join) {
+func (*DmlSyntax) WriteJoin(w core.Writer, cls *dml.ClauseJoin) {
 	for i, join := range cls.Segments {
 		if i > 0 {
 			w.Char(' ')
@@ -87,7 +87,7 @@ func (*DmlSyntax) WriteJoin(w core.Writer, cls *dml.Join) {
 	}
 }
 
-func (*DmlSyntax) WriteWhere(w core.Writer, cls *dml.Where) {
+func (*DmlSyntax) WriteWhere(w core.Writer, cls *dml.ClauseWhere) {
 	w.Write("WHERE")
 	w.Char(' ')
 
@@ -99,7 +99,7 @@ func (*DmlSyntax) WriteWhere(w core.Writer, cls *dml.Where) {
 	}
 }
 
-func (*DmlSyntax) WriteGroupBy(w core.Writer, cls *dml.GroupBy) {
+func (*DmlSyntax) WriteGroupBy(w core.Writer, cls *dml.ClauseGroupBy) {
 	w.Write("GROUP BY")
 	w.Char(' ')
 
@@ -111,13 +111,13 @@ func (*DmlSyntax) WriteGroupBy(w core.Writer, cls *dml.GroupBy) {
 	}
 }
 
-func (*DmlSyntax) WriteHaving(w core.Writer, cls *dml.Having) {
+func (*DmlSyntax) WriteHaving(w core.Writer, cls *dml.ClauseHaving) {
 	w.Write("HAVING")
 	w.Char(' ')
 	w.Value(cls.Cond, core.WriteExpr)
 }
 
-func (*DmlSyntax) WriteOrderBy(w core.Writer, cls *dml.OrderBy) {
+func (*DmlSyntax) WriteOrderBy(w core.Writer, cls *dml.ClauseOrderBy) {
 	w.Write("ORDER BY")
 	w.Char(' ')
 
@@ -134,19 +134,19 @@ func (*DmlSyntax) WriteOrderBy(w core.Writer, cls *dml.OrderBy) {
 	}
 }
 
-func (*DmlSyntax) WriteLimit(w core.Writer, cls *dml.Limit) {
+func (*DmlSyntax) WriteLimit(w core.Writer, cls *dml.ClauseLimit) {
 	w.Write("LIMIT")
 	w.Char(' ')
 	w.Value(cls.ValueInt, core.WriteBase)
 }
 
-func (*DmlSyntax) WriteOffset(w core.Writer, cls *dml.Offset) {
+func (*DmlSyntax) WriteOffset(w core.Writer, cls *dml.ClauseOffset) {
 	w.Write("OFFSET")
 	w.Char(' ')
 	w.Value(cls.ValueInt, core.WriteBase)
 }
 
-func (*DmlSyntax) WriteUpdate(w core.Writer, cls *dml.Update) {
+func (*DmlSyntax) WriteUpdate(w core.Writer, cls *dml.ClauseUpdate) {
 	w.Write("UPDATE")
 	w.Char(' ')
 
@@ -160,10 +160,10 @@ func (*DmlSyntax) WriteUpdate(w core.Writer, cls *dml.Update) {
 
 		w.Write(col)
 		w.Write(" = ")
-		w.Value(cls.Values[i], core.WriteBase)
+		w.Value(cls.Vals[i], core.WriteBase)
 	}
 }
 
-func (*DmlSyntax) WriteDelete(w core.Writer, cls *dml.Delete) {
+func (*DmlSyntax) WriteDelete(w core.Writer, cls *dml.ClauseDelete) {
 	w.Write("DELETE")
 }

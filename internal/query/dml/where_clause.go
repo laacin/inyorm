@@ -8,36 +8,32 @@ import (
 
 // --- Entity
 
-type Where struct{ Conds []expr.ExprBuilder }
-
-// --- Builder
-
-type WhereBuilder struct {
+type ClauseWhere struct {
 	declared bool
-	emb      Where
-	current  *expr.CondBuilder
+	Conds    []expr.ExprBuilder
+	current  expr.ExprBuilder
 }
 
 // --- PUB API
 
-func (b *WhereBuilder) Where(ident any) api.Cond {
-	b.declared = true
-	cond := &expr.CondBuilder{}
-	b.emb.Conds = append(b.emb.Conds, cond)
+func (c *ClauseWhere) Where(ident any) api.Cond {
+	c.declared = true
+	cond := &expr.Cond{}
+	c.Conds = append(c.Conds, cond)
 	return cond.Start(ident)
 }
 
 // --- Build
 
-func (*WhereBuilder) Kind() ClauseKind {
-	return ClauseWhere
+func (*ClauseWhere) Kind() ClauseKind {
+	return ClauseKindWhere
 }
 
-func (b *WhereBuilder) IsDeclared() bool {
-	return b != nil && b.declared
+func (c *ClauseWhere) IsDeclared() bool {
+	return c != nil && c.declared
 }
 
-func (b *WhereBuilder) Build(w core.InternalWriter, dial ClauseWriter) error {
-	dial.WriteWhere(w, &b.emb)
+func (c *ClauseWhere) Build(w core.InternalWriter, dial ClauseWriter) error {
+	dial.WriteWhere(w, c)
 	return nil
 }

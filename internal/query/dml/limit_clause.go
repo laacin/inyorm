@@ -4,35 +4,31 @@ import "github.com/laacin/inyorm/internal/core"
 
 // --- Entity
 
-type Limit struct{ ValueInt int }
-
-// --- Builder
-
-type LimitBuilder struct {
+type ClauseLimit struct {
 	declared bool
-	emb      Limit
+	ValueInt int
 }
 
 // --- PUB API
 
-func (b *LimitBuilder) Limit(v int) {
+func (c *ClauseLimit) Limit(v int) {
 	if v > 0 {
-		b.declared = true
-		b.emb.ValueInt = v
+		c.declared = true
+		c.ValueInt = v
 	}
 }
 
 // --- Build
 
-func (*LimitBuilder) Kind() ClauseKind {
-	return ClauseLimit
+func (*ClauseLimit) Kind() ClauseKind {
+	return ClauseKindLimit
 }
 
-func (b *LimitBuilder) IsDeclared() bool {
-	return b != nil && b.declared
+func (c *ClauseLimit) IsDeclared() bool {
+	return c != nil && c.declared
 }
 
-func (b *LimitBuilder) Build(w core.InternalWriter, dial ClauseWriter) error {
-	dial.WriteLimit(w, &b.emb)
+func (c *ClauseLimit) Build(w core.InternalWriter, dial ClauseWriter) error {
+	dial.WriteLimit(w, c)
 	return nil
 }

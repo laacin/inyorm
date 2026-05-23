@@ -13,79 +13,79 @@ import (
 
 // --- Entity
 
-type Insert struct {
-	Table  any
-	Cols   []string
-	Rows   int
-	Values []any
-}
+type ClauseInsert struct {
+	Table any
+	Cols  []string
+	Rows  int
+	Vals  []any
 
-// --- Builder
-
-type InsertBuilder struct {
+	// internal
 	declared bool
-	emb      Insert
 	ref      []any
 	ignores  []any
-	values   any
+	rawVal   any
 }
 
 // --- PUB API
 
-func (b *InsertBuilder) Insert(ref ...any) api.Ignore {
-	b.declared = true
-	b.ref = ref
-	return b
+func (c *ClauseInsert) Insert(ref ...any) api.Ignore {
+	c.declared = true
+	c.ref = ref
+	return c
 }
 
-func (b *InsertBuilder) Ignore(ignore ...any) {
-	b.ignores = ignore
+func (c *ClauseInsert) Ignore(ignore ...any) {
+	c.ignores = ignore
 }
 
-func (b *InsertBuilder) Values(v any) {
-	b.values = v
+func (c *ClauseInsert) Values(v any) {
+	c.rawVal = v
 }
 
-func (b *InsertBuilder) Into(v any) {
-	b.emb.Table = v
+func (c *ClauseInsert) Into(v any) {
+	c.Table = v
 }
 
 // --- Build
 
-func (*InsertBuilder) Kind() ClauseKind {
-	return ClauseInsert
+func (*ClauseInsert) Kind() ClauseKind {
+	return ClauseKindInsert
 }
 
-func (b *InsertBuilder) IsDeclared() bool {
-	return b != nil && b.declared
+func (c *ClauseInsert) IsDeclared() bool {
+	return c != nil && c.declared
 }
 
-func (b *InsertBuilder) Build(w core.InternalWriter, dial ClauseWriter) error {
-	if len(b.ref) < 1 {
+func (c *ClauseInsert) Build(w core.InternalWriter, dial ClauseWriter) error {
+	if len(c.ref) < 1 {
 		return errors.New("missing reference")
 	}
 
-	cols := mapper.ReadColumns(b.ref)
-	ignores := mapper.ReadColumns(b.ignores)
+	cols := mapper.ReadColumns(c.ref)
+	ignores := mapper.ReadColumns(c.ignores)
 
 	cols = slices.DeleteFunc(cols, func(col string) bool {
 		return slices.Contains(ignores, col)
 	})
 
-	result, err := mapper.ReadValues(cols, b.values)
+	result, err := mapper.ReadValues(cols, c.rawVal)
 	if err != nil {
 		return fmt.Errorf("failed to map value: %w", err)
 	}
 
 	params := make([]any, len(result.Args))
 	for i, arg := range result.Args {
-		params[i] = (&expr.ParamBuilder{}).Start(true, arg)
+		params[i] = (&expr.Param{}).Start(true, arg)
 	}
 
-	b.emb.Cols = cols
-	b.emb.Rows = result.Rows
-	b.emb.Values = params
+	c.Cols = cols
+	c.Rows = result.Rows
+	c.Vals = params
 
-	dial.WriteInsertInto(w, &b.emb)
+	c.ref = nil
+	c.ignores = nil
+	c.rawVal = nil
+
+	dial.WriteInsertInto(w, c)
 	return nil
 }

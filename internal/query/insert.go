@@ -9,7 +9,7 @@ type InsertQuery struct {
 	Ref  string
 	Dial Dialect
 
-	dml.InsertBuilder
+	dml.ClauseInsert
 }
 
 // start
@@ -29,7 +29,7 @@ func (*InsertQuery) Kind() QueryKind {
 func (q *InsertQuery) Build() (*QueryResult, error) {
 	// --- Load clauses
 	clauses := []dml.ClauseBuilder{
-		&q.InsertBuilder,
+		&q.ClauseInsert,
 	}
 
 	clauseMap := make(map[dml.ClauseKind]dml.ClauseBuilder)

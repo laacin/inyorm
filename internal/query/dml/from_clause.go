@@ -4,33 +4,29 @@ import "github.com/laacin/inyorm/internal/core"
 
 // --- Entity
 
-type From struct{ Value any }
-
-// --- Builder
-
-type FromBuilder struct {
+type ClauseFrom struct {
 	declared bool
-	emb      From
+	Value    any
 }
 
 // --- PUB API
 
-func (b *FromBuilder) From(from any) {
-	b.declared = true
-	b.emb.Value = from
+func (c *ClauseFrom) From(from any) {
+	c.declared = true
+	c.Value = from
 }
 
 // --- Build
 
-func (*FromBuilder) Kind() ClauseKind {
-	return ClauseFrom
+func (*ClauseFrom) Kind() ClauseKind {
+	return ClauseKindFrom
 }
 
-func (b *FromBuilder) IsDeclared() bool {
-	return b != nil && b.declared
+func (c *ClauseFrom) IsDeclared() bool {
+	return c != nil && c.declared
 }
 
-func (b *FromBuilder) Build(w core.InternalWriter, dial ClauseWriter) error {
-	dial.WriteFrom(w, &b.emb)
+func (c *ClauseFrom) Build(w core.InternalWriter, dial ClauseWriter) error {
+	dial.WriteFrom(w, c)
 	return nil
 }

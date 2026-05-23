@@ -6,42 +6,42 @@ type ClauseKind int
 
 const (
 	// Select statement
-	ClauseSelect ClauseKind = iota
-	ClauseFrom
-	ClauseJoin
-	ClauseWhere
-	ClauseGroupBy
-	ClauseHaving
-	ClauseOrderBy
-	ClauseLimit
-	ClauseOffset
+	ClauseKindSelect ClauseKind = iota
+	ClauseKindFrom
+	ClauseKindJoin
+	ClauseKindWhere
+	ClauseKindGroupBy
+	ClauseKindHaving
+	ClauseKindOrderBy
+	ClauseKindLimit
+	ClauseKindOffset
 
 	// Insert statement
-	ClauseInsert
+	ClauseKindInsert
 
 	// Update statement
-	ClauseUpdate
+	ClauseKindUpdate
 
 	// Delete statement
-	ClauseDelete
+	ClauseKindDelete
 )
 
 type ClauseWriter interface {
-	WriteSelect(core.Writer, *Select)
-	WriteFrom(core.Writer, *From)
-	WriteJoin(core.Writer, *Join)
-	WriteWhere(core.Writer, *Where)
-	WriteGroupBy(core.Writer, *GroupBy)
-	WriteHaving(core.Writer, *Having)
-	WriteOrderBy(core.Writer, *OrderBy)
-	WriteLimit(core.Writer, *Limit)
-	WriteOffset(core.Writer, *Offset)
+	WriteSelect(core.Writer, *ClauseSelect)
+	WriteFrom(core.Writer, *ClauseFrom)
+	WriteJoin(core.Writer, *ClauseJoin)
+	WriteWhere(core.Writer, *ClauseWhere)
+	WriteGroupBy(core.Writer, *ClauseGroupBy)
+	WriteHaving(core.Writer, *ClauseHaving)
+	WriteOrderBy(core.Writer, *ClauseOrderBy)
+	WriteLimit(core.Writer, *ClauseLimit)
+	WriteOffset(core.Writer, *ClauseOffset)
 
-	WriteInsertInto(core.Writer, *Insert)
+	WriteInsertInto(core.Writer, *ClauseInsert)
 
-	WriteUpdate(core.Writer, *Update)
+	WriteUpdate(core.Writer, *ClauseUpdate)
 
-	WriteDelete(core.Writer, *Delete)
+	WriteDelete(core.Writer, *ClauseDelete)
 }
 
 type QueryOrder interface {

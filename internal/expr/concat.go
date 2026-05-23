@@ -6,21 +6,17 @@ import "github.com/laacin/inyorm/internal/core"
 
 type Concat struct{ Values []any }
 
-// --- Builder
-
-type ConcatBuilder struct{ emb Concat }
-
 // start
-func (c *ConcatBuilder) Start(values []any) *ConcatBuilder {
-	c.emb.Values = values
+func (c *Concat) Start(values []any) *Concat {
+	c.Values = values
 	return c
 }
 
 // --- Build
-func (c *ConcatBuilder) Kind() ExprKind {
+func (c *Concat) Kind() ExprKind {
 	return ExprConcat
 }
 
-func (c *ConcatBuilder) Build(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
-	dial.WriteConcat(w, &c.emb, mode)
+func (c *Concat) Build(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
+	dial.WriteConcat(w, c, mode)
 }

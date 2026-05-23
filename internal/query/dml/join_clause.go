@@ -8,59 +8,55 @@ import (
 
 // --- Entity
 
-type Join struct{ Segments []JoinSegment }
-
-// --- Builder
-
-type JoinBuilder struct {
+type ClauseJoin struct {
 	declared bool
-	emb      Join
+	Segments []JoinSegment
 	current  *JoinSegment
 }
 
 // --- PUB API
 
-func (b *JoinBuilder) Join(v any) api.JoinNext {
-	b.declared = true
-	b.current = &JoinSegment{
+func (c *ClauseJoin) Join(v any) api.JoinNext {
+	c.declared = true
+	c.current = &JoinSegment{
 		Kind:  JoinInner,
 		Table: v,
 	}
-	return b
+	return c
 }
 
-func (b *JoinBuilder) Left() api.JoinEnd {
-	b.current.Kind = JoinLeft
-	return b
+func (c *ClauseJoin) Left() api.JoinEnd {
+	c.current.Kind = JoinLeft
+	return c
 }
-func (b *JoinBuilder) Full() api.JoinEnd {
-	b.current.Kind = JoinFull
-	return b
+func (c *ClauseJoin) Full() api.JoinEnd {
+	c.current.Kind = JoinFull
+	return c
 }
-func (b *JoinBuilder) Cross() {
-	b.current.Kind = JoinCross
-	b.emb.Segments = append(b.emb.Segments, *b.current)
+func (c *ClauseJoin) Cross() {
+	c.current.Kind = JoinCross
+	c.Segments = append(c.Segments, *c.current)
 }
 
-func (b *JoinBuilder) On(ident any) api.Cond {
-	cond := &expr.CondBuilder{}
-	b.current.Cond = cond
-	b.emb.Segments = append(b.emb.Segments, *b.current)
+func (c *ClauseJoin) On(ident any) api.Cond {
+	cond := &expr.Cond{}
+	c.current.Cond = cond
+	c.Segments = append(c.Segments, *c.current)
 	return cond.Start(ident)
 }
 
 // --- Build
 
-func (*JoinBuilder) Kind() ClauseKind {
-	return ClauseJoin
+func (*ClauseJoin) Kind() ClauseKind {
+	return ClauseKindJoin
 }
 
-func (b *JoinBuilder) IsDeclared() bool {
-	return b != nil && b.declared
+func (c *ClauseJoin) IsDeclared() bool {
+	return c != nil && c.declared
 }
 
-func (b *JoinBuilder) Build(w core.InternalWriter, dial ClauseWriter) error {
-	dial.WriteJoin(w, &b.emb)
+func (c *ClauseJoin) Build(w core.InternalWriter, dial ClauseWriter) error {
+	dial.WriteJoin(w, c)
 	return nil
 }
 

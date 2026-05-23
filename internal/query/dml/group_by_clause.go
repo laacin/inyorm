@@ -4,33 +4,29 @@ import "github.com/laacin/inyorm/internal/core"
 
 // --- Entity
 
-type GroupBy struct{ Values []any }
-
-// --- Builder
-
-type GroupByBuilder struct {
+type ClauseGroupBy struct {
 	declared bool
-	emb      GroupBy
+	Values   []any
 }
 
 // --- PUB API
 
-func (b *GroupByBuilder) GroupBy(vals ...any) {
-	b.declared = true
-	b.emb.Values = vals
+func (c *ClauseGroupBy) GroupBy(vals ...any) {
+	c.declared = true
+	c.Values = vals
 }
 
 // --- Build
 
-func (*GroupByBuilder) Kind() ClauseKind {
-	return ClauseGroupBy
+func (*ClauseGroupBy) Kind() ClauseKind {
+	return ClauseKindGroupBy
 }
 
-func (b *GroupByBuilder) IsDeclared() bool {
-	return b != nil && b.declared
+func (c *ClauseGroupBy) IsDeclared() bool {
+	return c != nil && c.declared
 }
 
-func (b *GroupByBuilder) Build(w core.InternalWriter, dial ClauseWriter) error {
-	dial.WriteGroupBy(w, &b.emb)
+func (c *ClauseGroupBy) Build(w core.InternalWriter, dial ClauseWriter) error {
+	dial.WriteGroupBy(w, c)
 	return nil
 }

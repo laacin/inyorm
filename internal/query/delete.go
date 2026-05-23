@@ -9,9 +9,9 @@ type DeleteQuery struct {
 	Ref  string
 	Dial Dialect
 
-	dml.DeleteBuilder
-	dml.FromBuilder
-	dml.WhereBuilder
+	dml.ClauseDelete
+	dml.ClauseFrom
+	dml.ClauseWhere
 }
 
 // start
@@ -31,9 +31,9 @@ func (q *DeleteQuery) Kind() QueryKind {
 func (q *DeleteQuery) Build() (*QueryResult, error) {
 	// --- Load clauses
 	clauses := []dml.ClauseBuilder{
-		&q.DeleteBuilder,
-		&q.FromBuilder,
-		&q.WhereBuilder,
+		&q.ClauseDelete,
+		&q.ClauseFrom,
+		&q.ClauseWhere,
 	}
 
 	clauseMap := make(map[dml.ClauseKind]dml.ClauseBuilder)

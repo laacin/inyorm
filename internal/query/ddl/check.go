@@ -11,7 +11,7 @@ type Check struct{ Cond expr.ExprBuilder }
 // start
 
 func (b *Check) Start(ident any) api.Cond {
-	cond := &expr.CondBuilder{}
+	cond := &expr.Cond{}
 	b.Cond = cond
 	return cond.Start(ident)
 }

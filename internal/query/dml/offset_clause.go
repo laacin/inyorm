@@ -4,35 +4,31 @@ import "github.com/laacin/inyorm/internal/core"
 
 // --- Entity
 
-type Offset struct{ ValueInt int }
-
-// --- Builder
-
-type OffsetBuilder struct {
+type ClauseOffset struct {
 	declared bool
-	emb      Offset
+	ValueInt int
 }
 
 // --- PUB API
 
-func (b *OffsetBuilder) Offset(v int) {
+func (c *ClauseOffset) Offset(v int) {
 	if v > 0 {
-		b.declared = true
-		b.emb.ValueInt = v
+		c.declared = true
+		c.ValueInt = v
 	}
 }
 
 // --- Build
 
-func (*OffsetBuilder) Kind() ClauseKind {
-	return ClauseOffset
+func (*ClauseOffset) Kind() ClauseKind {
+	return ClauseKindOffset
 }
 
-func (b *OffsetBuilder) IsDeclared() bool {
-	return b != nil && b.declared
+func (c *ClauseOffset) IsDeclared() bool {
+	return c != nil && c.declared
 }
 
-func (b *OffsetBuilder) Build(w core.InternalWriter, dial ClauseWriter) error {
-	dial.WriteOffset(w, &b.emb)
+func (c *ClauseOffset) Build(w core.InternalWriter, dial ClauseWriter) error {
+	dial.WriteOffset(w, c)
 	return nil
 }

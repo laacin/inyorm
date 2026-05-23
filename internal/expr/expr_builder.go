@@ -10,48 +10,48 @@ func (e *ExprBuilderImpl) Start(defaultTable string) *ExprBuilderImpl {
 }
 
 func (e *ExprBuilderImpl) Table(name string) any {
-	tbl := &TableBuilder{}
+	tbl := &Table{}
 	return tbl.Start(name)
 }
 
 func (e *ExprBuilderImpl) Col(name string, ref ...string) api.Col {
-	col := &ColBuilder{}
+	col := &Col{}
 	return col.Start(name, getLast(e.Ref, ref))
 }
 
 func (e *ExprBuilderImpl) All(ref ...string) api.Col {
-	col := &ColBuilder{}
+	col := &Col{}
 	return col.Start("*", getLast(e.Ref, ref))
 }
 
 func (e *ExprBuilderImpl) Param(value ...any) any {
-	param := &ParamBuilder{}
+	param := &Param{}
 	return param.Start(len(value) > 0, getLast(nil, value))
 }
 
 func (e *ExprBuilderImpl) Cond(ident any) api.Cond {
-	cond := &CondBuilder{}
+	cond := &Cond{}
 	return cond.Start(ident)
 }
 
 func (e *ExprBuilderImpl) Concat(values ...any) api.Col {
-	col := &ColBuilder{}
-	return col.StartFrom((&ConcatBuilder{}).Start(values))
+	col := &Col{}
+	return col.StartFrom((&Concat{}).Start(values))
 }
 
 func (e *ExprBuilderImpl) Switch(cond any, fn func(api.Case)) api.Col {
-	cs := &CaseBuilder{}
+	cs := &Case{}
 	fn(cs.StartSwitch(cond))
 
-	col := ColBuilder{}
+	col := &Col{}
 	return col.StartFrom(cs)
 }
 
 func (e *ExprBuilderImpl) Search(fn func(api.Case)) api.Col {
-	cs := &CaseBuilder{}
+	cs := &Case{}
 	fn(cs.StartSearch())
 
-	col := &ColBuilder{}
+	col := &Col{}
 	return col.StartFrom(cs)
 
 }

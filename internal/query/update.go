@@ -9,8 +9,8 @@ type UpdateQuery struct {
 	Ref  string
 	Dial Dialect
 
-	dml.UpdateBuilder
-	dml.WhereBuilder
+	dml.ClauseUpdate
+	dml.ClauseWhere
 }
 
 // start
@@ -29,8 +29,8 @@ func (q *UpdateQuery) Kind() QueryKind {
 func (q *UpdateQuery) Build() (*QueryResult, error) {
 	// --- Load clauses
 	clauses := []dml.ClauseBuilder{
-		&q.UpdateBuilder,
-		&q.WhereBuilder,
+		&q.ClauseUpdate,
+		&q.ClauseWhere,
 	}
 
 	clauseMap := make(map[dml.ClauseKind]dml.ClauseBuilder)

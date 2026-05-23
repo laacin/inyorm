@@ -17,7 +17,7 @@ func run(t *testing.T, v []any, exp []string) {
 }
 
 func col(name string) api.Col {
-	col := &expr.ColBuilder{}
+	col := &expr.Col{}
 	return col.Start(name, "")
 }
 

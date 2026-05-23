@@ -8,58 +8,54 @@ import (
 // --- Entity
 
 type Case struct {
-	Cond  any
-	Whens []CaseWhen
-	Els   any
-}
-
-// --- Builder
-type CaseBuilder struct {
+	Cond    any
+	Whens   []CaseWhen
+	Els     any
 	kind    ExprKind
-	emb     Case
 	current *CaseWhen
 }
 
 // start
-func (c *CaseBuilder) StartSwitch(cond any) *CaseBuilder {
+
+func (c *Case) StartSwitch(cond any) *Case {
 	c.kind = ExprCaseSwitch
-	c.emb.Cond = cond
+	c.Cond = cond
 	return c
 }
-func (c *CaseBuilder) StartSearch() *CaseBuilder {
+func (c *Case) StartSearch() *Case {
 	c.kind = ExprCaseSearch
 	return c
 }
 
 // --- PUB API
 
-func (c *CaseBuilder) When(when any) api.CaseNext {
+func (c *Case) When(when any) api.CaseNext {
 	c.current = &CaseWhen{When: when}
 	return c
 }
 
-func (c *CaseBuilder) Then(then any) api.Case {
+func (c *Case) Then(then any) api.Case {
 	c.current.Then = then
-	c.emb.Whens = append(c.emb.Whens, *c.current)
+	c.Whens = append(c.Whens, *c.current)
 	return c
 }
 
-func (c *CaseBuilder) Else(els any) {
-	c.emb.Els = els
+func (c *Case) Else(els any) {
+	c.Els = els
 }
 
 // --- Build
 
-func (c *CaseBuilder) Kind() ExprKind {
+func (c *Case) Kind() ExprKind {
 	return c.kind
 }
 
-func (c *CaseBuilder) Build(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
+func (c *Case) Build(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
 	switch c.kind {
 	case ExprCaseSwitch:
-		dial.WriteCaseSwitch(w, &c.emb, mode)
+		dial.WriteCaseSwitch(w, c, mode)
 	case ExprCaseSearch:
-		dial.WriteCaseSearch(w, &c.emb, mode)
+		dial.WriteCaseSearch(w, c, mode)
 	}
 }
 

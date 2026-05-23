@@ -6,35 +6,32 @@ import (
 )
 
 // --- Entity
+
 type Col struct {
 	Name  string
 	Ref   string
 	Alias string
 	Value string
-}
-
-// --- Builder
-type ColBuilder struct {
-	emb   Col
 	from  ExprBuilder
 	aggr  *ColAggr
 	exprs []ColExpr
 }
 
 // start
-func (c *ColBuilder) StartFrom(from ExprBuilder) *ColBuilder {
+
+func (c *Col) StartFrom(from ExprBuilder) *Col {
 	c.from = from
 	return c
 }
-func (c *ColBuilder) Start(name, table string) *ColBuilder {
-	c.emb.Name = name
-	c.emb.Ref = table
+func (c *Col) Start(name, table string) *Col {
+	c.Name = name
+	c.Ref = table
 	return c
 }
 
 // --- PUB API
 
-func (c *ColBuilder) Count(distinct ...bool) api.Col {
+func (c *Col) Count(distinct ...bool) api.Col {
 	dist := len(distinct) > 0 && distinct[0]
 	c.aggr = &ColAggr{
 		Kind:     ColAggrCount,
@@ -43,7 +40,7 @@ func (c *ColBuilder) Count(distinct ...bool) api.Col {
 	return c
 }
 
-func (c *ColBuilder) Sum(distinct ...bool) api.Col {
+func (c *Col) Sum(distinct ...bool) api.Col {
 	dist := len(distinct) > 0 && distinct[0]
 	c.aggr = &ColAggr{
 		Kind:     ColAggrSum,
@@ -52,7 +49,7 @@ func (c *ColBuilder) Sum(distinct ...bool) api.Col {
 	return c
 }
 
-func (c *ColBuilder) Min(distinct ...bool) api.Col {
+func (c *Col) Min(distinct ...bool) api.Col {
 	dist := len(distinct) > 0 && distinct[0]
 	c.aggr = &ColAggr{
 		Kind:     ColAggrMin,
@@ -61,7 +58,7 @@ func (c *ColBuilder) Min(distinct ...bool) api.Col {
 	return c
 }
 
-func (c *ColBuilder) Max(distinct ...bool) api.Col {
+func (c *Col) Max(distinct ...bool) api.Col {
 	dist := len(distinct) > 0 && distinct[0]
 	c.aggr = &ColAggr{
 		Kind:     ColAggrMax,
@@ -70,7 +67,7 @@ func (c *ColBuilder) Max(distinct ...bool) api.Col {
 	return c
 }
 
-func (c *ColBuilder) Avg(distinct ...bool) api.Col {
+func (c *Col) Avg(distinct ...bool) api.Col {
 	dist := len(distinct) > 0 && distinct[0]
 	c.aggr = &ColAggr{
 		Kind:     ColAggrAvg,
@@ -81,79 +78,79 @@ func (c *ColBuilder) Avg(distinct ...bool) api.Col {
 
 // --- Arith
 
-func (c *ColBuilder) Add(v any) api.Col {
+func (c *Col) Add(v any) api.Col {
 	c.exprs = append(c.exprs, newArith(ColArithAdd, v))
 	return c
 }
 
-func (c *ColBuilder) Sub(v any) api.Col {
+func (c *Col) Sub(v any) api.Col {
 	c.exprs = append(c.exprs, newArith(ColArithSub, v))
 	return c
 }
 
-func (c *ColBuilder) Mul(v any) api.Col {
+func (c *Col) Mul(v any) api.Col {
 	c.exprs = append(c.exprs, newArith(ColArithMul, v))
 	return c
 }
 
-func (c *ColBuilder) Div(v any) api.Col {
+func (c *Col) Div(v any) api.Col {
 	c.exprs = append(c.exprs, newArith(ColArithDiv, v))
 	return c
 }
 
-func (c *ColBuilder) Mod(v any) api.Col {
+func (c *Col) Mod(v any) api.Col {
 	c.exprs = append(c.exprs, newArith(ColArithMod, v))
 	return c
 }
 
-func (c *ColBuilder) Wrap() api.Col {
+func (c *Col) Wrap() api.Col {
 	c.exprs = append(c.exprs, newWrap())
 	return c
 }
 
 // --- Scalar
 
-func (c *ColBuilder) Lower() api.Col {
+func (c *Col) Lower() api.Col {
 	c.exprs = append(c.exprs, newScalar(ColScalarLower))
 	return c
 }
 
-func (c *ColBuilder) Upper() api.Col {
+func (c *Col) Upper() api.Col {
 	c.exprs = append(c.exprs, newScalar(ColScalarUpper))
 	return c
 }
 
-func (c *ColBuilder) Trim() api.Col {
+func (c *Col) Trim() api.Col {
 	c.exprs = append(c.exprs, newScalar(ColScalarTrim))
 	return c
 }
 
-func (c *ColBuilder) Round() api.Col {
+func (c *Col) Round() api.Col {
 	c.exprs = append(c.exprs, newScalar(ColScalarRound))
 	return c
 }
 
-func (c *ColBuilder) Abs() api.Col {
+func (c *Col) Abs() api.Col {
 	c.exprs = append(c.exprs, newScalar(ColScalarAbs))
 	return c
 }
 
 // --- Alias
 
-func (c *ColBuilder) As(value string) api.Col {
-	c.emb.Alias = value
+func (c *Col) As(value string) api.Col {
+	c.Alias = value
 	return c
 }
 
 // --- Build
-func (c *ColBuilder) BaseName() string { return c.emb.Name }
+func (c *Col) BaseName() string { return c.Name }
 
-func (c *ColBuilder) Kind() ExprKind {
+func (c *Col) Kind() ExprKind {
 	return ExprCol
 }
 
-func (c *ColBuilder) Build(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
-	w.SetRef(c.emb.Ref)
+func (c *Col) Build(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
+	w.SetRef(c.Ref)
 
 	if c != nil && (c.aggr != nil || c.exprs != nil || c.from != nil) {
 		nw := w.New()
@@ -161,7 +158,7 @@ func (c *ColBuilder) Build(w core.InternalWriter, dial ExprWriter, mode core.Wri
 		if c.from != nil {
 			nw.Value(c.from, mode)
 		} else {
-			dial.WriteColBase(nw, &c.emb)
+			dial.WriteColBase(nw, c)
 		}
 
 		if c.exprs != nil {
@@ -189,21 +186,21 @@ func (c *ColBuilder) Build(w core.InternalWriter, dial ExprWriter, mode core.Wri
 			c.aggr = nil
 		}
 
-		c.emb.Value = nw.ToString()
+		c.Value = nw.ToString()
 	}
 
 	switch mode {
 	case core.WriteBase:
-		dial.WriteColBase(w, &c.emb)
+		dial.WriteColBase(w, c)
 
 	case core.WriteExpr:
-		dial.WriteColExpr(w, &c.emb)
+		dial.WriteColExpr(w, c)
 
 	case core.WriteAlias:
-		dial.WriteColAlias(w, &c.emb)
+		dial.WriteColAlias(w, c)
 
 	case core.WriteDef:
-		dial.WriteColDef(w, &c.emb)
+		dial.WriteColDef(w, c)
 	}
 }
 
