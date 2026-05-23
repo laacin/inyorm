@@ -9,27 +9,27 @@ import (
 	"github.com/laacin/inyorm/internal/query"
 )
 
-type StatementImpl struct {
+type Statement struct {
 	driver core.Driver
 
 	query query.QueryBuilder
 	bind  any
 }
 
-func (s *StatementImpl) Start(driver core.Driver, q query.QueryBuilder) api.Statement {
+func (s *Statement) Start(driver core.Driver, q query.QueryBuilder) api.Statement {
 	s.driver = driver
 	s.query = q
 	return s
 }
 
 // --- Binder
-func (s *StatementImpl) Bind(binder ...any) api.Statement {
+func (s *Statement) Bind(binder ...any) api.Statement {
 	if len(binder) > 0 {
 		s.bind = binder[0]
 	}
 	return s
 }
-func (s *StatementImpl) BindPrep(binder ...any) api.PrepStatement {
+func (s *Statement) BindPrep(binder ...any) api.PrepStatement {
 	if len(binder) > 0 {
 		s.bind = binder[0]
 	}
@@ -37,7 +37,7 @@ func (s *StatementImpl) BindPrep(binder ...any) api.PrepStatement {
 }
 
 // --- Runner
-func (s *StatementImpl) Raw() (string, []any, error) {
+func (s *Statement) Raw() (string, []any, error) {
 	result, err := s.query.Build()
 	if err != nil {
 		return "", nil, err
@@ -46,7 +46,7 @@ func (s *StatementImpl) Raw() (string, []any, error) {
 	return result.Query, result.Values, nil
 }
 
-func (s *StatementImpl) Run(context ...context.Context) error {
+func (s *Statement) Run(context ...context.Context) error {
 	result, err := s.query.Build()
 	if err != nil {
 		return err
@@ -65,7 +65,7 @@ func (s *StatementImpl) Run(context ...context.Context) error {
 	return mapper.Scan(rows, s.bind)
 }
 
-func (s *StatementImpl) RunTx(ctx context.Context, tx core.Transaction) error {
+func (s *Statement) RunTx(ctx context.Context, tx core.Transaction) error {
 	result, err := s.query.Build()
 	if err != nil {
 		return err
@@ -84,12 +84,12 @@ func (s *StatementImpl) RunTx(ctx context.Context, tx core.Transaction) error {
 }
 
 // --- Prepare
-func (s *StatementImpl) Prepare() api.PrepStatement {
-	return s
+func (s *Statement) Prepare() api.PrepStatement {
+	panic("TODO")
 }
 
-func (s *StatementImpl) Values(values ...any) api.Runner {
-	return s
+func (s *Statement) Values(values ...any) api.Runner {
+	panic("TODO")
 }
 
 // --- Helpers
