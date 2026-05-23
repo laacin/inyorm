@@ -14,14 +14,25 @@ type Engine struct {
 
 // --- Expressions
 type (
-	// Table         = api.Table
-	Column = api.Col
-	// Parameter     = api.Parameter
-	Condition     = api.Cond
-	ConditionNext = api.CondNext
-	Case          = api.Case
-	CaseNext      = api.CaseNext
+	Table    = any
+	Col      = api.Col
+	Param    = any
+	Cond     = api.Cond
+	CondNext = api.CondNext
+	Case     = api.Case
+	CaseNext = api.CaseNext
 )
+
+type Expr interface {
+	Table(name string) Table
+	Col(name string, table ...string) Col
+	All(table ...string) Col
+	Param(value ...any) Param
+	Cond(ident any) Cond
+	Concat(v ...any) Col
+	Switch(cond any, fn func(cs Case)) Col
+	Search(fn func(cs Case)) Col
+}
 
 // --- Statement
 type (

@@ -134,7 +134,7 @@ func TestSelect(t *testing.T) {
 	t.Run("complex_with_helper", func(t *testing.T) {
 		stmt := db.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
 			// helper
-			isNull := func(cond inyorm.Column, then, els any) inyorm.Column {
+			isNull := func(cond inyorm.Col, then, els any) inyorm.Col {
 				return e.Search(func(cs inyorm.Case) {
 					cond := e.Cond(cond).IsNull()
 					cs.When(cond).Then(then)
