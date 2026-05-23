@@ -1,9 +1,6 @@
 package ddl
 
-import (
-	"github.com/laacin/inyorm/internal/api"
-	"github.com/laacin/inyorm/internal/core"
-)
+import "github.com/laacin/inyorm/internal/api"
 
 type ForeignKey struct {
 	Col      string
@@ -39,8 +36,8 @@ func (b *ForeignKey) OnUpd(key string) api.ForeignKeyNext {
 
 // --- Build
 
-func (b *ForeignKey) Build(w core.InternalWriter, dial TableWriter) {
-	dial.WriteConsForeignKey(w, b)
+func (b *ForeignKey) Build() error {
+	return nil
 }
 
 // --- Tools

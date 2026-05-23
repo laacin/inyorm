@@ -1,7 +1,5 @@
 package dml
 
-import "github.com/laacin/inyorm/internal/core"
-
 // --- Entity
 
 type ClauseLimit struct {
@@ -28,7 +26,6 @@ func (c *ClauseLimit) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *ClauseLimit) Build(w core.InternalWriter, dial ClauseWriter) error {
-	dial.WriteLimit(w, c)
+func (c *ClauseLimit) Build() error {
 	return nil
 }

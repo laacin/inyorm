@@ -9,9 +9,7 @@ type DeleteQuery struct {
 	Ref  string
 	Dial Dialect
 
-	dml.ClauseDelete
-	dml.ClauseFrom
-	dml.ClauseWhere
+	dml.DeleteQuery
 }
 
 // start
@@ -29,49 +27,13 @@ func (q *DeleteQuery) Kind() QueryKind {
 }
 
 func (q *DeleteQuery) Build() (*QueryResult, error) {
-	// --- Load clauses
-	clauses := []dml.ClauseBuilder{
-		&q.ClauseDelete,
-		&q.ClauseFrom,
-		&q.ClauseWhere,
-	}
-
-	clauseMap := make(map[dml.ClauseKind]dml.ClauseBuilder)
-	for _, cls := range clauses {
-		if cls.IsDeclared() {
-			clauseMap[cls.Kind()] = cls
-		}
-	}
-
-	// --- Declarate writers
-
-	var (
-		params = &writer.ParamStore{}
-	)
-
+	params := &writer.ParamStore{}
 	w := &writer.WriterImpl{
 		Syntax: q.Dial,
 		Params: params,
 	}
 
-	// --- Write the statement
-
-	first := true
-	for _, ord := range q.Dial.DeleteOrder() {
-		if cls, ok := clauseMap[ord]; ok {
-			if !first {
-				w.Char(' ')
-			}
-			first = false
-
-			if err := cls.Build(w, q.Dial); err != nil {
-				return nil, err
-			}
-		}
-	}
-
-	// --- Validate values
-
+	q.DeleteQuery.Build(w, q.Dial)
 	if err := params.Validate(); err != nil {
 		return nil, err
 	}

@@ -2,7 +2,6 @@ package dml
 
 import (
 	"github.com/laacin/inyorm/internal/api"
-	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/expr"
 )
 
@@ -55,8 +54,7 @@ func (c *ClauseJoin) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *ClauseJoin) Build(w core.InternalWriter, dial ClauseWriter) error {
-	dial.WriteJoin(w, c)
+func (c *ClauseJoin) Build() error {
 	return nil
 }
 

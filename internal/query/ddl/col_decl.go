@@ -1,9 +1,6 @@
 package ddl
 
-import (
-	"github.com/laacin/inyorm/internal/api"
-	"github.com/laacin/inyorm/internal/core"
-)
+import "github.com/laacin/inyorm/internal/api"
 
 type ColDecl struct {
 	Name string
@@ -43,8 +40,8 @@ func (b *ColDecl) Default(v any) api.ColDeclNext {
 
 // --- Build
 
-func (b *ColDecl) Build(w core.InternalWriter, dial TableWriter) {
-	dial.WriteColDecl(w, b)
+func (b *ColDecl) Build() error {
+	return nil
 }
 
 // --- Tools

@@ -13,6 +13,7 @@ func (t *Table) Start(table string) *Table {
 }
 
 // --- Build
+
 func (t *Table) Kind() ExprKind {
 	return ExprTable
 }

@@ -1,7 +1,5 @@
 package dml
 
-import "github.com/laacin/inyorm/internal/core"
-
 // --- Entity
 
 type ClauseOffset struct {
@@ -28,7 +26,6 @@ func (c *ClauseOffset) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *ClauseOffset) Build(w core.InternalWriter, dial ClauseWriter) error {
-	dial.WriteOffset(w, c)
+func (c *ClauseOffset) Build() error {
 	return nil
 }

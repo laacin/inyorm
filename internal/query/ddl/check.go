@@ -2,7 +2,6 @@ package ddl
 
 import (
 	"github.com/laacin/inyorm/internal/api"
-	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/expr"
 )
 
@@ -18,6 +17,6 @@ func (b *Check) Start(ident any) api.Cond {
 
 // --- Build
 
-func (b *Check) Build(w core.InternalWriter, dial TableWriter) {
-	dial.WriteConsCheck(w, b)
+func (b *Check) Build() error {
+	return nil
 }

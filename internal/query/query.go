@@ -26,7 +26,7 @@ const (
 type Dialect interface {
 	ddl.TableWriter
 	dml.ClauseWriter
-	dml.QueryOrder
+	dml.QueryWriter
 	expr.ExprWriter
 }
 

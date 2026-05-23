@@ -2,7 +2,6 @@ package dml
 
 import (
 	"github.com/laacin/inyorm/internal/api"
-	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/expr"
 )
 
@@ -32,7 +31,6 @@ func (c *ClauseHaving) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *ClauseHaving) Build(w core.InternalWriter, dial ClauseWriter) error {
-	dial.WriteHaving(w, c)
+func (c *ClauseHaving) Build() error {
 	return nil
 }

@@ -170,39 +170,133 @@ func (*Dialect) WriteDelete(w core.Writer, cls *dml.ClauseDelete) {
 	w.Write("DELETE")
 }
 
-// ---- STATEMENT ORDER -----
+// ---- QUERY WRITER -----
 
-func (*Dialect) SelectOrder() []dml.ClauseKind {
-	return []dml.ClauseKind{
-		dml.ClauseKindSelect,
-		dml.ClauseKindFrom,
-		dml.ClauseKindJoin,
-		dml.ClauseKindWhere,
-		dml.ClauseKindGroupBy,
-		dml.ClauseKindHaving,
-		dml.ClauseKindOrderBy,
-		dml.ClauseKindLimit,
-		dml.ClauseKindOffset,
+func (s *Dialect) WriteQuerySelect(w core.Writer, q *dml.SelectQuery) {
+	if q.ClauseSelect.IsDeclared() {
+		q.ClauseSelect.Build()
+		s.Self.WriteSelect(w, &q.ClauseSelect)
+	}
+
+	if q.ClauseFrom.IsDeclared() {
+		q.ClauseFrom.Build()
+		w.Char(' ')
+		s.Self.WriteFrom(w, &q.ClauseFrom)
+	}
+
+	if q.ClauseJoin.IsDeclared() {
+		q.ClauseJoin.Build()
+		w.Char(' ')
+		s.Self.WriteJoin(w, &q.ClauseJoin)
+	}
+
+	if q.ClauseWhere.IsDeclared() {
+		q.ClauseWhere.Build()
+		w.Char(' ')
+		s.Self.WriteWhere(w, &q.ClauseWhere)
+	}
+
+	if q.ClauseGroupBy.IsDeclared() {
+		q.ClauseGroupBy.Build()
+		w.Char(' ')
+		s.Self.WriteGroupBy(w, &q.ClauseGroupBy)
+	}
+
+	if q.ClauseHaving.IsDeclared() {
+		q.ClauseHaving.Build()
+		w.Char(' ')
+		s.Self.WriteHaving(w, &q.ClauseHaving)
+	}
+
+	if q.ClauseOrderBy.IsDeclared() {
+		q.ClauseOrderBy.Build()
+		w.Char(' ')
+		s.Self.WriteOrderBy(w, &q.ClauseOrderBy)
+	}
+
+	if q.ClauseLimit.IsDeclared() {
+		q.ClauseLimit.Build()
+		w.Char(' ')
+		s.Self.WriteLimit(w, &q.ClauseLimit)
+	}
+
+	if q.ClauseOffset.IsDeclared() {
+		q.ClauseOffset.Build()
+		w.Char(' ')
+		s.Self.WriteOffset(w, &q.ClauseOffset)
 	}
 }
 
-func (*Dialect) InsertOrder() []dml.ClauseKind {
-	return []dml.ClauseKind{
-		dml.ClauseKindInsert,
+func (s *Dialect) WriteQueryInsert(w core.Writer, q *dml.InsertQuery) {
+	if q.ClauseInsert.IsDeclared() {
+		q.ClauseInsert.Build()
+		s.Self.WriteInsertInto(w, &q.ClauseInsert)
 	}
 }
 
-func (*Dialect) UpdateOrder() []dml.ClauseKind {
-	return []dml.ClauseKind{
-		dml.ClauseKindUpdate,
-		dml.ClauseKindWhere,
+func (s *Dialect) WriteQueryUpdate(w core.Writer, q *dml.UpdateQuery) {
+	if q.ClauseUpdate.IsDeclared() {
+		q.ClauseUpdate.Build()
+		s.Self.WriteUpdate(w, &q.ClauseUpdate)
+	}
+
+	if q.ClauseWhere.IsDeclared() {
+		q.ClauseWhere.Build()
+		w.Char(' ')
+		s.Self.WriteWhere(w, &q.ClauseWhere)
 	}
 }
 
-func (*Dialect) DeleteOrder() []dml.ClauseKind {
-	return []dml.ClauseKind{
-		dml.ClauseKindDelete,
-		dml.ClauseKindFrom,
-		dml.ClauseKindWhere,
+func (s *Dialect) WriteQueryDelete(w core.Writer, q *dml.DeleteQuery) {
+	if q.ClauseDelete.IsDeclared() {
+		q.ClauseDelete.Build()
+		s.Self.WriteDelete(w, &q.ClauseDelete)
+	}
+
+	if q.ClauseFrom.IsDeclared() {
+		q.ClauseFrom.Build()
+		w.Char(' ')
+		s.Self.WriteFrom(w, &q.ClauseFrom)
+	}
+
+	if q.ClauseWhere.IsDeclared() {
+		q.ClauseWhere.Build()
+		w.Char(' ')
+		s.Self.WriteWhere(w, &q.ClauseWhere)
 	}
 }
+
+// func (*Dialect) SelectOrder() []dml.ClauseKind {
+// 	return []dml.ClauseKind{
+// 		dml.ClauseKindSelect,
+// 		dml.ClauseKindFrom,
+// 		dml.ClauseKindJoin,
+// 		dml.ClauseKindWhere,
+// 		dml.ClauseKindGroupBy,
+// 		dml.ClauseKindHaving,
+// 		dml.ClauseKindOrderBy,
+// 		dml.ClauseKindLimit,
+// 		dml.ClauseKindOffset,
+// 	}
+// }
+//
+// func (*Dialect) InsertOrder() []dml.ClauseKind {
+// 	return []dml.ClauseKind{
+// 		dml.ClauseKindInsert,
+// 	}
+// }
+//
+// func (*Dialect) UpdateOrder() []dml.ClauseKind {
+// 	return []dml.ClauseKind{
+// 		dml.ClauseKindUpdate,
+// 		dml.ClauseKindWhere,
+// 	}
+// }
+//
+// func (*Dialect) DeleteOrder() []dml.ClauseKind {
+// 	return []dml.ClauseKind{
+// 		dml.ClauseKindDelete,
+// 		dml.ClauseKindFrom,
+// 		dml.ClauseKindWhere,
+// 	}
+// }

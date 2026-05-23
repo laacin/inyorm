@@ -44,16 +44,20 @@ type ClauseWriter interface {
 	WriteDelete(core.Writer, *ClauseDelete)
 }
 
-type QueryOrder interface {
-	SelectOrder() []ClauseKind
-	InsertOrder() []ClauseKind
-	UpdateOrder() []ClauseKind
-	DeleteOrder() []ClauseKind
+type QueryWriter interface {
+	WriteQuerySelect(core.Writer, *SelectQuery)
+	WriteQueryInsert(core.Writer, *InsertQuery)
+	WriteQueryUpdate(core.Writer, *UpdateQuery)
+	WriteQueryDelete(core.Writer, *DeleteQuery)
 }
 
 // --- Internal
-type ClauseBuilder interface {
+type Clause interface {
 	IsDeclared() bool
 	Kind() ClauseKind
-	Build(core.InternalWriter, ClauseWriter) error
+	Build() error
+}
+
+type QueryBuilder interface {
+	Build(core.InternalWriter, QueryWriter) error
 }

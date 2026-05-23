@@ -20,8 +20,3 @@ type TableWriter interface {
 	WriteConsForeignKey(core.Writer, *ForeignKey)
 	WriteConsCheck(core.Writer, *Check)
 }
-
-// --- Internal
-type TableBuilder interface {
-	Build(core.InternalWriter, TableWriter) error
-}

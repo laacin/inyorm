@@ -1,9 +1,6 @@
 package dml
 
-import (
-	"github.com/laacin/inyorm/internal/api"
-	"github.com/laacin/inyorm/internal/core"
-)
+import "github.com/laacin/inyorm/internal/api"
 
 // --- Entity
 
@@ -39,9 +36,11 @@ func (c *ClauseOrderBy) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *ClauseOrderBy) Build(w core.InternalWriter, dial ClauseWriter) error {
-	c.Segments = append(c.Segments, *c.current)
-	dial.WriteOrderBy(w, c)
+func (c *ClauseOrderBy) Build() error {
+	if c.current != nil {
+		c.Segments = append(c.Segments, *c.current)
+		c.current = nil
+	}
 	return nil
 }
 

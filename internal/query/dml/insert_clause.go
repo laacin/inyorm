@@ -6,7 +6,6 @@ import (
 	"slices"
 
 	"github.com/laacin/inyorm/internal/api"
-	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/expr"
 	"github.com/laacin/inyorm/internal/impl/mapper"
 )
@@ -56,7 +55,7 @@ func (c *ClauseInsert) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *ClauseInsert) Build(w core.InternalWriter, dial ClauseWriter) error {
+func (c *ClauseInsert) Build() error {
 	if len(c.ref) < 1 {
 		return errors.New("missing reference")
 	}
@@ -86,6 +85,5 @@ func (c *ClauseInsert) Build(w core.InternalWriter, dial ClauseWriter) error {
 	c.ignores = nil
 	c.rawVal = nil
 
-	dial.WriteInsertInto(w, c)
 	return nil
 }

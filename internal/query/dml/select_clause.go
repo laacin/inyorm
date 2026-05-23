@@ -1,9 +1,6 @@
 package dml
 
-import (
-	"github.com/laacin/inyorm/internal/api"
-	"github.com/laacin/inyorm/internal/core"
-)
+import "github.com/laacin/inyorm/internal/api"
 
 // --- Entity
 type ClauseSelect struct {
@@ -34,7 +31,6 @@ func (c *ClauseSelect) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *ClauseSelect) Build(w core.InternalWriter, dial ClauseWriter) error {
-	dial.WriteSelect(w, c)
+func (c *ClauseSelect) Build() error {
 	return nil
 }

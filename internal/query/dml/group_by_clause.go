@@ -1,7 +1,5 @@
 package dml
 
-import "github.com/laacin/inyorm/internal/core"
-
 // --- Entity
 
 type ClauseGroupBy struct {
@@ -26,7 +24,6 @@ func (c *ClauseGroupBy) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *ClauseGroupBy) Build(w core.InternalWriter, dial ClauseWriter) error {
-	dial.WriteGroupBy(w, c)
+func (c *ClauseGroupBy) Build() error {
 	return nil
 }
