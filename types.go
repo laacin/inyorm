@@ -7,9 +7,14 @@ import (
 )
 
 // --- Main types
+type (
+	Dialect = query.Dialect
+	Driver  = core.Driver
+)
+
 type Engine struct {
-	Dialect query.Dialect
-	Driver  core.Driver
+	Dialect Dialect
+	Driver  Driver
 }
 
 // --- Expressions

@@ -14,12 +14,19 @@ type Dialect = std_dialect.Dialect
 func FromInstance(db *sql.DB) (*inyorm.Engine, error) {
 	return &inyorm.Engine{
 		Driver:  &std_driver.Driver{Instance: db},
-		Dialect: &std_dialect.Dialect{},
+		Dialect: loadDialect(),
 	}, nil
 }
 
 func JustDialect() (*inyorm.Engine, error) {
+
 	return &inyorm.Engine{
-		Dialect: &std_dialect.Dialect{},
+		Dialect: loadDialect(),
 	}, nil
+}
+
+func loadDialect() inyorm.Dialect {
+	dial := &Dialect{}
+	dial.Self = dial
+	return dial
 }

@@ -1,11 +1,13 @@
-package std_dml
+package std_dialect
 
 import (
 	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/query/dml"
 )
 
-func (*DmlSyntax) WriteInsertInto(w core.Writer, cls *dml.ClauseInsert) {
+// ---- CLAUSES -----
+
+func (*Dialect) WriteInsertInto(w core.Writer, cls *dml.ClauseInsert) {
 	w.Write("INSERT INTO")
 	w.Char(' ')
 
@@ -40,7 +42,7 @@ func (*DmlSyntax) WriteInsertInto(w core.Writer, cls *dml.ClauseInsert) {
 	}
 }
 
-func (*DmlSyntax) WriteSelect(w core.Writer, cls *dml.ClauseSelect) {
+func (*Dialect) WriteSelect(w core.Writer, cls *dml.ClauseSelect) {
 	w.Write("SELECT")
 	w.Char(' ')
 
@@ -57,7 +59,7 @@ func (*DmlSyntax) WriteSelect(w core.Writer, cls *dml.ClauseSelect) {
 	}
 }
 
-func (*DmlSyntax) WriteFrom(w core.Writer, cls *dml.ClauseFrom) {
+func (*Dialect) WriteFrom(w core.Writer, cls *dml.ClauseFrom) {
 	w.Write("FROM")
 	w.Char(' ')
 	w.Value(cls.Value, core.WriteDef)
@@ -70,7 +72,7 @@ var joinKindMap = map[dml.JoinKind]string{
 	dml.JoinCross: "CROSS",
 }
 
-func (*DmlSyntax) WriteJoin(w core.Writer, cls *dml.ClauseJoin) {
+func (*Dialect) WriteJoin(w core.Writer, cls *dml.ClauseJoin) {
 	for i, join := range cls.Segments {
 		if i > 0 {
 			w.Char(' ')
@@ -87,7 +89,7 @@ func (*DmlSyntax) WriteJoin(w core.Writer, cls *dml.ClauseJoin) {
 	}
 }
 
-func (*DmlSyntax) WriteWhere(w core.Writer, cls *dml.ClauseWhere) {
+func (*Dialect) WriteWhere(w core.Writer, cls *dml.ClauseWhere) {
 	w.Write("WHERE")
 	w.Char(' ')
 
@@ -99,7 +101,7 @@ func (*DmlSyntax) WriteWhere(w core.Writer, cls *dml.ClauseWhere) {
 	}
 }
 
-func (*DmlSyntax) WriteGroupBy(w core.Writer, cls *dml.ClauseGroupBy) {
+func (*Dialect) WriteGroupBy(w core.Writer, cls *dml.ClauseGroupBy) {
 	w.Write("GROUP BY")
 	w.Char(' ')
 
@@ -111,13 +113,13 @@ func (*DmlSyntax) WriteGroupBy(w core.Writer, cls *dml.ClauseGroupBy) {
 	}
 }
 
-func (*DmlSyntax) WriteHaving(w core.Writer, cls *dml.ClauseHaving) {
+func (*Dialect) WriteHaving(w core.Writer, cls *dml.ClauseHaving) {
 	w.Write("HAVING")
 	w.Char(' ')
 	w.Value(cls.Cond, core.WriteExpr)
 }
 
-func (*DmlSyntax) WriteOrderBy(w core.Writer, cls *dml.ClauseOrderBy) {
+func (*Dialect) WriteOrderBy(w core.Writer, cls *dml.ClauseOrderBy) {
 	w.Write("ORDER BY")
 	w.Char(' ')
 
@@ -134,19 +136,19 @@ func (*DmlSyntax) WriteOrderBy(w core.Writer, cls *dml.ClauseOrderBy) {
 	}
 }
 
-func (*DmlSyntax) WriteLimit(w core.Writer, cls *dml.ClauseLimit) {
+func (*Dialect) WriteLimit(w core.Writer, cls *dml.ClauseLimit) {
 	w.Write("LIMIT")
 	w.Char(' ')
 	w.Value(cls.ValueInt, core.WriteBase)
 }
 
-func (*DmlSyntax) WriteOffset(w core.Writer, cls *dml.ClauseOffset) {
+func (*Dialect) WriteOffset(w core.Writer, cls *dml.ClauseOffset) {
 	w.Write("OFFSET")
 	w.Char(' ')
 	w.Value(cls.ValueInt, core.WriteBase)
 }
 
-func (*DmlSyntax) WriteUpdate(w core.Writer, cls *dml.ClauseUpdate) {
+func (*Dialect) WriteUpdate(w core.Writer, cls *dml.ClauseUpdate) {
 	w.Write("UPDATE")
 	w.Char(' ')
 
@@ -164,6 +166,43 @@ func (*DmlSyntax) WriteUpdate(w core.Writer, cls *dml.ClauseUpdate) {
 	}
 }
 
-func (*DmlSyntax) WriteDelete(w core.Writer, cls *dml.ClauseDelete) {
+func (*Dialect) WriteDelete(w core.Writer, cls *dml.ClauseDelete) {
 	w.Write("DELETE")
+}
+
+// ---- STATEMENT ORDER -----
+
+func (*Dialect) SelectOrder() []dml.ClauseKind {
+	return []dml.ClauseKind{
+		dml.ClauseKindSelect,
+		dml.ClauseKindFrom,
+		dml.ClauseKindJoin,
+		dml.ClauseKindWhere,
+		dml.ClauseKindGroupBy,
+		dml.ClauseKindHaving,
+		dml.ClauseKindOrderBy,
+		dml.ClauseKindLimit,
+		dml.ClauseKindOffset,
+	}
+}
+
+func (*Dialect) InsertOrder() []dml.ClauseKind {
+	return []dml.ClauseKind{
+		dml.ClauseKindInsert,
+	}
+}
+
+func (*Dialect) UpdateOrder() []dml.ClauseKind {
+	return []dml.ClauseKind{
+		dml.ClauseKindUpdate,
+		dml.ClauseKindWhere,
+	}
+}
+
+func (*Dialect) DeleteOrder() []dml.ClauseKind {
+	return []dml.ClauseKind{
+		dml.ClauseKindDelete,
+		dml.ClauseKindFrom,
+		dml.ClauseKindWhere,
+	}
 }

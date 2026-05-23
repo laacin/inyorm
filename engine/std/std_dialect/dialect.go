@@ -1,13 +1,5 @@
 package std_dialect
 
-import (
-	"github.com/laacin/inyorm/engine/std/std_dialect/std_ddl"
-	"github.com/laacin/inyorm/engine/std/std_dialect/std_dml"
-	"github.com/laacin/inyorm/engine/std/std_dialect/std_expr"
-)
+import "github.com/laacin/inyorm"
 
-type Dialect struct {
-	std_expr.ExprSyntax
-	std_dml.DmlSyntax
-	std_ddl.DdlSyntax
-}
+type Dialect struct{ Self inyorm.Dialect }

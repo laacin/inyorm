@@ -93,7 +93,7 @@ func Test(t *testing.T) {
 		stmt := db.CreateTable("posts", func(q inyorm.CreateTable, e inyorm.Expr) {
 			q.Int("id").PrimaryKey().AutoIncrement()
 			q.Int("author_id")
-			q.String("title").Unique().Default("untitled")
+			q.String("title").Default("untitled")
 			q.String("description").Nullable()
 
 			q.ForeignKey("author_id").To("id", "users").OnDel("cascade")
