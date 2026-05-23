@@ -1,6 +1,6 @@
 package writer
 
-import "github.com/laacin/inyorm/internal/ir/expr"
+import "github.com/laacin/inyorm/internal/expr"
 
 func Normalize(value any) expr.ExprBuilder {
 	if value == nil {

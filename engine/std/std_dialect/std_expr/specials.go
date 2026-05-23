@@ -2,14 +2,14 @@ package std_expr
 
 import (
 	"github.com/laacin/inyorm/internal/core"
-	"github.com/laacin/inyorm/internal/ir/expr"
+	"github.com/laacin/inyorm/internal/expr"
 )
 
 func (*ExprSyntax) WritePlaceholder(w core.Writer) {
 	w.Char('?')
 }
 
-func (*ExprSyntax) WriteCondition(w core.Writer, cond *expr.Condition, mode core.WritingMode) {
+func (*ExprSyntax) WriteCond(w core.Writer, cond *expr.Cond, mode core.WritingMode) {
 	w.Char('(')
 	for i, pred := range cond.Predicates {
 		if !pred.Closed {
@@ -67,7 +67,7 @@ func (*ExprSyntax) WriteConcat(w core.Writer, con *expr.Concat, mode core.Writin
 	w.Char(')')
 }
 
-func (*ExprSyntax) WriteCaseSwitch(w core.Writer, cas *expr.CaseSwitch, mode core.WritingMode) {
+func (*ExprSyntax) WriteCaseSwitch(w core.Writer, cas *expr.Case, mode core.WritingMode) {
 	w.Write("CASE")
 	w.Char(' ')
 	w.Value(cas.Cond, core.WriteExpr)
@@ -91,7 +91,7 @@ func (*ExprSyntax) WriteCaseSwitch(w core.Writer, cas *expr.CaseSwitch, mode cor
 	w.Write("END")
 }
 
-func (*ExprSyntax) WriteCaseSearch(w core.Writer, cas *expr.CaseSearch, mode core.WritingMode) {
+func (*ExprSyntax) WriteCaseSearch(w core.Writer, cas *expr.Case, mode core.WritingMode) {
 	w.Write("CASE WHEN")
 	w.Char(' ')
 

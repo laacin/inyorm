@@ -41,7 +41,7 @@ const (
 )
 
 var (
-	column    = reflect.TypeFor[api.Column]()
+	column    = reflect.TypeFor[api.Col]()
 	infoCache sync.Map
 )
 

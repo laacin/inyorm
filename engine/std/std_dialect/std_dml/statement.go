@@ -1,6 +1,6 @@
 package std_dml
 
-import "github.com/laacin/inyorm/internal/ir/dml"
+import "github.com/laacin/inyorm/internal/query/dml"
 
 func (*DmlSyntax) SelectOrder() []dml.ClauseKind {
 	return []dml.ClauseKind{
@@ -18,7 +18,7 @@ func (*DmlSyntax) SelectOrder() []dml.ClauseKind {
 
 func (*DmlSyntax) InsertOrder() []dml.ClauseKind {
 	return []dml.ClauseKind{
-		dml.ClauseInsertInto,
+		dml.ClauseInsert,
 	}
 }
 

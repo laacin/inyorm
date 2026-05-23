@@ -11,15 +11,15 @@ import (
 // Expose dialect for the others dialects
 type Dialect = std_dialect.Dialect
 
-func FromInstance(db *sql.DB) *inyorm.Engine {
+func FromInstance(db *sql.DB) (*inyorm.Engine, error) {
 	return &inyorm.Engine{
 		Driver:  &std_driver.Driver{Instance: db},
 		Dialect: &std_dialect.Dialect{},
-	}
+	}, nil
 }
 
-func JustDialect() *inyorm.Engine {
+func JustDialect() (*inyorm.Engine, error) {
 	return &inyorm.Engine{
 		Dialect: &std_dialect.Dialect{},
-	}
+	}, nil
 }

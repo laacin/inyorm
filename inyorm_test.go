@@ -24,10 +24,10 @@ func run(t *testing.T, stmt inyorm.Statement, exp string, vals []any) {
 }
 
 func TestSelect(t *testing.T) {
-	qe, _ := inyorm.New(std.JustDialect())
+	db, _ := inyorm.New(std.JustDialect())
 
 	t.Run("simple", func(t *testing.T) {
-		stmt := qe.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
+		stmt := db.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
 			q.Select(e.All())
 			q.From(e.Table("users"))
 			q.Where(e.Col("id")).Equal(e.Param("uuid"))
@@ -40,7 +40,7 @@ func TestSelect(t *testing.T) {
 	})
 
 	t.Run("pagination", func(t *testing.T) {
-		stmt := qe.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
+		stmt := db.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
 			var (
 				id      = e.Col("id")
 				age     = e.Col("age")
@@ -68,7 +68,7 @@ func TestSelect(t *testing.T) {
 	})
 
 	t.Run("complex", func(t *testing.T) {
-		stmt := qe.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
+		stmt := db.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
 			var (
 				banned  = e.Col("banned")
 				fname   = e.Col("firstname")
@@ -132,7 +132,7 @@ func TestSelect(t *testing.T) {
 	})
 
 	t.Run("complex_with_helper", func(t *testing.T) {
-		stmt := qe.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
+		stmt := db.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
 			// helper
 			isNull := func(cond inyorm.Column, then, els any) inyorm.Column {
 				return e.Search(func(cs inyorm.Case) {
@@ -228,7 +228,7 @@ func TestSelect(t *testing.T) {
 }
 
 func TestInsert(t *testing.T) {
-	qe, _ := inyorm.New(std.JustDialect())
+	db, _ := inyorm.New(std.JustDialect())
 
 	type User struct {
 		Account string
@@ -236,7 +236,7 @@ func TestInsert(t *testing.T) {
 	}
 
 	t.Run("insert_one", func(t *testing.T) {
-		stmt := qe.Insert("users", func(q inyorm.InsertQuery, e inyorm.Expr) {
+		stmt := db.Insert("users", func(q inyorm.InsertQuery, e inyorm.Expr) {
 			q.Insert(User{})
 			q.Into(e.Table("users"))
 			q.Values(User{
@@ -250,7 +250,7 @@ func TestInsert(t *testing.T) {
 	})
 
 	t.Run("insert_many", func(t *testing.T) {
-		stmt := qe.Insert("users", func(q inyorm.InsertQuery, e inyorm.Expr) {
+		stmt := db.Insert("users", func(q inyorm.InsertQuery, e inyorm.Expr) {
 			q.Insert(User{})
 			q.Into(e.Table("users"))
 			q.Values([]User{
@@ -288,7 +288,7 @@ func TestInsert(t *testing.T) {
 			{"account": "acc6", "age": 60, "active": true, "score": 600, "country": "JP"},
 		}
 
-		stmt := qe.Insert("users", func(q inyorm.InsertQuery, e inyorm.Expr) {
+		stmt := db.Insert("users", func(q inyorm.InsertQuery, e inyorm.Expr) {
 			q.Insert(e.Col("score"), e.Col("age"))
 			q.Into(e.Table("users"))
 			q.Values(&vals)
@@ -309,7 +309,7 @@ func TestInsert(t *testing.T) {
 	})
 
 	t.Run("ignore_values", func(t *testing.T) {
-		stmt := qe.Insert("users", func(q inyorm.InsertQuery, e inyorm.Expr) {
+		stmt := db.Insert("users", func(q inyorm.InsertQuery, e inyorm.Expr) {
 			q.Insert(User{}).Ignore(e.Col("age"))
 			q.Into(e.Table("users"))
 			q.Values(User{
@@ -326,7 +326,7 @@ func TestInsert(t *testing.T) {
 }
 
 func TestUpdate(t *testing.T) {
-	qe, _ := inyorm.New(std.JustDialect())
+	db, _ := inyorm.New(std.JustDialect())
 
 	type Post struct {
 		Title       string
@@ -334,7 +334,7 @@ func TestUpdate(t *testing.T) {
 	}
 
 	t.Run("update_one", func(t *testing.T) {
-		stmt := qe.Update("posts", func(q inyorm.UpdateQuery, e inyorm.Expr) {
+		stmt := db.Update("posts", func(q inyorm.UpdateQuery, e inyorm.Expr) {
 			q.Update(&Post{})
 			q.Into(e.Table("posts"))
 			q.Values(Post{
@@ -349,7 +349,7 @@ func TestUpdate(t *testing.T) {
 	})
 
 	t.Run("with_cols", func(t *testing.T) {
-		stmt := qe.Update("posts", func(q inyorm.UpdateQuery, e inyorm.Expr) {
+		stmt := db.Update("posts", func(q inyorm.UpdateQuery, e inyorm.Expr) {
 			q.Update(e.Col("title"), e.Col("description"))
 			q.Into(e.Table("posts"))
 			q.Values(Post{
@@ -369,7 +369,7 @@ func TestUpdate(t *testing.T) {
 			"name":    "matias",
 		}
 
-		stmt := qe.Update("users", func(q inyorm.UpdateQuery, e inyorm.Expr) {
+		stmt := db.Update("users", func(q inyorm.UpdateQuery, e inyorm.Expr) {
 			q.Update(vals)
 			q.Into(e.Table("users"))
 			q.Values(vals)
@@ -388,7 +388,7 @@ func TestUpdate(t *testing.T) {
 			"id":       123,
 		}
 
-		stmt := qe.Update("users", func(q inyorm.UpdateQuery, e inyorm.Expr) {
+		stmt := db.Update("users", func(q inyorm.UpdateQuery, e inyorm.Expr) {
 			var (
 				name = e.Col("name")
 				acc  = e.Col("account")
@@ -406,10 +406,10 @@ func TestUpdate(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	qe, _ := inyorm.New(std.JustDialect())
+	db, _ := inyorm.New(std.JustDialect())
 
 	t.Run("delete_one", func(t *testing.T) {
-		stmt := qe.Delete("comments", func(q inyorm.DeleteQuery, e inyorm.Expr) {
+		stmt := db.Delete("comments", func(q inyorm.DeleteQuery, e inyorm.Expr) {
 			q.Delete()
 			q.From(e.Table("comments"))
 			q.Where(e.Col("id")).Equal(e.Param(12310))
@@ -420,41 +420,43 @@ func TestDelete(t *testing.T) {
 	})
 }
 
-// func TestCreateTable(t *testing.T) {
-// 	qe, _ := inyorm.New(std.JustDialect())
-//
-// 	t.Run("basic_table", func(t *testing.T) {
-// 		q, _ := qe.NewCreateTable(context.Background(), "users")
-//
-// 		q.Int("id").PrimaryKey().AutoIncrement()
-// 		q.Text("account").Unique()
-//
-// 		exp := "CREATE TABLE IF NOT EXISTS users ("
-// 		exp += "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-// 		exp += "account TEXT UNIQUE NOT NULL"
-// 		exp += ")"
-// 		runQ(t, q, exp)
-// 	})
-//
-// 	t.Run("with_constraints", func(t *testing.T) {
-// 		q, e := qe.NewCreateTable(context.Background(), "posts")
-//
-// 		q.Text("id").PrimaryKey()
-// 		q.Text("author_id")
-// 		q.Text("title").Default("untitled")
-// 		q.Text("description").Nullable()
-//
-// 		q.ForeignKey("author_id").To("id", "users").OnDel("cascade")
-// 		q.Check(e.Col("description")).Not().Like("%word%")
-//
-// 		exp := "CREATE TABLE IF NOT EXISTS posts ("
-// 		exp += "id TEXT PRIMARY KEY, "
-// 		exp += "author_id TEXT NOT NULL, "
-// 		exp += "title TEXT NOT NULL DEFAULT 'untitled', "
-// 		exp += "description TEXT, "
-// 		exp += "FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE, "
-// 		exp += "CHECK (description NOT LIKE '%word%')"
-// 		exp += ")"
-// 		runQ(t, q, exp)
-// 	})
-// }
+func TestCreateTable(t *testing.T) {
+	db, _ := inyorm.New(std.JustDialect())
+
+	t.Run("basic_table", func(t *testing.T) {
+		stmt := db.CreateTable("users", func(q inyorm.CreateTable, e inyorm.Expr) {
+			q.Int("id").PrimaryKey().AutoIncrement()
+			q.String("account").Unique()
+		})
+
+		exp := "CREATE TABLE IF NOT EXISTS users ("
+		exp += "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+		exp += "account TEXT UNIQUE NOT NULL"
+		exp += ")"
+
+		run(t, stmt, exp, nil)
+	})
+
+	t.Run("with_constraints", func(t *testing.T) {
+		stmt := db.CreateTable("posts", func(q inyorm.CreateTable, e inyorm.Expr) {
+			q.String("id").PrimaryKey()
+			q.String("author_id")
+			q.String("title").Default("untitled")
+			q.String("description").Nullable()
+
+			q.ForeignKey("author_id").To("id", "users").OnDel("cascade")
+			q.Check(e.Col("description")).Not().Like("%word%")
+		})
+
+		exp := "CREATE TABLE IF NOT EXISTS posts ("
+		exp += "id TEXT PRIMARY KEY, "
+		exp += "author_id TEXT NOT NULL, "
+		exp += "title TEXT NOT NULL DEFAULT 'untitled', "
+		exp += "description TEXT, "
+		exp += "FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE, "
+		exp += "CHECK (description NOT LIKE '%word%')"
+		exp += ")"
+
+		run(t, stmt, exp, nil)
+	})
+}

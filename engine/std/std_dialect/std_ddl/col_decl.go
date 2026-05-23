@@ -2,7 +2,7 @@ package std_ddl
 
 import (
 	"github.com/laacin/inyorm/internal/core"
-	"github.com/laacin/inyorm/internal/ir/ddl"
+	"github.com/laacin/inyorm/internal/query/ddl"
 )
 
 // --- MAIN WRITER
@@ -47,7 +47,7 @@ func (s *DdlSyntax) WriteColDecl(w core.Writer, c *ddl.ColDecl) {
 
 // --- KINDS
 
-func (*DdlSyntax) WriteColText(w core.Writer) {
+func (*DdlSyntax) WriteColString(w core.Writer) {
 	w.Write("TEXT")
 }
 func (*DdlSyntax) WriteColInt(w core.Writer) {

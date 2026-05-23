@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/laacin/inyorm/internal/core"
-	"github.com/laacin/inyorm/internal/ir/expr"
+	"github.com/laacin/inyorm/internal/expr"
 )
 
 type WriterImpl struct {

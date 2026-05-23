@@ -2,10 +2,10 @@ package std_ddl
 
 import (
 	"github.com/laacin/inyorm/internal/core"
-	"github.com/laacin/inyorm/internal/ir/ddl"
+	"github.com/laacin/inyorm/internal/query/ddl"
 )
 
-func (s *DdlSyntax) WriteCreateTable(w core.Writer, t *ddl.TableDecl) {
+func (s *DdlSyntax) WriteCreateTable(w core.Writer, t *ddl.CreateTable) {
 	w.Write("CREATE TABLE IF NOT EXISTS")
 	w.Char(' ')
 	w.Write(t.Name)
@@ -16,21 +16,17 @@ func (s *DdlSyntax) WriteCreateTable(w core.Writer, t *ddl.TableDecl) {
 		if i > 0 {
 			w.Write(", ")
 		}
-		s.WriteColDecl(w, &c)
+		s.WriteColDecl(w, c)
 	}
 
-	for _, c := range t.Cons {
+	for _, fk := range t.Fks {
 		w.Write(", ")
+		s.WriteConsForeignKey(w, fk)
+	}
 
-		if cons, ok := c.IsForeignKey(); ok {
-			s.WriteConsForeignKey(w, cons)
-			continue
-		}
-
-		if cons, ok := c.IsCheck(); ok {
-			s.WriteConsCheck(w, cons)
-			continue
-		}
+	for _, ck := range t.Checks {
+		w.Write(", ")
+		s.WriteConsCheck(w, ck)
 	}
 	w.Write(")")
 }

@@ -2,20 +2,23 @@ package inyorm
 
 import (
 	"github.com/laacin/inyorm/internal/api"
-	"github.com/laacin/inyorm/internal/ir"
+	"github.com/laacin/inyorm/internal/core"
+	"github.com/laacin/inyorm/internal/query"
 )
 
 // --- Main types
-type Engine = ir.Engine
+type Engine struct {
+	Dialect query.Dialect
+	Driver  core.Driver
+}
 
 // --- Expressions
 type (
+	// Table         = api.Table
+	Column = api.Col
 	// Parameter     = api.Parameter
-	Table         = api.Table
-	Column        = api.Column
-	Parameter     = api.Parameter
-	Condition     = api.Condition
-	ConditionNext = api.ConditionNext
+	Condition     = api.Cond
+	ConditionNext = api.CondNext
 	Case          = api.Case
 	CaseNext      = api.CaseNext
 )
@@ -55,7 +58,5 @@ type (
 
 // --- DDL
 type (
-	// Queries
-	CreateTable = api.CreateTable
-	CreateIndex = api.CreateIndex
+	CreateTable = api.CreateTableQuery
 )

@@ -4,17 +4,17 @@ import (
 	"context"
 	"errors"
 
+	"github.com/laacin/inyorm/internal"
 	"github.com/laacin/inyorm/internal/core"
-	"github.com/laacin/inyorm/internal/impl/exprimpl"
-	"github.com/laacin/inyorm/internal/impl/statement"
-	"github.com/laacin/inyorm/internal/ir"
+	"github.com/laacin/inyorm/internal/expr"
+	"github.com/laacin/inyorm/internal/query"
 )
 
-type DB struct{ eng *ir.Engine }
+type DB struct{ eng *Engine }
 
-func New(eng *Engine) (*DB, error) {
-	if eng.Err != nil {
-		return nil, eng.Err
+func New(eng *Engine, err error) (*DB, error) {
+	if err != nil {
+		return nil, err
 	}
 	return &DB{eng}, nil
 }
@@ -45,46 +45,46 @@ func (db *DB) RunTx(ctx context.Context, stmts ...Runner) error {
 // --- DML Statements
 
 func (db *DB) Select(ref string, fn func(q SelectQuery, e Expr)) Statement {
-	q := &statement.SelectQueryImpl{}
-	e := &exprimpl.ExprBuilderImpl{}
+	q := &query.SelectQuery{}
+	e := &expr.ExprBuilderImpl{}
 
 	fn(q.Start(db.eng.Dialect, ref), e.Start(ref))
-	stmt := &statement.StatementImpl{}
+	stmt := &internal.StatementImpl{}
 	return stmt.Start(db.eng.Driver, q)
 }
 func (db *DB) Insert(ref string, fn func(q InsertQuery, e Expr)) Statement {
-	q := &statement.InsertQueryImpl{}
-	e := &exprimpl.ExprBuilderImpl{}
+	q := &query.InsertQuery{}
+	e := &expr.ExprBuilderImpl{}
 
 	fn(q.Start(db.eng.Dialect, ref), e.Start(ref))
-	stmt := &statement.StatementImpl{}
+	stmt := &internal.StatementImpl{}
 	return stmt.Start(db.eng.Driver, q)
 }
 func (db *DB) Update(ref string, fn func(q UpdateQuery, e Expr)) Statement {
-	q := &statement.UpdateQueryImpl{}
-	e := &exprimpl.ExprBuilderImpl{}
+	q := &query.UpdateQuery{}
+	e := &expr.ExprBuilderImpl{}
 
 	fn(q.Start(db.eng.Dialect, ref), e.Start(ref))
-	stmt := &statement.StatementImpl{}
+	stmt := &internal.StatementImpl{}
 	return stmt.Start(db.eng.Driver, q)
 }
 func (db *DB) Delete(ref string, fn func(q DeleteQuery, e Expr)) Statement {
-	q := &statement.DeleteQueryImpl{}
-	e := &exprimpl.ExprBuilderImpl{}
+	q := &query.DeleteQuery{}
+	e := &expr.ExprBuilderImpl{}
 
 	fn(q.Start(db.eng.Dialect, ref), e.Start(ref))
-	stmt := &statement.StatementImpl{}
+	stmt := &internal.StatementImpl{}
 	return stmt.Start(db.eng.Driver, q)
 }
 
 // --- DDL Statements
 
 func (db *DB) CreateTable(name string, fn func(q CreateTable, e Expr)) Statement {
-	q := &statement.CreateTableQueryImpl{}
-	e := &exprimpl.ExprBuilderImpl{}
+	q := &query.CreateTableQuery{}
+	e := &expr.ExprBuilderImpl{}
 
 	fn(q.Start(db.eng.Dialect, name), e.Start(name))
-	stmt := &statement.StatementImpl{}
+	stmt := &internal.StatementImpl{}
 	return stmt.Start(db.eng.Driver, q)
 }
 

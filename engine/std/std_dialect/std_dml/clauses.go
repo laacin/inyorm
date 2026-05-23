@@ -2,10 +2,10 @@ package std_dml
 
 import (
 	"github.com/laacin/inyorm/internal/core"
-	"github.com/laacin/inyorm/internal/ir/dml"
+	"github.com/laacin/inyorm/internal/query/dml"
 )
 
-func (*DmlSyntax) WriteInsertInto(w core.Writer, cls *dml.InsertInto) {
+func (*DmlSyntax) WriteInsertInto(w core.Writer, cls *dml.Insert) {
 	w.Write("INSERT INTO")
 	w.Char(' ')
 
@@ -63,21 +63,20 @@ func (*DmlSyntax) WriteFrom(w core.Writer, cls *dml.From) {
 	w.Value(cls.Value, core.WriteDef)
 }
 
-var joinTypeMap = map[dml.JoinType]string{
+var joinKindMap = map[dml.JoinKind]string{
 	dml.JoinInner: "INNER",
 	dml.JoinLeft:  "LEFT",
-	dml.JoinRight: "RIGHT",
 	dml.JoinFull:  "FULL",
 	dml.JoinCross: "CROSS",
 }
 
 func (*DmlSyntax) WriteJoin(w core.Writer, cls *dml.Join) {
-	for i, join := range cls.Joins {
+	for i, join := range cls.Segments {
 		if i > 0 {
 			w.Char(' ')
 		}
 
-		w.Write(joinTypeMap[join.Type])
+		w.Write(joinKindMap[join.Kind])
 		w.Write(" JOIN ")
 		w.Value(join.Table, core.WriteDef)
 
@@ -122,7 +121,7 @@ func (*DmlSyntax) WriteOrderBy(w core.Writer, cls *dml.OrderBy) {
 	w.Write("ORDER BY")
 	w.Char(' ')
 
-	for i, ord := range cls.Orders {
+	for i, ord := range cls.Segments {
 		if i > 0 {
 			w.Write(", ")
 		}
@@ -138,13 +137,13 @@ func (*DmlSyntax) WriteOrderBy(w core.Writer, cls *dml.OrderBy) {
 func (*DmlSyntax) WriteLimit(w core.Writer, cls *dml.Limit) {
 	w.Write("LIMIT")
 	w.Char(' ')
-	w.Value(cls.ValueNumber, core.WriteBase)
+	w.Value(cls.ValueInt, core.WriteBase)
 }
 
 func (*DmlSyntax) WriteOffset(w core.Writer, cls *dml.Offset) {
 	w.Write("OFFSET")
 	w.Char(' ')
-	w.Value(cls.ValueNumber, core.WriteBase)
+	w.Value(cls.ValueInt, core.WriteBase)
 }
 
 func (*DmlSyntax) WriteUpdate(w core.Writer, cls *dml.Update) {

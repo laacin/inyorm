@@ -41,8 +41,8 @@ func Test(t *testing.T) {
 	t.Run("create_table", func(t *testing.T) {
 		stmt := db.CreateTable("users", func(q inyorm.CreateTable, e inyorm.Expr) {
 			q.Int("id").PrimaryKey().AutoIncrement()
-			q.Text("account").Unique()
-			q.Text("password")
+			q.String("account").Unique()
+			q.String("password")
 			q.Int("age").Nullable()
 		})
 
@@ -93,8 +93,8 @@ func Test(t *testing.T) {
 		stmt := db.CreateTable("posts", func(q inyorm.CreateTable, e inyorm.Expr) {
 			q.Int("id").PrimaryKey().AutoIncrement()
 			q.Int("author_id")
-			q.Text("title").Unique().Default("untitled")
-			q.Text("description").Nullable()
+			q.String("title").Unique().Default("untitled")
+			q.String("description").Nullable()
 
 			q.ForeignKey("author_id").To("id", "users").OnDel("cascade")
 			q.Check(e.Col("description")).Not().Like("%someword%")
@@ -299,9 +299,9 @@ func Test(t *testing.T) {
 	t.Run("create_table_profile", func(t *testing.T) {
 		stmt := db.CreateTable("profiles", func(q inyorm.CreateTable, e inyorm.Expr) {
 			q.Int("id").PrimaryKey()
-			q.Text("firstname")
-			q.Text("lastname")
-			q.Text("bio").Nullable()
+			q.String("firstname")
+			q.String("lastname")
+			q.String("bio").Nullable()
 
 			q.ForeignKey("id").To("id", "users").OnDel("cascade")
 		})

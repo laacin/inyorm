@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/laacin/inyorm/internal/api"
-	"github.com/laacin/inyorm/internal/impl/exprimpl"
+	"github.com/laacin/inyorm/internal/expr"
 	"github.com/laacin/inyorm/internal/impl/mapper"
 )
 
@@ -16,8 +16,8 @@ func run(t *testing.T, v []any, exp []string) {
 	}
 }
 
-func col(name string) api.Column {
-	col := &exprimpl.ColumnImpl{}
+func col(name string) api.Col {
+	col := &expr.ColBuilder{}
 	return col.Start(name, "")
 }
 
@@ -156,7 +156,7 @@ func TestGetColumn(t *testing.T) {
 	})
 
 	t.Run("slice_of_columns", func(t *testing.T) {
-		v := []any{[]api.Column{col("name"), col("age")}}
+		v := []any{[]api.Col{col("name"), col("age")}}
 
 		exp := []string{"age", "name"}
 
@@ -164,7 +164,7 @@ func TestGetColumn(t *testing.T) {
 	})
 
 	t.Run("ptr_slice_of_columns", func(t *testing.T) {
-		slc := []api.Column{col("name"), col("age")}
+		slc := []api.Col{col("name"), col("age")}
 
 		v := []any{&slc}
 		exp := []string{"age", "name"}

@@ -1,6 +1,6 @@
 package std_ddl
 
-import "github.com/laacin/inyorm/internal/ir/ddl"
+import "github.com/laacin/inyorm/internal/query/ddl"
 
 var mapOnAct = map[ddl.OnAction]string{
 	ddl.OnActionCascade:  "CASCADE",
@@ -11,8 +11,8 @@ var mapOnAct = map[ddl.OnAction]string{
 }
 
 var mapColKind = map[ddl.ColKind]string{
-	ddl.ColKindText:  "TEXT",
-	ddl.ColKindInt:   "INTEGER",
-	ddl.ColKindFloat: "DOUBLE",
-	ddl.ColKindBool:  "BOOLEAN",
+	ddl.ColKindString: "TEXT",
+	ddl.ColKindInt:    "INTEGER",
+	ddl.ColKindFloat:  "DOUBLE",
+	ddl.ColKindBool:   "BOOLEAN",
 }

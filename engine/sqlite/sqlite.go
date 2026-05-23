@@ -8,10 +8,10 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func Open(dest string) *inyorm.Engine {
+func Open(dest string) (*inyorm.Engine, error) {
 	db, err := sql.Open("sqlite3", dest)
 	if err != nil {
-		return &inyorm.Engine{Err: err}
+		return nil, err
 	}
 	return std.FromInstance(db)
 }
