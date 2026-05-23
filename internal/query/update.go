@@ -10,8 +10,6 @@ type UpdateQuery struct {
 	Dial Dialect
 
 	dml.UpdateQuery
-	// dml.ClauseUpdate
-	// dml.ClauseWhere
 }
 
 // start
