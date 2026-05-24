@@ -12,14 +12,14 @@ type Col struct {
 	Ref   string
 	Alias string
 	Value string
-	from  ExprBuilder
+	from  Expr
 	aggr  *ColAggr
 	exprs []ColExpr
 }
 
 // start
 
-func (c *Col) StartFrom(from ExprBuilder) *Col {
+func (c *Col) StartFrom(from Expr) *Col {
 	c.from = from
 	return c
 }
@@ -145,11 +145,11 @@ func (c *Col) As(value string) api.Col {
 // --- Build
 func (c *Col) BaseName() string { return c.Name }
 
-func (c *Col) Kind() ExprKind {
-	return ExprCol
+func (*Col) Kind() ExprKind {
+	return ExprKindCol
 }
 
-func (c *Col) Build(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
+func (c *Col) Render(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
 	w.SetRef(c.Ref)
 
 	if c != nil && (c.aggr != nil || c.exprs != nil || c.from != nil) {
@@ -158,23 +158,23 @@ func (c *Col) Build(w core.InternalWriter, dial ExprWriter, mode core.WritingMod
 		if c.from != nil {
 			nw.Value(c.from, mode)
 		} else {
-			dial.WriteColBase(nw, c)
+			dial.WriteExprColBase(nw, c)
 		}
 
 		if c.exprs != nil {
 			for _, e := range c.exprs {
 				if scalar, ok := e.IsScalar(); ok {
-					dial.WriteColScalar(nw, scalar)
+					dial.WriteExprColScalar(nw, scalar)
 					continue
 				}
 
 				if arith, ok := e.IsArith(); ok {
-					dial.WriteColArith(nw, arith)
+					dial.WriteExprColArith(nw, arith)
 					continue
 				}
 
 				if e.IsWrap() {
-					dial.WriteColWrap(nw)
+					dial.WriteExprColWrap(nw)
 					continue
 				}
 			}
@@ -182,7 +182,7 @@ func (c *Col) Build(w core.InternalWriter, dial ExprWriter, mode core.WritingMod
 		}
 
 		if c.aggr != nil {
-			dial.WriteColAggr(nw, c.aggr)
+			dial.WriteExprColAggr(nw, c.aggr)
 			c.aggr = nil
 		}
 
@@ -191,16 +191,16 @@ func (c *Col) Build(w core.InternalWriter, dial ExprWriter, mode core.WritingMod
 
 	switch mode {
 	case core.WriteBase:
-		dial.WriteColBase(w, c)
+		dial.WriteExprColBase(w, c)
 
 	case core.WriteExpr:
-		dial.WriteColExpr(w, c)
+		dial.WriteExprColExpr(w, c)
 
 	case core.WriteAlias:
-		dial.WriteColAlias(w, c)
+		dial.WriteExprColAlias(w, c)
 
 	case core.WriteDef:
-		dial.WriteColDef(w, c)
+		dial.WriteExprColDef(w, c)
 	}
 }
 

@@ -15,10 +15,10 @@ func (t *Table) Start(table string) *Table {
 // --- Build
 
 func (t *Table) Kind() ExprKind {
-	return ExprTable
+	return ExprKindTable
 }
 
-func (t *Table) Build(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
+func (t *Table) Render(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
 	w.SetRef(t.Value)
-	dial.WriteTable(w, t)
+	dial.WriteExprTable(w, t)
 }

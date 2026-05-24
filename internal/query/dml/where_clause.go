@@ -9,8 +9,8 @@ import (
 
 type ClauseWhere struct {
 	declared bool
-	Conds    []expr.ExprBuilder
-	current  expr.ExprBuilder
+	Conds    []expr.Expr
+	current  expr.Expr
 }
 
 // --- PUB API

@@ -5,7 +5,7 @@ import (
 	"github.com/laacin/inyorm/internal/expr"
 )
 
-type Check struct{ Cond expr.ExprBuilder }
+type Check struct{ Cond expr.Expr }
 
 // start
 

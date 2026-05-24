@@ -9,23 +9,23 @@ import (
 
 // ----- LITERALS -----
 
-func (*Dialect) WriteString(w core.Writer, v string) {
+func (*Dialect) WriteLitString(w core.Writer, v string) {
 	w.Char(quote)
 	w.Write(v)
 	w.Char(quote)
 }
 
-func (*Dialect) WriteNumber(w core.Writer, v int) {
+func (*Dialect) WriteLitInt(w core.Writer, v int) {
 	r := strconv.Itoa(v)
 	w.Write(r)
 }
 
-func (*Dialect) WriteFloat(w core.Writer, v float64) {
+func (*Dialect) WriteLitFloat(w core.Writer, v float64) {
 	r := strconv.FormatFloat(float64(v), 'f', -1, 32)
 	w.Write(r)
 }
 
-func (*Dialect) WriteBool(w core.Writer, v bool) {
+func (*Dialect) WriteLitBool(w core.Writer, v bool) {
 	if v {
 		w.Char('1')
 		return
@@ -33,19 +33,19 @@ func (*Dialect) WriteBool(w core.Writer, v bool) {
 	w.Char('0')
 }
 
-func (*Dialect) WriteNull(w core.Writer) {
+func (*Dialect) WriteLitNull(w core.Writer) {
 	w.Write("NULL")
 }
 
 // ---- Placeholder -----
 
-func (*Dialect) WritePlaceholder(w core.Writer) {
+func (*Dialect) WriteExprPlaceholder(w core.Writer) {
 	w.Char('?')
 }
 
 // ---- Cond ----
 
-func (*Dialect) WriteCond(w core.Writer, cond *expr.Cond, mode core.WritingMode) {
+func (*Dialect) WriteExprCond(w core.Writer, cond *expr.Cond, mode core.WritingMode) {
 	w.Char('(')
 	for i, pred := range cond.Predicates {
 		if !pred.Closed {
@@ -93,7 +93,7 @@ func (*Dialect) WriteCond(w core.Writer, cond *expr.Cond, mode core.WritingMode)
 
 // ----- CONCAT -----
 
-func (*Dialect) WriteConcat(w core.Writer, con *expr.Concat, mode core.WritingMode) {
+func (*Dialect) WriteExprConcat(w core.Writer, con *expr.Concat, mode core.WritingMode) {
 	w.Write("CONCAT")
 	w.Char('(')
 	for i, val := range con.Values {
@@ -107,7 +107,7 @@ func (*Dialect) WriteConcat(w core.Writer, con *expr.Concat, mode core.WritingMo
 
 // ----- CASE -----
 
-func (*Dialect) WriteCaseSwitch(w core.Writer, cas *expr.Case, mode core.WritingMode) {
+func (*Dialect) WriteExprCaseSwitch(w core.Writer, cas *expr.Case, mode core.WritingMode) {
 	w.Write("CASE")
 	w.Char(' ')
 	w.Value(cas.Cond, core.WriteExpr)
@@ -131,7 +131,7 @@ func (*Dialect) WriteCaseSwitch(w core.Writer, cas *expr.Case, mode core.Writing
 	w.Write("END")
 }
 
-func (*Dialect) WriteCaseSearch(w core.Writer, cas *expr.Case, mode core.WritingMode) {
+func (*Dialect) WriteExprCaseSearch(w core.Writer, cas *expr.Case, mode core.WritingMode) {
 	w.Write("CASE WHEN")
 	w.Char(' ')
 
@@ -154,7 +154,7 @@ func (*Dialect) WriteCaseSearch(w core.Writer, cas *expr.Case, mode core.Writing
 
 // ---- TABLE ----
 
-func (*Dialect) WriteTable(w core.Writer, tbl *expr.Table) {
+func (*Dialect) WriteExprTable(w core.Writer, tbl *expr.Table) {
 	w.Write(tbl.Value)
 	if ref, ok := w.GetRef(tbl.Value); ok {
 		w.Char(' ')
@@ -164,7 +164,7 @@ func (*Dialect) WriteTable(w core.Writer, tbl *expr.Table) {
 
 // ---- COLUMN ----
 
-func (*Dialect) WriteColBase(w core.Writer, col *expr.Col) {
+func (*Dialect) WriteExprColBase(w core.Writer, col *expr.Col) {
 	if ref, ok := w.GetRef(col.Ref); ok {
 		w.Char(ref)
 		w.Char('.')
@@ -172,36 +172,36 @@ func (*Dialect) WriteColBase(w core.Writer, col *expr.Col) {
 	w.Write(col.Name)
 }
 
-func (s *Dialect) WriteColExpr(w core.Writer, col *expr.Col) {
+func (s *Dialect) WriteExprColExpr(w core.Writer, col *expr.Col) {
 	if col.Value == "" {
-		s.Self.WriteColBase(w, col)
+		s.Self.WriteExprColBase(w, col)
 		return
 	}
 
 	w.Write(col.Value)
 }
 
-func (s *Dialect) WriteColAlias(w core.Writer, col *expr.Col) {
+func (s *Dialect) WriteExprColAlias(w core.Writer, col *expr.Col) {
 	if col.Alias != "" {
 		w.Write(col.Alias)
 		return
 	}
 
 	if col.Value != "" {
-		s.Self.WriteColExpr(w, col)
+		s.Self.WriteExprColExpr(w, col)
 		return
 	}
 
-	s.Self.WriteColBase(w, col)
+	s.Self.WriteExprColBase(w, col)
 }
 
-func (s *Dialect) WriteColDef(w core.Writer, col *expr.Col) {
+func (s *Dialect) WriteExprColDef(w core.Writer, col *expr.Col) {
 	if col.Value == "" {
-		s.WriteColBase(w, col)
+		s.WriteExprColBase(w, col)
 		return
 	}
 
-	s.WriteColExpr(w, col)
+	s.WriteExprColExpr(w, col)
 	if col.Alias != "" {
 		w.Write(" AS ")
 		w.Write(col.Alias)
@@ -210,14 +210,14 @@ func (s *Dialect) WriteColDef(w core.Writer, col *expr.Col) {
 
 // ---- COLUMN EXPRS ----
 
-func (*Dialect) WriteColArith(w core.Writer, arith *expr.ColArith) {
+func (*Dialect) WriteExprColArith(w core.Writer, arith *expr.ColArith) {
 	w.Char(' ')
 	w.Char(arithMap[arith.Kind])
 	w.Char(' ')
 	w.Value(arith.Value, core.WriteExpr)
 }
 
-func (*Dialect) WriteColScalar(w core.Writer, scalar *expr.ColScalar) {
+func (*Dialect) WriteExprColScalar(w core.Writer, scalar *expr.ColScalar) {
 	w.Wrap(func(current string, w core.Writer) {
 		w.Write(scalarMap[scalar.Kind])
 		w.Char('(')
@@ -226,7 +226,7 @@ func (*Dialect) WriteColScalar(w core.Writer, scalar *expr.ColScalar) {
 	})
 }
 
-func (*Dialect) WriteColWrap(w core.Writer) {
+func (*Dialect) WriteExprColWrap(w core.Writer) {
 	w.Wrap(func(current string, w core.Writer) {
 		w.Char('(')
 		w.Write(current)
@@ -234,7 +234,7 @@ func (*Dialect) WriteColWrap(w core.Writer) {
 	})
 }
 
-func (*Dialect) WriteColAggr(w core.Writer, aggr *expr.ColAggr) {
+func (*Dialect) WriteExprColAggr(w core.Writer, aggr *expr.ColAggr) {
 	w.Wrap(func(current string, w core.Writer) {
 		w.Write(aggrMap[aggr.Kind])
 		w.Char('(')

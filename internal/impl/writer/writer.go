@@ -31,7 +31,7 @@ func (w *WriterImpl) Wrap(fn func(string, core.Writer)) {
 }
 
 func (w *WriterImpl) Value(v any, mode core.WritingMode) {
-	Normalize(v).Build(w, w.Syntax, mode)
+	expr.NormalizeExpr(v).Render(w, w.Syntax, mode)
 }
 
 func (w *WriterImpl) ValueCount() int {

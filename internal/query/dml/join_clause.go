@@ -62,7 +62,7 @@ func (c *ClauseJoin) Build() error {
 type JoinSegment struct {
 	Kind  JoinKind
 	Table any
-	Cond  expr.ExprBuilder
+	Cond  expr.Expr
 }
 
 type JoinKind int

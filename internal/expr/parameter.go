@@ -20,13 +20,13 @@ func (p *Param) Start(store bool, value any) *Param {
 // --- Build
 
 func (p *Param) Kind() ExprKind {
-	return ExprParam
+	return ExprKindParam
 }
 
-func (p *Param) Build(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
+func (p *Param) Render(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
 	if p.Store {
 		w.PushValue(p.Value)
 	}
 	w.IncValueCount()
-	dial.WritePlaceholder(w)
+	dial.WriteExprPlaceholder(w)
 }

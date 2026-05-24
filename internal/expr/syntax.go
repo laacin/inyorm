@@ -6,56 +6,55 @@ type ExprKind int
 
 const (
 	// Literals
-	ExprString ExprKind = iota
-	ExprNumber
-	ExprFloat
-	ExprBool
-	ExprNull
+	ExprKindString ExprKind = iota
+	ExprKindNumber
+	ExprKindFloat
+	ExprKindBool
+	ExprKindNull
 
 	// Specials
-	ExprParam
-	ExprCond
-	ExprConcat
-	ExprCaseSwitch
-	ExprCaseSearch
+	ExprKindParam
+	ExprKindCond
+	ExprKindConcat
+	ExprKindCaseSwitch
+	ExprKindCaseSearch
 
 	// SQL Values
-	ExprTable
-	ExprCol
+	ExprKindTable
+	ExprKindCol
 )
 
 type ExprWriter interface {
 	// Literals
-	WriteString(core.Writer, string)
-	WriteNumber(core.Writer, int)
-	WriteFloat(core.Writer, float64)
-	WriteBool(core.Writer, bool)
-	WriteNull(core.Writer)
+	WriteLitString(core.Writer, string)
+	WriteLitInt(core.Writer, int)
+	WriteLitFloat(core.Writer, float64)
+	WriteLitBool(core.Writer, bool)
+	WriteLitNull(core.Writer)
 
 	// Specials
-	WritePlaceholder(core.Writer)
-	WriteConcat(core.Writer, *Concat, core.WritingMode)
-	WriteCond(core.Writer, *Cond, core.WritingMode)
-	WriteCaseSwitch(core.Writer, *Case, core.WritingMode)
-	WriteCaseSearch(core.Writer, *Case, core.WritingMode)
+	WriteExprPlaceholder(core.Writer)
+	WriteExprConcat(core.Writer, *Concat, core.WritingMode)
+	WriteExprCond(core.Writer, *Cond, core.WritingMode)
+	WriteExprCaseSwitch(core.Writer, *Case, core.WritingMode)
+	WriteExprCaseSearch(core.Writer, *Case, core.WritingMode)
 
 	// Table
-	WriteTable(core.Writer, *Table)
+	WriteExprTable(core.Writer, *Table)
 
 	// Column
-	WriteColBase(core.Writer, *Col)
-	WriteColExpr(core.Writer, *Col)
-	WriteColAlias(core.Writer, *Col)
-	WriteColDef(core.Writer, *Col)
+	WriteExprColBase(core.Writer, *Col)
+	WriteExprColExpr(core.Writer, *Col)
+	WriteExprColAlias(core.Writer, *Col)
+	WriteExprColDef(core.Writer, *Col)
 
-	WriteColAggr(core.Writer, *ColAggr)
-	WriteColScalar(core.Writer, *ColScalar)
-	WriteColArith(core.Writer, *ColArith)
-	WriteColWrap(core.Writer)
+	WriteExprColAggr(core.Writer, *ColAggr)
+	WriteExprColScalar(core.Writer, *ColScalar)
+	WriteExprColArith(core.Writer, *ColArith)
+	WriteExprColWrap(core.Writer)
 }
 
-// --- Internal
-type ExprBuilder interface {
+type Expr interface {
 	Kind() ExprKind
-	Build(core.InternalWriter, ExprWriter, core.WritingMode)
+	Render(core.InternalWriter, ExprWriter, core.WritingMode)
 }

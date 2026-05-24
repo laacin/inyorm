@@ -72,12 +72,12 @@ func (c *Cond) Or(ident any) api.Cond {
 }
 
 // --- Build
-func (c *Cond) Kind() ExprKind {
-	return ExprCond
+func (*Cond) Kind() ExprKind {
+	return ExprKindCond
 }
 
-func (c *Cond) Build(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
-	dial.WriteCond(w, c, mode)
+func (c *Cond) Render(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
+	dial.WriteExprCond(w, c, mode)
 }
 
 // --- Helpers

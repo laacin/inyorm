@@ -9,7 +9,7 @@ import (
 
 type ClauseHaving struct {
 	declared bool
-	Cond     expr.ExprBuilder
+	Cond     expr.Expr
 }
 
 // --- PUB API
