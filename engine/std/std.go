@@ -19,7 +19,6 @@ func FromInstance(db *sql.DB) (*inyorm.Engine, error) {
 }
 
 func JustDialect() (*inyorm.Engine, error) {
-
 	return &inyorm.Engine{
 		Dialect: loadDialect(),
 	}, nil

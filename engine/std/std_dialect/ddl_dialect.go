@@ -7,7 +7,7 @@ import (
 
 // ---- CREATE TABLE ----
 
-func (s *Dialect) WriteCreateTable(w core.Writer, t *ddl.CreateTable) {
+func (s *Dialect) WriteCreateTable(w core.Writer, t *ddl.QueryCreateTable) {
 	w.Write("CREATE TABLE IF NOT EXISTS")
 	w.Char(' ')
 	w.Write(t.Name)

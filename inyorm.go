@@ -79,7 +79,7 @@ func (db *DB) Delete(ref string, fn func(q DeleteQuery, e Expr)) Statement {
 // --- DDL Statements
 
 func (db *DB) CreateTable(name string, fn func(q CreateTable, e Expr)) Statement {
-	q := &query.CreateTableQuery{}
+	q := &query.CreateTable{}
 	e := &internal.ExprBuilder{}
 
 	fn(q.Start(db.eng.Dialect, name), e.Start(name))

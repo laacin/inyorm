@@ -3,7 +3,7 @@ package ddl
 import "github.com/laacin/inyorm/internal/core"
 
 type TableWriter interface {
-	WriteCreateTable(core.Writer, *CreateTable)
+	WriteCreateTable(core.Writer, *QueryCreateTable)
 	WriteColDecl(core.Writer, *ColDecl)
 
 	WriteColString(core.Writer)
