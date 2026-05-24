@@ -17,7 +17,7 @@ const (
 	ClauseKindOffset
 
 	// Insert statement
-	ClauseKindInsert
+	ClauseKindInsertInto
 
 	// Update statement
 	ClauseKindUpdate
@@ -27,28 +27,28 @@ const (
 )
 
 type ClauseWriter interface {
-	WriteSelect(core.Writer, *ClauseSelect)
-	WriteFrom(core.Writer, *ClauseFrom)
-	WriteJoin(core.Writer, *ClauseJoin)
-	WriteWhere(core.Writer, *ClauseWhere)
-	WriteGroupBy(core.Writer, *ClauseGroupBy)
-	WriteHaving(core.Writer, *ClauseHaving)
-	WriteOrderBy(core.Writer, *ClauseOrderBy)
-	WriteLimit(core.Writer, *ClauseLimit)
-	WriteOffset(core.Writer, *ClauseOffset)
+	WriteClauseSelect(core.Writer, *ClauseSelect)
+	WriteClauseFrom(core.Writer, *ClauseFrom)
+	WriteClauseJoin(core.Writer, *ClauseJoin)
+	WriteClauseWhere(core.Writer, *ClauseWhere)
+	WriteClauseGroupBy(core.Writer, *ClauseGroupBy)
+	WriteClauseHaving(core.Writer, *ClauseHaving)
+	WriteClauseOrderBy(core.Writer, *ClauseOrderBy)
+	WriteClauseLimit(core.Writer, *ClauseLimit)
+	WriteClauseOffset(core.Writer, *ClauseOffset)
 
-	WriteInsertInto(core.Writer, *ClauseInsert)
+	WriteClauseInsertInto(core.Writer, *ClauseInsertInto)
 
-	WriteUpdate(core.Writer, *ClauseUpdate)
+	WriteClauseUpdate(core.Writer, *ClauseUpdate)
 
-	WriteDelete(core.Writer, *ClauseDelete)
+	WriteClauseDelete(core.Writer, *ClauseDelete)
 }
 
 type QueryWriter interface {
-	WriteQuerySelect(core.Writer, *SelectQuery)
-	WriteQueryInsert(core.Writer, *InsertQuery)
-	WriteQueryUpdate(core.Writer, *UpdateQuery)
-	WriteQueryDelete(core.Writer, *DeleteQuery)
+	WriteQuerySelect(core.Writer, *QuerySelect)
+	WriteQueryInsert(core.Writer, *QueryInsert)
+	WriteQueryUpdate(core.Writer, *QueryUpdate)
+	WriteQueryDelete(core.Writer, *QueryDelete)
 }
 
 // --- Internal
@@ -56,8 +56,4 @@ type Clause interface {
 	IsDeclared() bool
 	Kind() ClauseKind
 	Build() error
-}
-
-type QueryBuilder interface {
-	Build(core.InternalWriter, QueryWriter) error
 }

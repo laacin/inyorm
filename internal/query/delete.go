@@ -9,7 +9,7 @@ type DeleteQuery struct {
 	Ref  string
 	Dial Dialect
 
-	dml.DeleteQuery
+	dml.QueryDelete
 }
 
 // start
@@ -33,7 +33,7 @@ func (q *DeleteQuery) Build() (*QueryResult, error) {
 		Params: params,
 	}
 
-	q.DeleteQuery.Build(w, q.Dial)
+	q.QueryDelete.Render(w, q.Dial)
 	if err := params.Validate(); err != nil {
 		return nil, err
 	}

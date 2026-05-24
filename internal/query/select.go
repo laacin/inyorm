@@ -9,7 +9,7 @@ type SelectQuery struct {
 	Ref  string
 	Dial Dialect
 
-	dml.SelectQuery
+	dml.QuerySelect
 }
 
 // start
@@ -37,7 +37,7 @@ func (q *SelectQuery) Build() (*QueryResult, error) {
 		w.Aliases = &writer.AliasStore{}
 	}
 
-	q.SelectQuery.Build(w, q.Dial)
+	q.QuerySelect.Render(w, q.Dial)
 	if err := params.Validate(); err != nil {
 		return nil, err
 	}

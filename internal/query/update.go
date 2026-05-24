@@ -9,7 +9,7 @@ type UpdateQuery struct {
 	Ref  string
 	Dial Dialect
 
-	dml.UpdateQuery
+	dml.QueryUpdate
 }
 
 // start
@@ -32,7 +32,7 @@ func (q *UpdateQuery) Build() (*QueryResult, error) {
 		Params: params,
 	}
 
-	q.UpdateQuery.Build(w, q.Dial)
+	q.QueryUpdate.Render(w, q.Dial)
 	if err := params.Validate(); err != nil {
 		return nil, err
 	}

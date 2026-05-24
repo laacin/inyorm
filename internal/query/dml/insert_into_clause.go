@@ -12,7 +12,7 @@ import (
 
 // --- Entity
 
-type ClauseInsert struct {
+type ClauseInsertInto struct {
 	Table any
 	Cols  []string
 	Rows  int
@@ -27,35 +27,35 @@ type ClauseInsert struct {
 
 // --- PUB API
 
-func (c *ClauseInsert) Insert(ref ...any) api.Ignore {
+func (c *ClauseInsertInto) Insert(ref ...any) api.Ignore {
 	c.declared = true
 	c.ref = ref
 	return c
 }
 
-func (c *ClauseInsert) Ignore(ignore ...any) {
+func (c *ClauseInsertInto) Ignore(ignore ...any) {
 	c.ignores = ignore
 }
 
-func (c *ClauseInsert) Values(v any) {
+func (c *ClauseInsertInto) Values(v any) {
 	c.rawVal = v
 }
 
-func (c *ClauseInsert) Into(v any) {
+func (c *ClauseInsertInto) Into(v any) {
 	c.Table = v
 }
 
 // --- Build
 
-func (*ClauseInsert) Kind() ClauseKind {
-	return ClauseKindInsert
+func (*ClauseInsertInto) Kind() ClauseKind {
+	return ClauseKindInsertInto
 }
 
-func (c *ClauseInsert) IsDeclared() bool {
+func (c *ClauseInsertInto) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *ClauseInsert) Build() error {
+func (c *ClauseInsertInto) Build() error {
 	if len(c.ref) < 1 {
 		return errors.New("missing reference")
 	}

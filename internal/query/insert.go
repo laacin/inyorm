@@ -9,7 +9,7 @@ type InsertQuery struct {
 	Ref  string
 	Dial Dialect
 
-	dml.InsertQuery
+	dml.QueryInsert
 }
 
 // start
@@ -34,8 +34,7 @@ func (q *InsertQuery) Build() (*QueryResult, error) {
 		Params: params,
 	}
 
-	q.InsertQuery.Build(w, q.Dial)
-
+	q.QueryInsert.Render(w, q.Dial)
 	if err := params.Validate(); err != nil {
 		return nil, err
 	}

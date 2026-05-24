@@ -4,7 +4,7 @@ import "github.com/laacin/inyorm/internal/core"
 
 // ---- SELECT QUERY -----
 
-type SelectQuery struct {
+type QuerySelect struct {
 	ClauseSelect
 	ClauseFrom
 	ClauseJoin
@@ -16,43 +16,43 @@ type SelectQuery struct {
 	ClauseOffset
 }
 
-func (q *SelectQuery) Build(w core.InternalWriter, dial QueryWriter) error {
+func (q *QuerySelect) Render(w core.InternalWriter, dial QueryWriter) error {
 	dial.WriteQuerySelect(w, q)
 	return nil
 }
 
 // ----- INSERT QUERY ------
 
-type InsertQuery struct {
-	ClauseInsert
+type QueryInsert struct {
+	ClauseInsertInto
 }
 
-func (q *InsertQuery) Build(w core.InternalWriter, dial QueryWriter) error {
+func (q *QueryInsert) Render(w core.InternalWriter, dial QueryWriter) error {
 	dial.WriteQueryInsert(w, q)
 	return nil
 }
 
 // ----- UPDATE QUERY ------
 
-type UpdateQuery struct {
+type QueryUpdate struct {
 	ClauseUpdate
 	ClauseWhere
 }
 
-func (q *UpdateQuery) Build(w core.InternalWriter, dial QueryWriter) error {
+func (q *QueryUpdate) Render(w core.InternalWriter, dial QueryWriter) error {
 	dial.WriteQueryUpdate(w, q)
 	return nil
 }
 
 // ----- DELETE QUERY ------
 
-type DeleteQuery struct {
+type QueryDelete struct {
 	ClauseDelete
 	ClauseFrom
 	ClauseWhere
 }
 
-func (q *DeleteQuery) Build(w core.InternalWriter, dial QueryWriter) error {
+func (q *QueryDelete) Render(w core.InternalWriter, dial QueryWriter) error {
 	dial.WriteQueryDelete(w, q)
 	return nil
 }
