@@ -3,6 +3,14 @@ package core
 type Builder struct {
 	Mapper Mapper
 	Param  ParamStore
+	Attach AttachmentConfig
+}
+
+// --- Attachments
+
+type AttachmentConfig struct {
+	MainRef    string
+	UseAliases bool
 }
 
 // --- Mapper

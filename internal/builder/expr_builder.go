@@ -7,15 +7,22 @@ import (
 )
 
 type ExprBuilder struct {
-	builder *core.Builder
-	Ref     string
+	param core.ParamStore
+	Ref   string
 }
 
-func (e *ExprBuilder) Start(builder *core.Builder, defaultTable string) *ExprBuilder {
-	e.Ref = defaultTable
-	e.builder = builder
+// start
+func (e *ExprBuilder) Start(paramStore core.ParamStore) *ExprBuilder {
+	e.param = paramStore
 	return e
 }
+
+func (e *ExprBuilder) AttachRef(ref string) *ExprBuilder {
+	e.Ref = ref
+	return e
+}
+
+// --- PUB API
 
 func (e *ExprBuilder) Table(name string) any {
 	tbl := &expr.Table{}
@@ -34,15 +41,15 @@ func (e *ExprBuilder) All(ref ...string) api.Col {
 
 func (e *ExprBuilder) Param(v any) any {
 	return (&expr.Placeholder{}).Start(func() core.ParamIndex {
-		e.builder.Param.Store(v)
-		return e.builder.Param.LastIndex(0)
+		e.param.Store(v)
+		return e.param.LastIndex(0)
 	})
 }
 
 func (e *ExprBuilder) Lazy(id ...string) any {
 	return (&expr.Placeholder{}).StartLazy(func() core.ParamIndex {
-		e.builder.Param.Lazy(getLast("", id))
-		return e.builder.Param.LastIndex(0)
+		e.param.Lazy(getLast("", id))
+		return e.param.LastIndex(0)
 	})
 }
 

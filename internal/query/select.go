@@ -1,52 +1,69 @@
 package query
 
 import (
-	"github.com/laacin/inyorm/internal/builder"
 	"github.com/laacin/inyorm/internal/core"
+	"github.com/laacin/inyorm/internal/expr"
 	"github.com/laacin/inyorm/internal/query/dml"
-	"github.com/laacin/inyorm/internal/writer"
 )
 
-type SelectQuery struct {
-	Ref     string
-	Dial    Dialect
-	builder *core.Builder
-
-	dml.QuerySelect
+type QuerySelect struct {
+	dml.ClauseSelect
+	dml.ClauseFrom
+	dml.ClauseJoin
+	dml.ClauseWhere
+	dml.ClauseGroupBy
+	dml.ClauseHaving
+	dml.ClauseOrderBy
+	dml.ClauseLimit
+	dml.ClauseOffset
 }
 
-// start
-
-func (q *SelectQuery) Start(dial Dialect, ref string) (*SelectQuery, *builder.ExprBuilder) {
-	b := builder.New()
-
-	q.builder = b
-	q.Dial = dial
-	q.Ref = ref
-
-	e := &builder.ExprBuilder{}
-	return q, e.Start(b, ref)
-}
-
-// --- Build
-
-func (*SelectQuery) Kind() QueryKind {
-	return QuerySelect
-}
-
-func (q *SelectQuery) Build() (*QueryResult, error) {
-	w := writer.New(q.Dial, q.ClauseJoin.IsDeclared())
-
-	q.QuerySelect.Build(q.builder)
-	q.QuerySelect.Render(w, q.Dial)
-
-	vals, err := q.builder.Param.Values()
-	if err != nil {
-		return nil, err
+func (q *QuerySelect) Build(b *core.Builder) error {
+	if q.ClauseSelect.IsDeclared() {
+		q.ClauseSelect.Build(b)
 	}
 
-	return &QueryResult{
-		Query:  w.ToString(),
-		Values: vals,
-	}, nil
+	if q.ClauseFrom.IsDeclared() {
+		if tbl, ok := q.ClauseFrom.Value.(*expr.Table); ok {
+			b.Attach.MainRef = tbl.Value
+		}
+
+		q.ClauseFrom.Build(b)
+	}
+
+	if q.ClauseJoin.IsDeclared() {
+		b.Attach.UseAliases = true
+		q.ClauseJoin.Build(b)
+	}
+
+	if q.ClauseWhere.IsDeclared() {
+		q.ClauseWhere.Build(b)
+	}
+
+	if q.ClauseGroupBy.IsDeclared() {
+		q.ClauseGroupBy.Build(b)
+	}
+
+	if q.ClauseHaving.IsDeclared() {
+		q.ClauseHaving.Build(b)
+	}
+
+	if q.ClauseOrderBy.IsDeclared() {
+		q.ClauseOrderBy.Build(b)
+	}
+
+	if q.ClauseLimit.IsDeclared() {
+		q.ClauseLimit.Build(b)
+	}
+
+	if q.ClauseOffset.IsDeclared() {
+		q.ClauseOffset.Build(b)
+	}
+
+	return nil
+}
+
+func (q *QuerySelect) Render(w core.InternalWriter, dial Dialect) error {
+	dial.WriteQuerySelect(w, q)
+	return nil
 }

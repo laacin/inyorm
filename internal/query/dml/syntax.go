@@ -44,13 +44,6 @@ type ClauseWriter interface {
 	WriteClauseDelete(core.Writer, *ClauseDelete)
 }
 
-type QueryWriter interface {
-	WriteQuerySelect(core.Writer, *QuerySelect)
-	WriteQueryInsert(core.Writer, *QueryInsert)
-	WriteQueryUpdate(core.Writer, *QueryUpdate)
-	WriteQueryDelete(core.Writer, *QueryDelete)
-}
-
 // --- Internal
 type Clause interface {
 	IsDeclared() bool

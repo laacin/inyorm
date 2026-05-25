@@ -1,51 +1,33 @@
 package query
 
 import (
-	"github.com/laacin/inyorm/internal/builder"
 	"github.com/laacin/inyorm/internal/core"
+	"github.com/laacin/inyorm/internal/expr"
 	"github.com/laacin/inyorm/internal/query/dml"
-	"github.com/laacin/inyorm/internal/writer"
 )
 
-type UpdateQuery struct {
-	Ref     string
-	Dial    Dialect
-	builder *core.Builder
-
-	dml.QueryUpdate
+type QueryUpdate struct {
+	dml.ClauseUpdate
+	dml.ClauseWhere
 }
 
-// start
+func (q *QueryUpdate) Build(b *core.Builder) error {
+	if q.ClauseUpdate.IsDeclared() {
+		if tbl, ok := q.ClauseUpdate.Table.(*expr.Table); ok {
+			b.Attach.MainRef = tbl.Value
+		}
 
-func (q *UpdateQuery) Start(dial Dialect, ref string) (*UpdateQuery, *builder.ExprBuilder) {
-	b := builder.New()
-
-	q.builder = b
-	q.Dial = dial
-	q.Ref = ref
-
-	e := &builder.ExprBuilder{}
-	return q, e.Start(b, ref)
-}
-
-// --- Build
-func (q *UpdateQuery) Kind() QueryKind {
-	return QueryUpdate
-}
-
-func (q *UpdateQuery) Build() (*QueryResult, error) {
-	w := writer.New(q.Dial, false)
-
-	q.QueryUpdate.Build(q.builder)
-	q.QueryUpdate.Render(w, q.Dial)
-
-	vals, err := q.builder.Param.Values()
-	if err != nil {
-		return nil, err
+		q.ClauseUpdate.Build(b)
 	}
 
-	return &QueryResult{
-		Query:  w.ToString(),
-		Values: vals,
-	}, nil
+	if q.ClauseWhere.IsDeclared() {
+		q.ClauseWhere.Build(b)
+	}
+
+	return nil
+}
+
+func (q *QueryUpdate) Render(w core.InternalWriter, dial Dialect) error {
+	dial.WriteQueryUpdate(w, q)
+	return nil
 }

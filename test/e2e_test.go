@@ -40,6 +40,8 @@ func Test(t *testing.T) {
 
 	t.Run("create_table", func(t *testing.T) {
 		stmt := db.CreateTable("users", func(q inyorm.CreateTable, e inyorm.Expr) {
+			q.TableName("users")
+
 			q.Int("id").PrimaryKey().AutoIncrement()
 			q.String("account").Unique()
 			q.String("password")
@@ -91,6 +93,8 @@ func Test(t *testing.T) {
 
 	t.Run("create_table_with_constraints", func(t *testing.T) {
 		stmt := db.CreateTable("posts", func(q inyorm.CreateTable, e inyorm.Expr) {
+			q.TableName("posts")
+
 			q.Int("id").PrimaryKey().AutoIncrement()
 			q.Int("author_id")
 			q.String("title").Default("untitled")
@@ -298,6 +302,8 @@ func Test(t *testing.T) {
 
 	t.Run("create_table_profile", func(t *testing.T) {
 		stmt := db.CreateTable("profiles", func(q inyorm.CreateTable, e inyorm.Expr) {
+			q.TableName("profiles")
+
 			q.Int("id").PrimaryKey()
 			q.String("firstname")
 			q.String("lastname")

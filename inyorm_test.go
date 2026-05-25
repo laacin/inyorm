@@ -425,6 +425,8 @@ func TestCreateTable(t *testing.T) {
 
 	t.Run("basic_table", func(t *testing.T) {
 		stmt := db.CreateTable("users", func(q inyorm.CreateTable, e inyorm.Expr) {
+			q.TableName("users")
+
 			q.Int("id").PrimaryKey().AutoIncrement()
 			q.String("account").Unique()
 		})
@@ -434,11 +436,13 @@ func TestCreateTable(t *testing.T) {
 		exp += "account TEXT UNIQUE NOT NULL"
 		exp += ")"
 
-		run(t, stmt, exp, nil)
+		run(t, stmt, exp, []any{})
 	})
 
 	t.Run("with_constraints", func(t *testing.T) {
 		stmt := db.CreateTable("posts", func(q inyorm.CreateTable, e inyorm.Expr) {
+			q.TableName("posts")
+
 			q.String("id").PrimaryKey()
 			q.String("author_id")
 			q.String("title").Default("untitled")
@@ -457,6 +461,6 @@ func TestCreateTable(t *testing.T) {
 		exp += "CHECK (description NOT LIKE '%word%')"
 		exp += ")"
 
-		run(t, stmt, exp, nil)
+		run(t, stmt, exp, []any{})
 	})
 }

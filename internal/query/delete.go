@@ -1,52 +1,38 @@
 package query
 
 import (
-	"github.com/laacin/inyorm/internal/builder"
 	"github.com/laacin/inyorm/internal/core"
+	"github.com/laacin/inyorm/internal/expr"
 	"github.com/laacin/inyorm/internal/query/dml"
-	"github.com/laacin/inyorm/internal/writer"
 )
 
-type DeleteQuery struct {
-	Ref     string
-	Dial    Dialect
-	builder *core.Builder
-
-	dml.QueryDelete
+type QueryDelete struct {
+	dml.ClauseDelete
+	dml.ClauseFrom
+	dml.ClauseWhere
 }
 
-// start
-
-func (q *DeleteQuery) Start(dial Dialect, ref string) (*DeleteQuery, *builder.ExprBuilder) {
-	b := builder.New()
-
-	q.builder = b
-	q.Dial = dial
-	q.Ref = ref
-
-	e := &builder.ExprBuilder{}
-	return q, e.Start(b, ref)
-}
-
-// --- Build
-
-func (q *DeleteQuery) Kind() QueryKind {
-	return QueryDelete
-}
-
-func (q *DeleteQuery) Build() (*QueryResult, error) {
-	w := writer.New(q.Dial, false)
-
-	q.QueryDelete.Build(q.builder)
-	q.QueryDelete.Render(w, q.Dial)
-
-	vals, err := q.builder.Param.Values()
-	if err != nil {
-		return nil, err
+func (q *QueryDelete) Build(b *core.Builder) error {
+	if q.ClauseDelete.IsDeclared() {
+		q.ClauseDelete.Build(b)
 	}
 
-	return &QueryResult{
-		Query:  w.ToString(),
-		Values: vals,
-	}, nil
+	if q.ClauseFrom.IsDeclared() {
+		if tbl, ok := q.ClauseFrom.Value.(*expr.Table); ok {
+			b.Attach.MainRef = tbl.Value
+		}
+
+		q.ClauseFrom.Build(b)
+	}
+
+	if q.ClauseWhere.IsDeclared() {
+		q.ClauseWhere.Build(b)
+	}
+
+	return nil
+}
+
+func (q *QueryDelete) Render(w core.InternalWriter, dial Dialect) error {
+	dial.WriteQueryDelete(w, q)
+	return nil
 }
