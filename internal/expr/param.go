@@ -5,15 +5,20 @@ import "github.com/laacin/inyorm/internal/core"
 // --- Entity
 
 type Param struct {
+	lazy  bool
 	Value any
-	Store bool
+	Ref   string
+	Cols  []string
 }
 
 // start
-
-func (p *Param) Start(store bool, value any) *Param {
-	p.Store = store
+func (p *Param) Start(value any) *Param {
 	p.Value = value
+	return p
+}
+
+func (p *Param) Lazy(ref string) *Param {
+	p.Ref = ref
 	return p
 }
 
@@ -24,9 +29,6 @@ func (p *Param) Kind() ExprKind {
 }
 
 func (p *Param) Render(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
-	if p.Store {
-		w.PushValue(p.Value)
-	}
-	w.IncValueCount()
+	w.PushValue(p.Value)
 	dial.WriteExprPlaceholder(w)
 }

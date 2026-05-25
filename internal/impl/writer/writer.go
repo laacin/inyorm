@@ -35,7 +35,7 @@ func (w *WriterImpl) Value(v any, mode core.WritingMode) {
 }
 
 func (w *WriterImpl) ValueCount() int {
-	return w.Params.count
+	return w.Params.ValueCount()
 }
 
 func (w *WriterImpl) GetRef(ref string) (byte, bool) {
@@ -51,8 +51,12 @@ func (w *WriterImpl) PushValue(v any) {
 	w.Params.Store(v)
 }
 
-func (w *WriterImpl) IncValueCount() {
-	w.Params.JustCount()
+func (w *WriterImpl) PushLazyValue(ref string) {
+	w.Params.StoreLazy(ref)
+}
+
+func (w *WriterImpl) PushLazyObj(cols []string) {
+	w.Params.StoreLazyObj(cols)
 }
 
 func (w *WriterImpl) SetRef(ref string) {

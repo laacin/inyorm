@@ -24,7 +24,8 @@ type Writer interface {
 type InternalWriter interface {
 	Writer
 	PushValue(v any)
-	IncValueCount()
+	PushLazyValue(ref string)
+	PushLazyObj(cols []string)
 	SetRef(string)
 
 	New() InternalWriter

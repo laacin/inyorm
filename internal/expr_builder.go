@@ -29,7 +29,7 @@ func (e *ExprBuilder) All(ref ...string) api.Col {
 
 func (e *ExprBuilder) Param(value ...any) any {
 	param := &expr.Param{}
-	return param.Start(len(value) > 0, getLast(nil, value))
+	return param.Start(getLast(nil, value))
 }
 
 func (e *ExprBuilder) Cond(ident any) api.Cond {

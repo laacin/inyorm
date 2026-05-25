@@ -74,7 +74,7 @@ func (c *ClauseInsertInto) Build() error {
 
 	params := make([]any, len(result.Args))
 	for i, arg := range result.Args {
-		params[i] = (&expr.Param{}).Start(true, arg)
+		params[i] = (&expr.Param{}).Start(arg)
 	}
 
 	c.Cols = cols

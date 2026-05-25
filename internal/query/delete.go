@@ -34,12 +34,13 @@ func (q *DeleteQuery) Build() (*QueryResult, error) {
 	}
 
 	q.QueryDelete.Render(w, q.Dial)
-	if err := params.Validate(); err != nil {
+	vals, err := params.GetValues()
+	if err != nil {
 		return nil, err
 	}
 
 	return &QueryResult{
 		Query:  w.ToString(),
-		Values: params.Values(),
+		Values: vals,
 	}, nil
 }
