@@ -8,10 +8,16 @@ import (
 )
 
 type WriterImpl struct {
-	sb      strings.Builder
-	Syntax  expr.ExprWriter
-	Aliases *AliasStore
-	Params  *ParamStore
+	sb    strings.Builder
+	dial  expr.ExprWriter
+	alias *AliasStore
+}
+
+func New(dial expr.ExprWriter, useAliases bool) *WriterImpl {
+	if useAliases {
+		return &WriterImpl{dial: dial, alias: &AliasStore{}}
+	}
+	return &WriterImpl{dial: dial}
 }
 
 // --- Writer
@@ -31,46 +37,29 @@ func (w *WriterImpl) Wrap(fn func(string, core.Writer)) {
 }
 
 func (w *WriterImpl) Value(v any, mode core.WritingMode) {
-	expr.NormalizeExpr(v).Render(w, w.Syntax, mode)
-}
-
-func (w *WriterImpl) ValueCount() int {
-	return w.Params.ValueCount()
+	expr.NormalizeExpr(v).Render(w, w.dial, mode)
 }
 
 func (w *WriterImpl) GetRef(ref string) (byte, bool) {
 	if ref == "" {
 		return 0, false
 	}
-	return w.Aliases.Get(ref)
+	return w.alias.Get(ref)
 }
 
 // --- Internal writer
-
-func (w *WriterImpl) PushValue(v any) {
-	w.Params.Store(v)
-}
-
-func (w *WriterImpl) PushLazyValue(ref string) {
-	w.Params.StoreLazy(ref)
-}
-
-func (w *WriterImpl) PushLazyObj(cols []string) {
-	w.Params.StoreLazyObj(cols)
-}
 
 func (w *WriterImpl) SetRef(ref string) {
 	if ref == "" {
 		return
 	}
-	w.Aliases.Set(ref)
+	w.alias.Set(ref)
 }
 
 func (w *WriterImpl) New() core.InternalWriter {
 	return &WriterImpl{
-		Syntax:  w.Syntax,
-		Aliases: w.Aliases,
-		Params:  w.Params,
+		dial:  w.dial,
+		alias: w.alias,
 	}
 }
 

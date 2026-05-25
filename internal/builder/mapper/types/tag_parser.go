@@ -1,23 +1,10 @@
-package core
+package types
 
 import (
 	"strings"
 	"unicode"
-)
 
-// TAG MAIN NAME
-const TAG = "inyorm"
-
-// --- Seps
-const (
-	KeySep = ","
-	ValSep = ":"
-)
-
-// ---- Tag keys
-const (
-	KeySkip = "skip"
-	KeyCol  = "col"
+	"github.com/laacin/inyorm/internal/core"
 )
 
 type TagResult struct {
@@ -28,26 +15,26 @@ type TagResult struct {
 func ParseTag(fieldName, tag string) TagResult {
 	result := TagResult{}
 
-	for seq := range strings.SplitSeq(tag, KeySep) {
+	for seq := range strings.SplitSeq(tag, core.TagKeySep) {
 		seq = strings.TrimSpace(seq)
 
-		if strings.ToLower(seq) == KeySkip {
+		if strings.ToLower(seq) == core.TagKeySkip {
 			result.Skip = true
 			continue
 		}
 
-		if strings.ToLower(seq) == KeyCol {
+		if strings.ToLower(seq) == core.TagKeyCol {
 			result.Name = fieldName
 			continue
 		}
 
-		keyVal := strings.Split(seq, ValSep)
+		keyVal := strings.Split(seq, core.TagValSep)
 		if len(keyVal) < 2 {
 			continue
 		}
 
 		key, val := keyVal[0], keyVal[1]
-		if strings.ToLower(key) == KeyCol {
+		if strings.ToLower(key) == core.TagKeyCol {
 			result.Name = val
 			continue
 		}

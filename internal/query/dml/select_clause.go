@@ -1,6 +1,9 @@
 package dml
 
-import "github.com/laacin/inyorm/internal/api"
+import (
+	"github.com/laacin/inyorm/internal/api"
+	"github.com/laacin/inyorm/internal/core"
+)
 
 // --- Entity
 type ClauseSelect struct {
@@ -31,6 +34,6 @@ func (c *ClauseSelect) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *ClauseSelect) Build() error {
+func (c *ClauseSelect) Build(b *core.Builder) error {
 	return nil
 }

@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/laacin/inyorm/internal/builder/mapper/types"
 	"github.com/laacin/inyorm/internal/core"
-	"github.com/laacin/inyorm/internal/impl/mapper/types"
 )
 
-func Scan(rows core.Rows, scanner any) error {
+func (m *Mapper) Scan(rows core.Rows, scanner any) error {
 	info := types.ReadInfo(reflect.TypeOf(scanner))
 
 	if !info.IsPtr() && info.Kind != types.KindMap {
@@ -38,7 +38,7 @@ func Scan(rows core.Rows, scanner any) error {
 }
 
 // --- Scanners
-func scanByStruct(rows core.Rows, value any, schema core.StructInfo) error {
+func scanByStruct(rows core.Rows, value any, schema types.StructInfo) error {
 	defer rows.Close()
 
 	if !rows.Next() {
@@ -71,7 +71,7 @@ func scanByStruct(rows core.Rows, value any, schema core.StructInfo) error {
 	return rows.Err()
 }
 
-func scanByStructSlc(rows core.Rows, value any, schema core.StructInfo) error {
+func scanByStructSlc(rows core.Rows, value any, schema types.StructInfo) error {
 	defer rows.Close()
 
 	cols, _ := rows.Columns()

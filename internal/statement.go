@@ -4,21 +4,23 @@ import (
 	"context"
 
 	"github.com/laacin/inyorm/internal/api"
+	"github.com/laacin/inyorm/internal/builder"
 	"github.com/laacin/inyorm/internal/core"
-	"github.com/laacin/inyorm/internal/impl/mapper"
 	"github.com/laacin/inyorm/internal/query"
 )
 
 type Statement struct {
 	driver core.Driver
 
-	query query.QueryBuilder
-	bind  any
+	builder *core.Builder
+	query   query.QueryBuilder
+	bind    any
 }
 
 func (s *Statement) Start(driver core.Driver, q query.QueryBuilder) api.Statement {
 	s.driver = driver
 	s.query = q
+	s.builder = builder.New()
 	return s
 }
 
@@ -62,7 +64,7 @@ func (s *Statement) Run(context ...context.Context) error {
 		return err
 	}
 
-	return mapper.Scan(rows, s.bind)
+	return s.builder.Mapper.Scan(rows, s.bind)
 }
 
 func (s *Statement) RunTx(ctx context.Context, tx core.Transaction) error {
@@ -80,7 +82,7 @@ func (s *Statement) RunTx(ctx context.Context, tx core.Transaction) error {
 		return err
 	}
 
-	return mapper.Scan(rows, s.bind)
+	return s.builder.Mapper.Scan(rows, s.bind)
 }
 
 // --- Prepare

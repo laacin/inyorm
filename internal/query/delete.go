@@ -1,23 +1,31 @@
 package query
 
 import (
-	"github.com/laacin/inyorm/internal/impl/writer"
+	"github.com/laacin/inyorm/internal/builder"
+	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/query/dml"
+	"github.com/laacin/inyorm/internal/writer"
 )
 
 type DeleteQuery struct {
-	Ref  string
-	Dial Dialect
+	Ref     string
+	Dial    Dialect
+	builder *core.Builder
 
 	dml.QueryDelete
 }
 
 // start
 
-func (q *DeleteQuery) Start(dial Dialect, ref string) *DeleteQuery {
+func (q *DeleteQuery) Start(dial Dialect, ref string) (*DeleteQuery, *builder.ExprBuilder) {
+	b := builder.New()
+
+	q.builder = b
 	q.Dial = dial
 	q.Ref = ref
-	return q
+
+	e := &builder.ExprBuilder{}
+	return q, e.Start(b, ref)
 }
 
 // --- Build
@@ -27,14 +35,12 @@ func (q *DeleteQuery) Kind() QueryKind {
 }
 
 func (q *DeleteQuery) Build() (*QueryResult, error) {
-	params := &writer.ParamStore{}
-	w := &writer.WriterImpl{
-		Syntax: q.Dial,
-		Params: params,
-	}
+	w := writer.New(q.Dial, false)
 
+	q.QueryDelete.Build(q.builder)
 	q.QueryDelete.Render(w, q.Dial)
-	vals, err := params.GetValues()
+
+	vals, err := q.builder.Param.Values()
 	if err != nil {
 		return nil, err
 	}

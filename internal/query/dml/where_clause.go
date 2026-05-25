@@ -2,6 +2,7 @@ package dml
 
 import (
 	"github.com/laacin/inyorm/internal/api"
+	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/expr"
 )
 
@@ -10,7 +11,6 @@ import (
 type ClauseWhere struct {
 	declared bool
 	Conds    []expr.Expr
-	current  expr.Expr
 }
 
 // --- PUB API
@@ -32,6 +32,6 @@ func (c *ClauseWhere) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *ClauseWhere) Build() error {
+func (c *ClauseWhere) Build(b *core.Builder) error {
 	return nil
 }

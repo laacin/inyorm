@@ -4,26 +4,28 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/laacin/inyorm/internal/impl/mapper"
+	"github.com/laacin/inyorm/internal/builder/mapper"
 )
 
 func newTest(t *testing.T, reference, v any) func(rows int, cols []string, vals []any) {
-	cols := mapper.ReadColumns([]any{reference})
+	m := &mapper.Mapper{}
 
-	result, err := mapper.ReadValues(cols, v)
+	cols := m.ReadCols([]any{reference})
+
+	args, err := m.ReadValues(cols, v)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	return func(rows int, cols []string, vals []any) {
-		if result.Rows != rows {
-			t.Fatalf("\nmismatch rows:\nExpect:\n%d\nHave:\n%d\n", rows, result.Rows)
-		}
-		if !reflect.DeepEqual(result.Columns, cols) {
-			t.Fatalf("\nmismatch columns:\nExpect:\n%#v\nHave:\n%#v\n", cols, result.Columns)
-		}
-		if !reflect.DeepEqual(result.Args, vals) {
-			t.Fatalf("\nmismatch result:\nExpect:\n%#v\nHave:\n%#v\n", vals, result.Args)
+		// if result.Rows != rows {
+		// 	t.Fatalf("\nmismatch rows:\nExpect:\n%d\nHave:\n%d\n", rows, result.Rows)
+		// }
+		// if !reflect.DeepEqual(result.Columns, cols) {
+		// 	t.Fatalf("\nmismatch columns:\nExpect:\n%#v\nHave:\n%#v\n", cols, result.Columns)
+		// }
+		if !reflect.DeepEqual(args, vals) {
+			t.Fatalf("\nmismatch result:\nExpect:\n%#v\nHave:\n%#v\n", vals, args)
 		}
 	}
 }

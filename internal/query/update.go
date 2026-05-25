@@ -1,23 +1,31 @@
 package query
 
 import (
-	"github.com/laacin/inyorm/internal/impl/writer"
+	"github.com/laacin/inyorm/internal/builder"
+	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/query/dml"
+	"github.com/laacin/inyorm/internal/writer"
 )
 
 type UpdateQuery struct {
-	Ref  string
-	Dial Dialect
+	Ref     string
+	Dial    Dialect
+	builder *core.Builder
 
 	dml.QueryUpdate
 }
 
 // start
 
-func (q *UpdateQuery) Start(dial Dialect, ref string) *UpdateQuery {
+func (q *UpdateQuery) Start(dial Dialect, ref string) (*UpdateQuery, *builder.ExprBuilder) {
+	b := builder.New()
+
+	q.builder = b
 	q.Dial = dial
 	q.Ref = ref
-	return q
+
+	e := &builder.ExprBuilder{}
+	return q, e.Start(b, ref)
 }
 
 // --- Build
@@ -26,14 +34,12 @@ func (q *UpdateQuery) Kind() QueryKind {
 }
 
 func (q *UpdateQuery) Build() (*QueryResult, error) {
-	params := &writer.ParamStore{}
-	w := &writer.WriterImpl{
-		Syntax: q.Dial,
-		Params: params,
-	}
+	w := writer.New(q.Dial, false)
 
+	q.QueryUpdate.Build(q.builder)
 	q.QueryUpdate.Render(w, q.Dial)
-	vals, err := params.GetValues()
+
+	vals, err := q.builder.Param.Values()
 	if err != nil {
 		return nil, err
 	}

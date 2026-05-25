@@ -39,7 +39,7 @@ func (*Dialect) WriteLitNull(w core.Writer) {
 
 // ---- Placeholder -----
 
-func (*Dialect) WriteExprPlaceholder(w core.Writer) {
+func (*Dialect) WriteExprPlaceholder(w core.Writer, p *expr.Placeholder) {
 	w.Char('?')
 }
 

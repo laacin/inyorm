@@ -4,10 +4,10 @@ import (
 	"reflect"
 	"slices"
 
-	"github.com/laacin/inyorm/internal/impl/mapper/types"
+	"github.com/laacin/inyorm/internal/builder/mapper/types"
 )
 
-func ReadColumns(entries []any) []string {
+func (m *Mapper) ReadCols(entries ...any) []string {
 	c := collector(map[string]struct{}{})
 
 	for _, entry := range entries {

@@ -1,8 +1,8 @@
 package query
 
 import (
-	"github.com/laacin/inyorm/internal/impl/writer"
 	"github.com/laacin/inyorm/internal/query/ddl"
+	"github.com/laacin/inyorm/internal/writer"
 )
 
 type CreateTable struct {
@@ -26,7 +26,8 @@ func (q *CreateTable) Kind() QueryKind {
 }
 
 func (q *CreateTable) Build() (*QueryResult, error) {
-	w := &writer.WriterImpl{Syntax: q.Dial}
+	w := writer.New(q.Dial, false)
+
 	q.QueryCreateTable.Render(w, q.Dial)
 
 	return &QueryResult{

@@ -13,7 +13,7 @@ const (
 	ExprKindNull
 
 	// Specials
-	ExprKindParam
+	ExprKindPlaceholder
 	ExprKindCond
 	ExprKindConcat
 	ExprKindCaseSwitch
@@ -33,7 +33,7 @@ type ExprWriter interface {
 	WriteLitNull(core.Writer)
 
 	// Specials
-	WriteExprPlaceholder(core.Writer)
+	WriteExprPlaceholder(core.Writer, *Placeholder)
 	WriteExprConcat(core.Writer, *Concat, core.WritingMode)
 	WriteExprCond(core.Writer, *Cond, core.WritingMode)
 	WriteExprCaseSwitch(core.Writer, *Case, core.WritingMode)

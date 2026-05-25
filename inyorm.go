@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/laacin/inyorm/internal"
+	"github.com/laacin/inyorm/internal/builder"
 	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/query"
 )
@@ -45,33 +46,29 @@ func (db *DB) RunTx(ctx context.Context, stmts ...Runner) error {
 
 func (db *DB) Select(ref string, fn func(q SelectQuery, e Expr)) Statement {
 	q := &query.SelectQuery{}
-	e := &internal.ExprBuilder{}
 
-	fn(q.Start(db.eng.Dialect, ref), e.Start(ref))
+	fn(q.Start(db.eng.Dialect, ref))
 	stmt := &internal.Statement{}
 	return stmt.Start(db.eng.Driver, q)
 }
 func (db *DB) Insert(ref string, fn func(q InsertQuery, e Expr)) Statement {
 	q := &query.InsertQuery{}
-	e := &internal.ExprBuilder{}
 
-	fn(q.Start(db.eng.Dialect, ref), e.Start(ref))
+	fn(q.Start(db.eng.Dialect, ref))
 	stmt := &internal.Statement{}
 	return stmt.Start(db.eng.Driver, q)
 }
 func (db *DB) Update(ref string, fn func(q UpdateQuery, e Expr)) Statement {
 	q := &query.UpdateQuery{}
-	e := &internal.ExprBuilder{}
 
-	fn(q.Start(db.eng.Dialect, ref), e.Start(ref))
+	fn(q.Start(db.eng.Dialect, ref))
 	stmt := &internal.Statement{}
 	return stmt.Start(db.eng.Driver, q)
 }
 func (db *DB) Delete(ref string, fn func(q DeleteQuery, e Expr)) Statement {
 	q := &query.DeleteQuery{}
-	e := &internal.ExprBuilder{}
 
-	fn(q.Start(db.eng.Dialect, ref), e.Start(ref))
+	fn(q.Start(db.eng.Dialect, ref))
 	stmt := &internal.Statement{}
 	return stmt.Start(db.eng.Driver, q)
 }
@@ -80,9 +77,9 @@ func (db *DB) Delete(ref string, fn func(q DeleteQuery, e Expr)) Statement {
 
 func (db *DB) CreateTable(name string, fn func(q CreateTable, e Expr)) Statement {
 	q := &query.CreateTable{}
-	e := &internal.ExprBuilder{}
+	e := &builder.ExprBuilder{}
 
-	fn(q.Start(db.eng.Dialect, name), e.Start(name))
+	fn(q.Start(db.eng.Dialect, name), e.Start(builder.New(), name))
 	stmt := &internal.Statement{}
 	return stmt.Start(db.eng.Driver, q)
 }

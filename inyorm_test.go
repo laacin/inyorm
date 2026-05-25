@@ -223,7 +223,7 @@ func TestSelect(t *testing.T) {
 		exp += "ORDER BY total_posts DESC, a.age "
 		exp += "LIMIT 50"
 
-		run(t, stmt, exp, nil)
+		run(t, stmt, exp, []any{})
 	})
 }
 

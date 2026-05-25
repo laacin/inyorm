@@ -1,5 +1,7 @@
 package dml
 
+import "github.com/laacin/inyorm/internal/core"
+
 // --- Entity
 
 type ClauseLimit struct {
@@ -26,6 +28,6 @@ func (c *ClauseLimit) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *ClauseLimit) Build() error {
+func (c *ClauseLimit) Build(b *core.Builder) error {
 	return nil
 }

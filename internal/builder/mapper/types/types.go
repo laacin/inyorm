@@ -5,14 +5,13 @@ import (
 	"sync"
 
 	"github.com/laacin/inyorm/internal/api"
-	"github.com/laacin/inyorm/internal/core"
 )
 
 type TypeInfo struct {
 	Kind   Kind
 	Ptr    int
 	Slc    int
-	Schema core.StructInfo // nil if Kind != KindStruct
+	Schema StructInfo // nil if Kind != KindStruct
 }
 
 func (t *TypeInfo) CanBeDeref() bool  { return t.Ptr <= 1 && t.Slc <= 1 }

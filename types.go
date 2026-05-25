@@ -32,7 +32,7 @@ type Expr interface {
 	Table(name string) Table
 	Col(name string, table ...string) Col
 	All(table ...string) Col
-	Param(value ...any) Param
+	Param(value any) Param
 	Cond(ident any) Cond
 	Concat(v ...any) Col
 	Switch(cond any, fn func(cs Case)) Col

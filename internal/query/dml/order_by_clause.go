@@ -1,6 +1,9 @@
 package dml
 
-import "github.com/laacin/inyorm/internal/api"
+import (
+	"github.com/laacin/inyorm/internal/api"
+	"github.com/laacin/inyorm/internal/core"
+)
 
 // --- Entity
 
@@ -36,7 +39,7 @@ func (c *ClauseOrderBy) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *ClauseOrderBy) Build() error {
+func (c *ClauseOrderBy) Build(b *core.Builder) error {
 	if c.current != nil {
 		c.Segments = append(c.Segments, *c.current)
 		c.current = nil

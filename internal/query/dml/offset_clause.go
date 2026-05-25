@@ -1,5 +1,7 @@
 package dml
 
+import "github.com/laacin/inyorm/internal/core"
+
 // --- Entity
 
 type ClauseOffset struct {
@@ -26,6 +28,6 @@ func (c *ClauseOffset) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *ClauseOffset) Build() error {
+func (c *ClauseOffset) Build(b *core.Builder) error {
 	return nil
 }

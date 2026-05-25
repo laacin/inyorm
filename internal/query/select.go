@@ -1,23 +1,31 @@
 package query
 
 import (
-	"github.com/laacin/inyorm/internal/impl/writer"
+	"github.com/laacin/inyorm/internal/builder"
+	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/query/dml"
+	"github.com/laacin/inyorm/internal/writer"
 )
 
 type SelectQuery struct {
-	Ref  string
-	Dial Dialect
+	Ref     string
+	Dial    Dialect
+	builder *core.Builder
 
 	dml.QuerySelect
 }
 
 // start
 
-func (q *SelectQuery) Start(dial Dialect, ref string) *SelectQuery {
+func (q *SelectQuery) Start(dial Dialect, ref string) (*SelectQuery, *builder.ExprBuilder) {
+	b := builder.New()
+
+	q.builder = b
 	q.Dial = dial
 	q.Ref = ref
-	return q
+
+	e := &builder.ExprBuilder{}
+	return q, e.Start(b, ref)
 }
 
 // --- Build
@@ -27,18 +35,12 @@ func (*SelectQuery) Kind() QueryKind {
 }
 
 func (q *SelectQuery) Build() (*QueryResult, error) {
-	params := &writer.ParamStore{}
-	w := &writer.WriterImpl{
-		Syntax: q.Dial,
-		Params: params,
-	}
+	w := writer.New(q.Dial, q.ClauseJoin.IsDeclared())
 
-	if q.ClauseJoin.IsDeclared() {
-		w.Aliases = &writer.AliasStore{}
-	}
-
+	q.QuerySelect.Build(q.builder)
 	q.QuerySelect.Render(w, q.Dial)
-	vals, err := params.GetValues()
+
+	vals, err := q.builder.Param.Values()
 	if err != nil {
 		return nil, err
 	}

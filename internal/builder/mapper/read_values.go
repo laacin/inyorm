@@ -6,8 +6,7 @@ import (
 	"reflect"
 	"slices"
 
-	"github.com/laacin/inyorm/internal/core"
-	"github.com/laacin/inyorm/internal/impl/mapper/types"
+	"github.com/laacin/inyorm/internal/builder/mapper/types"
 )
 
 // Errs
@@ -17,13 +16,7 @@ var (
 	ErrColNotFound = func(col string) error { return fmt.Errorf("column %s not found", col) }
 )
 
-type Result struct {
-	Rows    int
-	Columns []string
-	Args    []any
-}
-
-func ReadValues(cols []string, values any) (*Result, error) {
+func (m *Mapper) ReadValues(cols []string, values any) ([]any, error) {
 	val := reflect.ValueOf(values)
 	info := types.ReadInfo(val.Type())
 	val, _ = types.DerefPtrVal(val)
@@ -57,7 +50,7 @@ func ReadValues(cols []string, values any) (*Result, error) {
 }
 
 // Readers
-func valsByStruct(cols []string, val reflect.Value, schema core.StructInfo) (*Result, error) {
+func valsByStruct(cols []string, val reflect.Value, schema types.StructInfo) ([]any, error) {
 	args := make([]any, len(cols))
 	for i, col := range cols {
 		if idx, ok := schema.GetIndex(col); ok {
@@ -67,14 +60,10 @@ func valsByStruct(cols []string, val reflect.Value, schema core.StructInfo) (*Re
 		return nil, ErrColNotFound(col)
 	}
 
-	return &Result{
-		Rows:    1,
-		Columns: cols,
-		Args:    args,
-	}, nil
+	return args, nil
 }
 
-func valsByStructSlc(cols []string, val reflect.Value, schema core.StructInfo) (*Result, error) {
+func valsByStructSlc(cols []string, val reflect.Value, schema types.StructInfo) ([]any, error) {
 	args := make([]any, len(cols)*val.Len())
 
 	for i := range val.Len() {
@@ -89,14 +78,10 @@ func valsByStructSlc(cols []string, val reflect.Value, schema core.StructInfo) (
 		}
 	}
 
-	return &Result{
-		Rows:    len(args) / len(cols),
-		Columns: cols,
-		Args:    args,
-	}, nil
+	return args, nil
 }
 
-func valsByMap(cols []string, val reflect.Value) (*Result, error) {
+func valsByMap(cols []string, val reflect.Value) ([]any, error) {
 	m, _ := reflect.TypeAssert[map[string]any](val)
 	args := make([]any, len(cols))
 
@@ -108,14 +93,10 @@ func valsByMap(cols []string, val reflect.Value) (*Result, error) {
 		return nil, ErrColNotFound(col)
 	}
 
-	return &Result{
-		Rows:    1,
-		Columns: cols,
-		Args:    args,
-	}, nil
+	return args, nil
 }
 
-func valsByMapSlc(cols []string, val reflect.Value) (*Result, error) {
+func valsByMapSlc(cols []string, val reflect.Value) ([]any, error) {
 	args := make([]any, len(cols)*val.Len())
 
 	for i := range val.Len() {
@@ -131,22 +112,14 @@ func valsByMapSlc(cols []string, val reflect.Value) (*Result, error) {
 		}
 	}
 
-	return &Result{
-		Rows:    len(args) / len(cols),
-		Columns: cols,
-		Args:    args,
-	}, nil
+	return args, nil
 }
 
-func valsByPrim(cols []string, val reflect.Value) (*Result, error) {
-	return &Result{
-		Rows:    1,
-		Columns: cols,
-		Args:    []any{val.Interface()},
-	}, nil
+func valsByPrim(cols []string, val reflect.Value) ([]any, error) {
+	return []any{val.Interface()}, nil
 }
 
-func valsByPrimSlc(cols []string, val reflect.Value) (*Result, error) {
+func valsByPrimSlc(cols []string, val reflect.Value) ([]any, error) {
 	args := make([]any, val.Len())
 
 	for i := range val.Len() {
@@ -158,11 +131,7 @@ func valsByPrimSlc(cols []string, val reflect.Value) (*Result, error) {
 		args[i] = elem.Interface()
 	}
 
-	return &Result{
-		Rows:    val.Len() / len(cols),
-		Columns: cols,
-		Args:    args,
-	}, nil
+	return args, nil
 }
 
 // Helpers

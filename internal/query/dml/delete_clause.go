@@ -1,5 +1,7 @@
 package dml
 
+import "github.com/laacin/inyorm/internal/core"
+
 // --- Entity
 
 type ClauseDelete struct {
@@ -22,6 +24,6 @@ func (c *ClauseDelete) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *ClauseDelete) Build() error {
+func (c *ClauseDelete) Build(b *core.Builder) error {
 	return nil
 }

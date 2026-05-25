@@ -1,14 +1,19 @@
-package internal
+package builder
 
 import (
 	"github.com/laacin/inyorm/internal/api"
+	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/expr"
 )
 
-type ExprBuilder struct{ Ref string }
+type ExprBuilder struct {
+	builder *core.Builder
+	Ref     string
+}
 
-func (e *ExprBuilder) Start(defaultTable string) *ExprBuilder {
+func (e *ExprBuilder) Start(builder *core.Builder, defaultTable string) *ExprBuilder {
 	e.Ref = defaultTable
+	e.builder = builder
 	return e
 }
 
@@ -27,9 +32,18 @@ func (e *ExprBuilder) All(ref ...string) api.Col {
 	return col.Start("*", getLast(e.Ref, ref))
 }
 
-func (e *ExprBuilder) Param(value ...any) any {
-	param := &expr.Param{}
-	return param.Start(getLast(nil, value))
+func (e *ExprBuilder) Param(v any) any {
+	return (&expr.Placeholder{}).Start(func() core.ParamIndex {
+		e.builder.Param.Store(v)
+		return e.builder.Param.LastIndex(0)
+	})
+}
+
+func (e *ExprBuilder) Lazy(id ...string) any {
+	return (&expr.Placeholder{}).StartLazy(func() core.ParamIndex {
+		e.builder.Param.Lazy(getLast("", id))
+		return e.builder.Param.LastIndex(0)
+	})
 }
 
 func (e *ExprBuilder) Cond(ident any) api.Cond {

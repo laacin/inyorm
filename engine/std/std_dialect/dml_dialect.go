@@ -167,54 +167,45 @@ func (*Dialect) WriteClauseDelete(w core.Writer, cls *dml.ClauseDelete) {
 
 func (s *Dialect) WriteQuerySelect(w core.Writer, q *dml.QuerySelect) {
 	if q.ClauseSelect.IsDeclared() {
-		q.ClauseSelect.Build()
 		s.Self.WriteClauseSelect(w, &q.ClauseSelect)
 	}
 
 	if q.ClauseFrom.IsDeclared() {
-		q.ClauseFrom.Build()
 		w.Char(' ')
 		s.Self.WriteClauseFrom(w, &q.ClauseFrom)
 	}
 
 	if q.ClauseJoin.IsDeclared() {
-		q.ClauseJoin.Build()
 		w.Char(' ')
 		s.Self.WriteClauseJoin(w, &q.ClauseJoin)
 	}
 
 	if q.ClauseWhere.IsDeclared() {
-		q.ClauseWhere.Build()
 		w.Char(' ')
 		s.Self.WriteClauseWhere(w, &q.ClauseWhere)
 	}
 
 	if q.ClauseGroupBy.IsDeclared() {
-		q.ClauseGroupBy.Build()
 		w.Char(' ')
 		s.Self.WriteClauseGroupBy(w, &q.ClauseGroupBy)
 	}
 
 	if q.ClauseHaving.IsDeclared() {
-		q.ClauseHaving.Build()
 		w.Char(' ')
 		s.Self.WriteClauseHaving(w, &q.ClauseHaving)
 	}
 
 	if q.ClauseOrderBy.IsDeclared() {
-		q.ClauseOrderBy.Build()
 		w.Char(' ')
 		s.Self.WriteClauseOrderBy(w, &q.ClauseOrderBy)
 	}
 
 	if q.ClauseLimit.IsDeclared() {
-		q.ClauseLimit.Build()
 		w.Char(' ')
 		s.Self.WriteClauseLimit(w, &q.ClauseLimit)
 	}
 
 	if q.ClauseOffset.IsDeclared() {
-		q.ClauseOffset.Build()
 		w.Char(' ')
 		s.Self.WriteClauseOffset(w, &q.ClauseOffset)
 	}
@@ -222,19 +213,16 @@ func (s *Dialect) WriteQuerySelect(w core.Writer, q *dml.QuerySelect) {
 
 func (s *Dialect) WriteQueryInsert(w core.Writer, q *dml.QueryInsert) {
 	if q.ClauseInsertInto.IsDeclared() {
-		q.ClauseInsertInto.Build()
 		s.Self.WriteClauseInsertInto(w, &q.ClauseInsertInto)
 	}
 }
 
 func (s *Dialect) WriteQueryUpdate(w core.Writer, q *dml.QueryUpdate) {
 	if q.ClauseUpdate.IsDeclared() {
-		q.ClauseUpdate.Build()
 		s.Self.WriteClauseUpdate(w, &q.ClauseUpdate)
 	}
 
 	if q.ClauseWhere.IsDeclared() {
-		q.ClauseWhere.Build()
 		w.Char(' ')
 		s.Self.WriteClauseWhere(w, &q.ClauseWhere)
 	}
@@ -242,18 +230,15 @@ func (s *Dialect) WriteQueryUpdate(w core.Writer, q *dml.QueryUpdate) {
 
 func (s *Dialect) WriteQueryDelete(w core.Writer, q *dml.QueryDelete) {
 	if q.ClauseDelete.IsDeclared() {
-		q.ClauseDelete.Build()
 		s.Self.WriteClauseDelete(w, &q.ClauseDelete)
 	}
 
 	if q.ClauseFrom.IsDeclared() {
-		q.ClauseFrom.Build()
 		w.Char(' ')
 		s.Self.WriteClauseFrom(w, &q.ClauseFrom)
 	}
 
 	if q.ClauseWhere.IsDeclared() {
-		q.ClauseWhere.Build()
 		w.Char(' ')
 		s.Self.WriteClauseWhere(w, &q.ClauseWhere)
 	}

@@ -1,23 +1,31 @@
 package query
 
 import (
-	"github.com/laacin/inyorm/internal/impl/writer"
+	"github.com/laacin/inyorm/internal/builder"
+	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/query/dml"
+	"github.com/laacin/inyorm/internal/writer"
 )
 
 type InsertQuery struct {
-	Ref  string
-	Dial Dialect
+	Ref     string
+	Dial    Dialect
+	builder *core.Builder
 
 	dml.QueryInsert
 }
 
 // start
 
-func (q *InsertQuery) Start(dial Dialect, ref string) *InsertQuery {
+func (q *InsertQuery) Start(dial Dialect, ref string) (*InsertQuery, *builder.ExprBuilder) {
+	b := builder.New()
+
+	q.builder = b
 	q.Dial = dial
 	q.Ref = ref
-	return q
+
+	e := &builder.ExprBuilder{}
+	return q, e.Start(b, ref)
 }
 
 // --- Build
@@ -27,15 +35,12 @@ func (*InsertQuery) Kind() QueryKind {
 }
 
 func (q *InsertQuery) Build() (*QueryResult, error) {
-	params := &writer.ParamStore{}
+	w := writer.New(q.Dial, false)
 
-	w := &writer.WriterImpl{
-		Syntax: q.Dial,
-		Params: params,
-	}
-
+	q.QueryInsert.Build(q.builder)
 	q.QueryInsert.Render(w, q.Dial)
-	vals, err := params.GetValues()
+
+	vals, err := q.builder.Param.Values()
 	if err != nil {
 		return nil, err
 	}

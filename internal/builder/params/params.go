@@ -1,8 +1,10 @@
-package writer
+package params
 
 import (
 	"fmt"
 	"strconv"
+
+	"github.com/laacin/inyorm/internal/core"
 )
 
 type ParamStore struct {
@@ -22,24 +24,24 @@ func (p *ParamStore) Store(v any) {
 	p.store[id] = v
 }
 
-func (p *ParamStore) StoreLazy(ref string) {
-	if ref == "" {
-		id := p.rand()
+func (p *ParamStore) Lazy(id string) {
+	if id == "" {
+		id = p.rand()
 
 		p.ids = append(p.ids, id)
-		p.lazy = append(p.lazy, ref)
+		p.lazy = append(p.lazy, id)
 		return
 	}
 
-	if _, exists := p.store[ref]; exists {
-		p.pushErr("param conflict: %s already exists", ref)
+	if _, exists := p.store[id]; exists {
+		p.pushErr("param conflict: %s already exists", id)
 		return
 	}
 
-	p.ids = append(p.ids, ref)
+	p.ids = append(p.ids, id)
 }
 
-func (p *ParamStore) StoreLazyObj(cols []string) {
+func (p *ParamStore) LazyObj(cols []string) {
 	baseId := p.rand()
 
 	objIds := make([]string, len(cols))
@@ -55,16 +57,16 @@ func (p *ParamStore) StoreLazyObj(cols []string) {
 	})
 }
 
-func (p *ParamStore) Load(v any, ref ...string) {
+func (p *ParamStore) Fill(id string, v any) {
 	p.initMap()
 
-	if len(ref) > 0 {
-		if _, exists := p.store[ref[0]]; exists {
-			p.pushErr("param duplicate: %s is already assigned", ref)
+	if id != "" {
+		if _, exists := p.store[id]; exists {
+			p.pushErr("param duplicate: %s is already assigned", id)
 			return
 		}
 
-		p.store[ref[0]] = v
+		p.store[id] = v
 		return
 	}
 
@@ -73,13 +75,13 @@ func (p *ParamStore) Load(v any, ref ...string) {
 		return
 	}
 
-	id := p.lazy[0]
+	id = p.lazy[0]
 	p.lazy = p.lazy[1:]
 
 	p.store[id] = v
 }
 
-func (p *ParamStore) LoadObj(fn func(cols []string) []any) {
+func (p *ParamStore) FillObj(fn func(cols []string) []any) {
 	p.initMap()
 
 	if len(p.obj) < 1 {
@@ -96,11 +98,20 @@ func (p *ParamStore) LoadObj(fn func(cols []string) []any) {
 	}
 }
 
-func (p *ParamStore) ValueCount() int {
-	return len(p.ids)
+// idx = 0 -> last inserted, idx = 1 -> previous one
+func (p *ParamStore) LastIndex(idx int) core.ParamIndex {
+	num := len(p.ids)
+	if idx > len(p.ids) {
+		return core.ParamIndex{}
+	}
+
+	return core.ParamIndex{
+		ID:  p.ids[num-idx-1],
+		Num: num - idx,
+	}
 }
 
-func (p *ParamStore) GetValues() ([]any, error) {
+func (p *ParamStore) Values() ([]any, error) {
 	if p.store == nil {
 		return []any{}, nil
 	}

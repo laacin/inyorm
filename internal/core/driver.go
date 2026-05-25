@@ -12,16 +12,16 @@ type Connection interface {
 	Close() error
 }
 
-type Transaction interface {
-	Executor
-	Commit() error
-	Rollback() error
-}
-
 type Executor interface {
 	Exec(context.Context, string, ...any) error
 	Query(context.Context, string, ...any) (Rows, error)
 	Prepare(context.Context, string) (Prepared, error)
+}
+
+type Transaction interface {
+	Executor
+	Commit() error
+	Rollback() error
 }
 
 // dependencies
