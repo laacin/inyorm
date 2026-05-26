@@ -5,22 +5,24 @@ import (
 
 	"github.com/laacin/inyorm/internal/api"
 	"github.com/laacin/inyorm/internal/builder"
+	"github.com/laacin/inyorm/internal/builder/mapper"
 	"github.com/laacin/inyorm/internal/core"
-	"github.com/laacin/inyorm/internal/query"
 )
 
-type Statement struct {
-	driver core.Driver
-
-	builder *core.Builder
-	query   query.QueryBuilder
-	bind    any
+type queryBuilder interface {
+	Build() (*builder.Builder, error)
 }
 
-func (s *Statement) Start(driver core.Driver, q query.QueryBuilder) api.Statement {
+type Statement struct {
+	query  queryBuilder
+	driver core.Driver
+
+	bind any
+}
+
+func (s *Statement) Start(driver core.Driver, q queryBuilder) api.Statement {
 	s.driver = driver
 	s.query = q
-	s.builder = builder.New()
 	return s
 }
 
@@ -40,49 +42,54 @@ func (s *Statement) BindPrep(binder ...any) api.PrepStatement {
 
 // --- Runner
 func (s *Statement) Raw() (string, []any, error) {
-	result, err := s.query.Build()
+	b, err := s.query.Build()
 	if err != nil {
 		return "", nil, err
 	}
 
-	return result.Query, result.Values, nil
+	vals, err := b.Params().Values()
+	if err != nil {
+		return "", nil, err
+	}
+
+	return b.Writer().ToString(), vals, nil
 }
 
 func (s *Statement) Run(context ...context.Context) error {
-	result, err := s.query.Build()
+	query, values, err := s.Raw()
 	if err != nil {
 		return err
 	}
 
 	ctx := getCtx(context)
 	if s.bind == nil {
-		return s.driver.Exec(ctx, result.Query, result.Values...)
+		return s.driver.Exec(ctx, query, values...)
 	}
 
-	rows, err := s.driver.Query(ctx, result.Query, result.Values...)
+	rows, err := s.driver.Query(ctx, query, values...)
 	if err != nil {
 		return err
 	}
 
-	return s.builder.Mapper.Scan(rows, s.bind)
+	return (&mapper.Mapper{}).Scan(rows, s.bind)
 }
 
 func (s *Statement) RunTx(ctx context.Context, tx core.Transaction) error {
-	result, err := s.query.Build()
+	query, values, err := s.Raw()
 	if err != nil {
 		return err
 	}
 
 	if s.bind == nil {
-		return tx.Exec(ctx, result.Query, result.Values...)
+		return tx.Exec(ctx, query, values...)
 	}
 
-	rows, err := tx.Query(ctx, result.Query, result.Values...)
+	rows, err := tx.Query(ctx, query, values...)
 	if err != nil {
 		return err
 	}
 
-	return s.builder.Mapper.Scan(rows, s.bind)
+	return (&mapper.Mapper{}).Scan(rows, s.bind)
 }
 
 // --- Prepare
@@ -95,9 +102,8 @@ func (s *Statement) Values(values ...any) api.Runner {
 }
 
 // --- Helpers
-
 func getCtx(candidate []context.Context) context.Context {
-	if len(candidate) > 0 {
+	if len(candidate) > 0 && candidate[0] != nil {
 		return candidate[0]
 	}
 	return context.Background()

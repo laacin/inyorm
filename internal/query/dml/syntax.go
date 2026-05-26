@@ -43,10 +43,3 @@ type ClauseWriter interface {
 
 	WriteClauseDelete(core.Writer, *ClauseDelete)
 }
-
-// --- Internal
-type Clause interface {
-	IsDeclared() bool
-	Kind() ClauseKind
-	Build() error
-}

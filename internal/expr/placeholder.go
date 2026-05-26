@@ -8,13 +8,13 @@ type Placeholder struct {
 	ID       string
 	Num      int
 	lazy     bool
-	onRender func() core.ParamIndex
+	paramIdx core.LazyVal[core.ParamIndex]
 }
 
 // start
 
 func (p *Placeholder) Start(fn func() core.ParamIndex) *Placeholder {
-	p.onRender = fn
+	p.paramIdx = fn
 	return p
 }
 
@@ -26,7 +26,7 @@ func (p *Placeholder) StartEmpty(idx core.ParamIndex) *Placeholder {
 
 func (p *Placeholder) StartLazy(fn func() core.ParamIndex) *Placeholder {
 	p.lazy = true
-	p.onRender = fn
+	p.paramIdx = fn
 	return p
 }
 
@@ -40,8 +40,8 @@ func (p *Placeholder) Kind() ExprKind {
 }
 
 func (p *Placeholder) Render(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
-	if p.onRender != nil {
-		idx := p.onRender()
+	if p.paramIdx != nil {
+		idx := p.paramIdx()
 		p.ID = idx.ID
 		p.Num = idx.Num
 	}

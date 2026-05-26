@@ -43,29 +43,29 @@ func (db *DB) RunTx(ctx context.Context, stmts ...Runner) error {
 
 // --- DML Statements
 
-func (db *DB) Select(ref string, fn func(q SelectQuery, e Expr)) Statement {
-	q := query.New(&query.QuerySelect{}, db.eng.Dialect, ref)
+func (db *DB) Select(fn func(q SelectQuery, e Expr)) Statement {
+	q := query.New(&query.QuerySelect{}, db.eng.Dialect)
 	fn(q.API, q.Expr)
 
 	stmt := &internal.Statement{}
 	return stmt.Start(db.eng.Driver, q)
 }
-func (db *DB) Insert(ref string, fn func(q InsertQuery, e Expr)) Statement {
-	q := query.New(&query.QueryInsert{}, db.eng.Dialect, ref)
+func (db *DB) Insert(fn func(q InsertQuery, e Expr)) Statement {
+	q := query.New(&query.QueryInsert{}, db.eng.Dialect)
 	fn(q.API, q.Expr)
 
 	stmt := &internal.Statement{}
 	return stmt.Start(db.eng.Driver, q)
 }
-func (db *DB) Update(ref string, fn func(q UpdateQuery, e Expr)) Statement {
-	q := query.New(&query.QueryUpdate{}, db.eng.Dialect, ref)
+func (db *DB) Update(fn func(q UpdateQuery, e Expr)) Statement {
+	q := query.New(&query.QueryUpdate{}, db.eng.Dialect)
 	fn(q.API, q.Expr)
 
 	stmt := &internal.Statement{}
 	return stmt.Start(db.eng.Driver, q)
 }
-func (db *DB) Delete(ref string, fn func(q DeleteQuery, e Expr)) Statement {
-	q := query.New(&query.QueryDelete{}, db.eng.Dialect, ref)
+func (db *DB) Delete(fn func(q DeleteQuery, e Expr)) Statement {
+	q := query.New(&query.QueryDelete{}, db.eng.Dialect)
 	fn(q.API, q.Expr)
 
 	stmt := &internal.Statement{}
@@ -74,8 +74,8 @@ func (db *DB) Delete(ref string, fn func(q DeleteQuery, e Expr)) Statement {
 
 // --- DDL Statements
 
-func (db *DB) CreateTable(ref string, fn func(q CreateTable, e Expr)) Statement {
-	q := query.New(&query.QueryCreateTable{}, db.eng.Dialect, ref)
+func (db *DB) CreateTable(fn func(q CreateTable, e Expr)) Statement {
+	q := query.New(&query.QueryCreateTable{}, db.eng.Dialect)
 	fn(q.API, q.Expr)
 
 	stmt := &internal.Statement{}

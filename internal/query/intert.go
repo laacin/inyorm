@@ -1,6 +1,7 @@
 package query
 
 import (
+	"github.com/laacin/inyorm/internal/builder"
 	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/expr"
 	"github.com/laacin/inyorm/internal/query/dml"
@@ -10,10 +11,10 @@ type QueryInsert struct {
 	dml.ClauseInsertInto
 }
 
-func (q *QueryInsert) Build(b *core.Builder) error {
+func (q *QueryInsert) Build(b *builder.Builder) error {
 	if q.ClauseInsertInto.IsDeclared() {
 		if tbl, ok := q.ClauseInsertInto.Table.(*expr.Table); ok {
-			b.Attach.MainRef = tbl.Value
+			b.SetMainRef(tbl.Name)
 		}
 
 		q.ClauseInsertInto.Build(b)

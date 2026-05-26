@@ -1,6 +1,7 @@
 package query
 
 import (
+	"github.com/laacin/inyorm/internal/builder"
 	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/expr"
 	"github.com/laacin/inyorm/internal/query/dml"
@@ -18,21 +19,21 @@ type QuerySelect struct {
 	dml.ClauseOffset
 }
 
-func (q *QuerySelect) Build(b *core.Builder) error {
+func (q *QuerySelect) Build(b *builder.Builder) error {
 	if q.ClauseSelect.IsDeclared() {
 		q.ClauseSelect.Build(b)
 	}
 
 	if q.ClauseFrom.IsDeclared() {
 		if tbl, ok := q.ClauseFrom.Value.(*expr.Table); ok {
-			b.Attach.MainRef = tbl.Value
+			b.SetMainRef(tbl.Name)
 		}
 
 		q.ClauseFrom.Build(b)
 	}
 
 	if q.ClauseJoin.IsDeclared() {
-		b.Attach.UseAliases = true
+		b.Aliases().Enable()
 		q.ClauseJoin.Build(b)
 	}
 

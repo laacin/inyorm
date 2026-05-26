@@ -2,7 +2,7 @@ package dml
 
 import (
 	"github.com/laacin/inyorm/internal/api"
-	"github.com/laacin/inyorm/internal/core"
+	"github.com/laacin/inyorm/internal/builder"
 )
 
 // --- Entity
@@ -34,6 +34,6 @@ func (c *ClauseSelect) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *ClauseSelect) Build(b *core.Builder) error {
+func (c *ClauseSelect) Build(b *builder.Builder) error {
 	return nil
 }

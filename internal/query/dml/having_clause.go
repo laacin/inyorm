@@ -2,7 +2,7 @@ package dml
 
 import (
 	"github.com/laacin/inyorm/internal/api"
-	"github.com/laacin/inyorm/internal/core"
+	"github.com/laacin/inyorm/internal/builder"
 	"github.com/laacin/inyorm/internal/expr"
 )
 
@@ -32,6 +32,6 @@ func (c *ClauseHaving) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *ClauseHaving) Build(b *core.Builder) error {
+func (c *ClauseHaving) Build(b *builder.Builder) error {
 	return nil
 }

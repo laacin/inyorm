@@ -3,12 +3,16 @@ package expr
 import "github.com/laacin/inyorm/internal/core"
 
 // --- Entity
-type Table struct{ Value string }
+type Table struct {
+	Name string
+	Ref  core.LazyVal[core.Reference]
+}
 
 // start
 
-func (t *Table) Start(table string) *Table {
-	t.Value = table
+func (t *Table) Start(name string, ref core.LazyVal[core.Reference]) *Table {
+	t.Name = name
+	t.Ref = ref
 	return t
 }
 
@@ -19,6 +23,5 @@ func (t *Table) Kind() ExprKind {
 }
 
 func (t *Table) Render(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
-	w.SetRef(t.Value)
 	dial.WriteExprTable(w, t)
 }

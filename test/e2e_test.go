@@ -39,7 +39,7 @@ func Test(t *testing.T) {
 	defer End(db, deleteSqliteFile)
 
 	t.Run("create_table", func(t *testing.T) {
-		stmt := db.CreateTable("users", func(q inyorm.CreateTable, e inyorm.Expr) {
+		stmt := db.CreateTable(func(q inyorm.CreateTable, e inyorm.Expr) {
 			q.TableName("users")
 
 			q.Int("id").PrimaryKey().AutoIncrement()
@@ -54,7 +54,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("insert_values", func(t *testing.T) {
-		stmt := db.Insert("users", func(q inyorm.InsertQuery, e inyorm.Expr) {
+		stmt := db.Insert(func(q inyorm.InsertQuery, e inyorm.Expr) {
 			q.Insert(User{})
 			q.Into(e.Table("users"))
 			q.Values(User{
@@ -71,7 +71,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("get_values", func(t *testing.T) {
-		stmt := db.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
+		stmt := db.Select(func(q inyorm.SelectQuery, e inyorm.Expr) {
 			q.Select(e.All())
 			q.From(e.Table("users"))
 			q.Where(e.Col("id")).Equal(e.Param(1))
@@ -92,7 +92,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("create_table_with_constraints", func(t *testing.T) {
-		stmt := db.CreateTable("posts", func(q inyorm.CreateTable, e inyorm.Expr) {
+		stmt := db.CreateTable(func(q inyorm.CreateTable, e inyorm.Expr) {
 			q.TableName("posts")
 
 			q.Int("id").PrimaryKey().AutoIncrement()
@@ -110,7 +110,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("insert_post", func(t *testing.T) {
-		stmt := db.Insert("posts", func(q inyorm.InsertQuery, e inyorm.Expr) {
+		stmt := db.Insert(func(q inyorm.InsertQuery, e inyorm.Expr) {
 			q.Insert(Post{}).Ignore(e.Col("id"), e.Col("title"), e.Col("description"))
 			q.Into(e.Table("posts"))
 			q.Values(Post{AuthorID: 1})
@@ -122,7 +122,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("get_post_with_relation", func(t *testing.T) {
-		stmt := db.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
+		stmt := db.Select(func(q inyorm.SelectQuery, e inyorm.Expr) {
 			q.Select(e.All(), e.Col("title", "posts"), e.Col("description", "posts"))
 			q.From(e.Table("users"))
 			q.Join(e.Table("posts")).On(e.Col("author_id", "posts")).Equal(e.Col("id"))
@@ -154,7 +154,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("update_post", func(t *testing.T) {
-		stmt := db.Update("posts", func(q inyorm.UpdateQuery, e inyorm.Expr) {
+		stmt := db.Update(func(q inyorm.UpdateQuery, e inyorm.Expr) {
 			q.Update(e.Col("description"))
 			q.Into(e.Table("posts"))
 			q.Where(e.Col("author_id")).Equal(e.Param(1))
@@ -167,7 +167,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("try_to_insert_invalid_post", func(t *testing.T) {
-		stmt := db.Insert("posts", func(q inyorm.InsertQuery, e inyorm.Expr) {
+		stmt := db.Insert(func(q inyorm.InsertQuery, e inyorm.Expr) {
 			q.Insert(Post{}).Ignore(e.Col("id"))
 			q.Into(e.Table("posts"))
 			q.Values(Post{
@@ -190,7 +190,7 @@ func Test(t *testing.T) {
 			posts[i].Description = fmt.Sprintf("Desc %d", i)
 		}
 
-		stmt := db.Insert("posts", func(q inyorm.InsertQuery, e inyorm.Expr) {
+		stmt := db.Insert(func(q inyorm.InsertQuery, e inyorm.Expr) {
 			q.Insert(Post{}).Ignore(e.Col("id"))
 			q.Into(e.Table("posts"))
 			q.Values(posts)
@@ -202,7 +202,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("get_post_count", func(t *testing.T) {
-		stmt := db.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
+		stmt := db.Select(func(q inyorm.SelectQuery, e inyorm.Expr) {
 			q.Select(e.Col("id", "posts").Count())
 			q.From(e.Table("users"))
 			q.Join(e.Table("posts")).On(e.Col("author_id", "posts")).Equal(e.Col("id"))
@@ -221,7 +221,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("get_custom_summary", func(t *testing.T) {
-		stmt := db.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
+		stmt := db.Select(func(q inyorm.SelectQuery, e inyorm.Expr) {
 			summary := e.Concat("The user with ID: ", e.Col("id"), ", Has: ", e.Col("id", "posts").Count(), " Posts.")
 
 			q.Select(summary)
@@ -257,7 +257,7 @@ func Test(t *testing.T) {
 			expect[i].Description = fmt.Sprintf("Desc %d", i-1)
 		}
 
-		stmt := db.Select("posts", func(q inyorm.SelectQuery, e inyorm.Expr) {
+		stmt := db.Select(func(q inyorm.SelectQuery, e inyorm.Expr) {
 			q.Select(e.All())
 			q.From(e.Table("posts"))
 		})
@@ -273,7 +273,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("delete_all_posts", func(t *testing.T) {
-		stmt := db.Delete("posts", func(q inyorm.DeleteQuery, e inyorm.Expr) {
+		stmt := db.Delete(func(q inyorm.DeleteQuery, e inyorm.Expr) {
 			q.Delete()
 			q.From(e.Table("posts"))
 			q.Where(e.Col("author_id")).Equal(1)
@@ -285,7 +285,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("expect_zero_values", func(t *testing.T) {
-		stmt := db.Select("posts", func(q inyorm.SelectQuery, e inyorm.Expr) {
+		stmt := db.Select(func(q inyorm.SelectQuery, e inyorm.Expr) {
 			q.Select(e.All())
 			q.From(e.Table("posts"))
 		})
@@ -301,7 +301,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("create_table_profile", func(t *testing.T) {
-		stmt := db.CreateTable("profiles", func(q inyorm.CreateTable, e inyorm.Expr) {
+		stmt := db.CreateTable(func(q inyorm.CreateTable, e inyorm.Expr) {
 			q.TableName("profiles")
 
 			q.Int("id").PrimaryKey()
@@ -318,7 +318,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("run_tx", func(t *testing.T) {
-		stmt1 := db.Insert("users", func(q inyorm.InsertQuery, e inyorm.Expr) {
+		stmt1 := db.Insert(func(q inyorm.InsertQuery, e inyorm.Expr) {
 			q.Insert(User{})
 			q.Into(e.Table("users"))
 			q.Values(User{
@@ -329,7 +329,7 @@ func Test(t *testing.T) {
 			})
 		})
 
-		stmt2 := db.Insert("profiles", func(q inyorm.InsertQuery, e inyorm.Expr) {
+		stmt2 := db.Insert(func(q inyorm.InsertQuery, e inyorm.Expr) {
 			q.Insert(Profile{})
 			q.Into(e.Table("profiles"))
 			q.Values(Profile{
@@ -346,7 +346,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("get_tx_values", func(t *testing.T) {
-		stmt := db.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
+		stmt := db.Select(func(q inyorm.SelectQuery, e inyorm.Expr) {
 			q.Select(e.All(), e.All("profiles"))
 			q.From(e.Table("users"))
 			q.Join(e.Table("profiles")).On(e.Col("id", "profiles")).Equal(e.Col("id"))
@@ -387,14 +387,14 @@ func Test(t *testing.T) {
 	t.Run("bind_between_tx", func(t *testing.T) {
 		var user1, user2 User
 
-		stmt1 := db.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
+		stmt1 := db.Select(func(q inyorm.SelectQuery, e inyorm.Expr) {
 			q.Select(e.All())
 			q.From(e.Table("users"))
 			q.Where(e.Col("id")).Equal(e.Param(1))
 			q.Limit(1)
 		}).Bind(&user1)
 
-		stmt2 := db.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
+		stmt2 := db.Select(func(q inyorm.SelectQuery, e inyorm.Expr) {
 			q.Select(e.All())
 			q.From(e.Table("users"))
 			q.Where(e.Col("id")).Equal(e.Param(2))

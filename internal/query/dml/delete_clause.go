@@ -1,6 +1,6 @@
 package dml
 
-import "github.com/laacin/inyorm/internal/core"
+import "github.com/laacin/inyorm/internal/builder"
 
 // --- Entity
 
@@ -24,6 +24,6 @@ func (c *ClauseDelete) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *ClauseDelete) Build(b *core.Builder) error {
+func (c *ClauseDelete) Build(b *builder.Builder) error {
 	return nil
 }

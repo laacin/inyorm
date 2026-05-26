@@ -6,6 +6,7 @@ import (
 	"slices"
 
 	"github.com/laacin/inyorm/internal/api"
+	"github.com/laacin/inyorm/internal/builder"
 	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/expr"
 )
@@ -55,13 +56,13 @@ func (c *ClauseInsertInto) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *ClauseInsertInto) Build(b *core.Builder) error {
+func (c *ClauseInsertInto) Build(b *builder.Builder) error {
 	if len(c.ref) < 1 {
 		return errors.New("missing reference")
 	}
 
-	cols := b.Mapper.ReadCols(c.ref...)
-	ignores := b.Mapper.ReadCols(c.ignores...)
+	cols := b.Mapper().ReadCols(c.ref...)
+	ignores := b.Mapper().ReadCols(c.ignores...)
 
 	cols = slices.DeleteFunc(cols, func(col string) bool {
 		return slices.Contains(ignores, col)
@@ -73,19 +74,19 @@ func (c *ClauseInsertInto) Build(b *core.Builder) error {
 			ph := &expr.Placeholder{}
 			if i == 0 {
 				ph.Start(func() core.ParamIndex {
-					b.Param.LazyObj(cols)
-					return b.Param.LastIndex(len(cols) - 1)
+					b.Params().LazyObj(cols)
+					return b.Params().LastIndex(len(cols) - 1)
 				})
 			}
 			params[i] = ph.Start(func() core.ParamIndex {
-				return b.Param.LastIndex(len(cols) - i - 1)
+				return b.Params().LastIndex(len(cols) - i - 1)
 			})
 		}
 
 		return c.done(cols, 1, params)
 	}
 
-	args, err := b.Mapper.ReadValues(cols, c.rawVal)
+	args, err := b.Mapper().ReadValues(cols, c.rawVal)
 	if err != nil {
 		return fmt.Errorf("failed to map value: %w", err)
 	}
@@ -93,8 +94,8 @@ func (c *ClauseInsertInto) Build(b *core.Builder) error {
 	params := make([]any, len(args))
 	for i, arg := range args {
 		params[i] = (&expr.Placeholder{}).Start(func() core.ParamIndex {
-			b.Param.Store(arg)
-			return b.Param.LastIndex(0)
+			b.Params().Store(arg)
+			return b.Params().LastIndex(0)
 		})
 	}
 

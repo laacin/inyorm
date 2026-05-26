@@ -1,6 +1,7 @@
 package query
 
 import (
+	"github.com/laacin/inyorm/internal/builder"
 	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/expr"
 	"github.com/laacin/inyorm/internal/query/dml"
@@ -11,10 +12,10 @@ type QueryUpdate struct {
 	dml.ClauseWhere
 }
 
-func (q *QueryUpdate) Build(b *core.Builder) error {
+func (q *QueryUpdate) Build(b *builder.Builder) error {
 	if q.ClauseUpdate.IsDeclared() {
 		if tbl, ok := q.ClauseUpdate.Table.(*expr.Table); ok {
-			b.Attach.MainRef = tbl.Value
+			b.SetMainRef(tbl.Name)
 		}
 
 		q.ClauseUpdate.Build(b)

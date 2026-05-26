@@ -17,7 +17,7 @@ func run(t *testing.T, v []any, exp []string) {
 
 func col(name string) *expr.Col {
 	col := &expr.Col{}
-	return col.Start(name, "")
+	return col.Start(name, nil)
 }
 
 func TestGetColumn(t *testing.T) {

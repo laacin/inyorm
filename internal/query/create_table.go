@@ -2,6 +2,7 @@ package query
 
 import (
 	"github.com/laacin/inyorm/internal/api"
+	"github.com/laacin/inyorm/internal/builder"
 	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/query/ddl"
 )
@@ -51,8 +52,8 @@ func (q *QueryCreateTable) Check(ident any) api.Cond {
 }
 
 // --- Render
-func (q *QueryCreateTable) Build(b *core.Builder) error {
-	b.Attach.MainRef = q.Name
+func (q *QueryCreateTable) Build(b *builder.Builder) error {
+	b.SetMainRef(q.Name)
 	return nil
 }
 

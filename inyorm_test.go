@@ -27,7 +27,7 @@ func TestSelect(t *testing.T) {
 	db, _ := inyorm.New(std.JustDialect())
 
 	t.Run("simple", func(t *testing.T) {
-		stmt := db.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
+		stmt := db.Select(func(q inyorm.SelectQuery, e inyorm.Expr) {
 			q.Select(e.All())
 			q.From(e.Table("users"))
 			q.Where(e.Col("id")).Equal(e.Param("uuid"))
@@ -40,7 +40,7 @@ func TestSelect(t *testing.T) {
 	})
 
 	t.Run("pagination", func(t *testing.T) {
-		stmt := db.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
+		stmt := db.Select(func(q inyorm.SelectQuery, e inyorm.Expr) {
 			var (
 				id      = e.Col("id")
 				age     = e.Col("age")
@@ -68,7 +68,7 @@ func TestSelect(t *testing.T) {
 	})
 
 	t.Run("complex", func(t *testing.T) {
-		stmt := db.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
+		stmt := db.Select(func(q inyorm.SelectQuery, e inyorm.Expr) {
 			var (
 				banned  = e.Col("banned")
 				fname   = e.Col("firstname")
@@ -114,15 +114,15 @@ func TestSelect(t *testing.T) {
 		exp := "SELECT "
 		exp += "CONCAT('User: ', a.firstname, ' ', a.lastname, ' ', "
 		exp += "CASE WHEN (a.banned IS NULL) THEN "
-		exp += "CONCAT('with role: ', b.name, ' has ', COUNT(c.id), ' posts and', ' his last login was: ', a.last_login) "
+		exp += "CONCAT('with role: ', d.name, ' has ', COUNT(b.id), ' posts and', ' his last login was: ', a.last_login) "
 		exp += "ELSE CONCAT('was banned at: ', a.banned) END) AS user_info "
 		exp += "FROM users a "
-		exp += "INNER JOIN posts c ON (c.user_id = a.id) "
-		exp += "INNER JOIN user_roles d ON (d.user_id = a.id) "
-		exp += "INNER JOIN roles b ON (b.id = d.role_id) "
+		exp += "INNER JOIN posts b ON (b.user_id = a.id) "
+		exp += "INNER JOIN user_roles c ON (c.user_id = a.id) "
+		exp += "INNER JOIN roles d ON (d.id = c.role_id) "
 		exp += "WHERE (a.age > ? AND a.age < ?) "
-		exp += "GROUP BY c.id "
-		exp += "HAVING (COUNT(c.id) > 10) "
+		exp += "GROUP BY b.id "
+		exp += "HAVING (COUNT(b.id) > 10) "
 		exp += "ORDER BY a.age DESC "
 		exp += "LIMIT 100 OFFSET 20"
 
@@ -132,7 +132,7 @@ func TestSelect(t *testing.T) {
 	})
 
 	t.Run("complex_with_helper", func(t *testing.T) {
-		stmt := db.Select("users", func(q inyorm.SelectQuery, e inyorm.Expr) {
+		stmt := db.Select(func(q inyorm.SelectQuery, e inyorm.Expr) {
 			// helper
 			isNull := func(cond inyorm.Col, then, els any) inyorm.Col {
 				return e.Search(func(cs inyorm.Case) {
@@ -203,23 +203,23 @@ func TestSelect(t *testing.T) {
 
 		exp := "SELECT CONCAT("
 		exp += "'User: ', a.firstname, ' ', a.lastname, ' | ', "
-		exp += "'Role: ', CASE WHEN (b.name IS NULL) THEN 'No role' ELSE b.name END, ' | ', "
-		exp += "'Posts: ', COUNT(c.id), ' | ', "
-		exp += "'Comments: ', COUNT(d.id), ' | ', "
+		exp += "'Role: ', CASE WHEN (c.name IS NULL) THEN 'No role' ELSE c.name END, ' | ', "
+		exp += "'Posts: ', COUNT(d.id), ' | ', "
+		exp += "'Comments: ', COUNT(e.id), ' | ', "
 		exp += "'Last login: ', CASE WHEN (a.last_login IS NULL) THEN 'Never' ELSE a.last_login END, ' | ', "
 		exp += "CASE WHEN (a.banned IS NULL) THEN 'Active' ELSE CONCAT('Banned at: ', a.banned) END"
 		exp += ") AS user_summary, "
-		exp += "COUNT(DISTINCT c.id) AS total_posts, "
-		exp += "COUNT(DISTINCT d.id) AS total_comments, "
-		exp += "MAX(c.created_at) AS last_post_date "
+		exp += "COUNT(DISTINCT d.id) AS total_posts, "
+		exp += "COUNT(DISTINCT e.id) AS total_comments, "
+		exp += "MAX(d.created_at) AS last_post_date "
 		exp += "FROM users a "
-		exp += "LEFT JOIN user_roles e ON (e.user_id = a.id) "
-		exp += "LEFT JOIN roles b ON (b.id = e.role_id) "
-		exp += "LEFT JOIN posts c ON (c.user_id = a.id) "
-		exp += "LEFT JOIN comments d ON (d.user_id = a.id) "
+		exp += "LEFT JOIN user_roles b ON (b.user_id = a.id) "
+		exp += "LEFT JOIN roles c ON (c.id = b.role_id) "
+		exp += "LEFT JOIN posts d ON (d.user_id = a.id) "
+		exp += "LEFT JOIN comments e ON (e.user_id = a.id) "
 		exp += "WHERE (a.age BETWEEN 18 AND 60 AND a.active = 1) "
-		exp += "GROUP BY a.id, a.firstname, a.lastname, a.last_login, a.banned, b.name "
-		exp += "HAVING (COUNT(c.id) > 5) "
+		exp += "GROUP BY a.id, a.firstname, a.lastname, a.last_login, a.banned, c.name "
+		exp += "HAVING (COUNT(d.id) > 5) "
 		exp += "ORDER BY total_posts DESC, a.age "
 		exp += "LIMIT 50"
 
@@ -236,7 +236,7 @@ func TestInsert(t *testing.T) {
 	}
 
 	t.Run("insert_one", func(t *testing.T) {
-		stmt := db.Insert("users", func(q inyorm.InsertQuery, e inyorm.Expr) {
+		stmt := db.Insert(func(q inyorm.InsertQuery, e inyorm.Expr) {
 			q.Insert(User{})
 			q.Into(e.Table("users"))
 			q.Values(User{
@@ -250,7 +250,7 @@ func TestInsert(t *testing.T) {
 	})
 
 	t.Run("insert_many", func(t *testing.T) {
-		stmt := db.Insert("users", func(q inyorm.InsertQuery, e inyorm.Expr) {
+		stmt := db.Insert(func(q inyorm.InsertQuery, e inyorm.Expr) {
 			q.Insert(User{})
 			q.Into(e.Table("users"))
 			q.Values([]User{
@@ -278,7 +278,6 @@ func TestInsert(t *testing.T) {
 	})
 
 	t.Run("omit_values", func(t *testing.T) {
-
 		vals := []map[string]any{
 			{"account": "acc1", "age": 10, "active": true, "score": 100, "country": "AR"},
 			{"account": "acc2", "age": 20, "active": false, "score": 200, "country": "US"},
@@ -288,7 +287,7 @@ func TestInsert(t *testing.T) {
 			{"account": "acc6", "age": 60, "active": true, "score": 600, "country": "JP"},
 		}
 
-		stmt := db.Insert("users", func(q inyorm.InsertQuery, e inyorm.Expr) {
+		stmt := db.Insert(func(q inyorm.InsertQuery, e inyorm.Expr) {
 			q.Insert(e.Col("score"), e.Col("age"))
 			q.Into(e.Table("users"))
 			q.Values(&vals)
@@ -309,7 +308,7 @@ func TestInsert(t *testing.T) {
 	})
 
 	t.Run("ignore_values", func(t *testing.T) {
-		stmt := db.Insert("users", func(q inyorm.InsertQuery, e inyorm.Expr) {
+		stmt := db.Insert(func(q inyorm.InsertQuery, e inyorm.Expr) {
 			q.Insert(User{}).Ignore(e.Col("age"))
 			q.Into(e.Table("users"))
 			q.Values(User{
@@ -334,7 +333,7 @@ func TestUpdate(t *testing.T) {
 	}
 
 	t.Run("update_one", func(t *testing.T) {
-		stmt := db.Update("posts", func(q inyorm.UpdateQuery, e inyorm.Expr) {
+		stmt := db.Update(func(q inyorm.UpdateQuery, e inyorm.Expr) {
 			q.Update(&Post{})
 			q.Into(e.Table("posts"))
 			q.Values(Post{
@@ -349,7 +348,7 @@ func TestUpdate(t *testing.T) {
 	})
 
 	t.Run("with_cols", func(t *testing.T) {
-		stmt := db.Update("posts", func(q inyorm.UpdateQuery, e inyorm.Expr) {
+		stmt := db.Update(func(q inyorm.UpdateQuery, e inyorm.Expr) {
 			q.Update(e.Col("title"), e.Col("description"))
 			q.Into(e.Table("posts"))
 			q.Values(Post{
@@ -369,7 +368,7 @@ func TestUpdate(t *testing.T) {
 			"name":    "matias",
 		}
 
-		stmt := db.Update("users", func(q inyorm.UpdateQuery, e inyorm.Expr) {
+		stmt := db.Update(func(q inyorm.UpdateQuery, e inyorm.Expr) {
 			q.Update(vals)
 			q.Into(e.Table("users"))
 			q.Values(vals)
@@ -388,7 +387,7 @@ func TestUpdate(t *testing.T) {
 			"id":       123,
 		}
 
-		stmt := db.Update("users", func(q inyorm.UpdateQuery, e inyorm.Expr) {
+		stmt := db.Update(func(q inyorm.UpdateQuery, e inyorm.Expr) {
 			var (
 				name = e.Col("name")
 				acc  = e.Col("account")
@@ -409,7 +408,7 @@ func TestDelete(t *testing.T) {
 	db, _ := inyorm.New(std.JustDialect())
 
 	t.Run("delete_one", func(t *testing.T) {
-		stmt := db.Delete("comments", func(q inyorm.DeleteQuery, e inyorm.Expr) {
+		stmt := db.Delete(func(q inyorm.DeleteQuery, e inyorm.Expr) {
 			q.Delete()
 			q.From(e.Table("comments"))
 			q.Where(e.Col("id")).Equal(e.Param(12310))
@@ -424,7 +423,7 @@ func TestCreateTable(t *testing.T) {
 	db, _ := inyorm.New(std.JustDialect())
 
 	t.Run("basic_table", func(t *testing.T) {
-		stmt := db.CreateTable("users", func(q inyorm.CreateTable, e inyorm.Expr) {
+		stmt := db.CreateTable(func(q inyorm.CreateTable, e inyorm.Expr) {
 			q.TableName("users")
 
 			q.Int("id").PrimaryKey().AutoIncrement()
@@ -440,7 +439,7 @@ func TestCreateTable(t *testing.T) {
 	})
 
 	t.Run("with_constraints", func(t *testing.T) {
-		stmt := db.CreateTable("posts", func(q inyorm.CreateTable, e inyorm.Expr) {
+		stmt := db.CreateTable(func(q inyorm.CreateTable, e inyorm.Expr) {
 			q.TableName("posts")
 
 			q.String("id").PrimaryKey()

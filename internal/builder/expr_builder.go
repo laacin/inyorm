@@ -8,35 +8,35 @@ import (
 
 type ExprBuilder struct {
 	param core.ParamStore
-	Ref   string
+	alias core.AliasStore
 }
 
-// start
-func (e *ExprBuilder) Start(paramStore core.ParamStore) *ExprBuilder {
-	e.param = paramStore
-	return e
-}
-
-func (e *ExprBuilder) AttachRef(ref string) *ExprBuilder {
-	e.Ref = ref
-	return e
+func NewExprBuilder(param core.ParamStore, alias core.AliasStore) *ExprBuilder {
+	return &ExprBuilder{param: param, alias: alias}
 }
 
 // --- PUB API
 
 func (e *ExprBuilder) Table(name string) any {
 	tbl := &expr.Table{}
-	return tbl.Start(name)
+	e.alias.Set(name)
+	return tbl.Start(name, func() core.Reference {
+		return e.alias.Get(name)
+	})
 }
 
 func (e *ExprBuilder) Col(name string, ref ...string) api.Col {
 	col := &expr.Col{}
-	return col.Start(name, getLast(e.Ref, ref))
+	return col.Start(name, func() core.Reference {
+		return e.getRef(ref)
+	})
 }
 
 func (e *ExprBuilder) All(ref ...string) api.Col {
 	col := &expr.Col{}
-	return col.Start("*", getLast(e.Ref, ref))
+	return col.Start("*", func() core.Reference {
+		return e.getRef(ref)
+	})
 }
 
 func (e *ExprBuilder) Param(v any) any {
@@ -86,4 +86,11 @@ func getLast[T any](prev T, candidate []T) T {
 		return candidate[0]
 	}
 	return prev
+}
+
+func (e *ExprBuilder) getRef(candidate []string) core.Reference {
+	if len(candidate) > 0 {
+		return e.alias.Get(candidate[0])
+	}
+	return e.alias.GetMain()
 }

@@ -1,6 +1,6 @@
 package expr
 
-func NormalizeExpr(value any) Expr {
+func Parse(value any) Expr {
 	if value == nil {
 		return Null{}
 	}

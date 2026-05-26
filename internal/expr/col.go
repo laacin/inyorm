@@ -9,7 +9,7 @@ import (
 
 type Col struct {
 	Name  string
-	Ref   string
+	Ref   core.LazyVal[core.Reference]
 	Alias string
 	Value string
 	from  Expr
@@ -23,9 +23,9 @@ func (c *Col) StartFrom(from Expr) *Col {
 	c.from = from
 	return c
 }
-func (c *Col) Start(name, table string) *Col {
+func (c *Col) Start(name string, ref core.LazyVal[core.Reference]) *Col {
 	c.Name = name
-	c.Ref = table
+	c.Ref = ref
 	return c
 }
 
@@ -150,8 +150,6 @@ func (*Col) Kind() ExprKind {
 }
 
 func (c *Col) Render(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
-	w.SetRef(c.Ref)
-
 	if c != nil && (c.aggr != nil || c.exprs != nil || c.from != nil) {
 		nw := w.New()
 

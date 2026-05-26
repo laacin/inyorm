@@ -1,18 +1,5 @@
 package core
 
-type Builder struct {
-	Mapper Mapper
-	Param  ParamStore
-	Attach AttachmentConfig
-}
-
-// --- Attachments
-
-type AttachmentConfig struct {
-	MainRef    string
-	UseAliases bool
-}
-
 // --- Mapper
 
 // tag rules
@@ -32,6 +19,22 @@ type Mapper interface {
 
 	Scan(rows Rows, bind any) error
 }
+
+// --- Aliases
+type AliasStore interface {
+	Enable()
+
+	GetMain() Reference
+	Get(ref string) Reference
+	Set(id string)
+}
+
+type Reference struct {
+	Ref    byte
+	Enable bool
+}
+
+// --- Params
 
 type ParamStore interface {
 	Store(v any)

@@ -155,18 +155,18 @@ func (*Dialect) WriteExprCaseSearch(w core.Writer, cas *expr.Case, mode core.Wri
 // ---- TABLE ----
 
 func (*Dialect) WriteExprTable(w core.Writer, tbl *expr.Table) {
-	w.Write(tbl.Value)
-	if ref, ok := w.GetRef(tbl.Value); ok {
+	w.Write(tbl.Name)
+	if ref := tbl.Ref(); ref.Enable {
 		w.Char(' ')
-		w.Char(ref)
+		w.Char(ref.Ref)
 	}
 }
 
 // ---- COLUMN ----
 
 func (*Dialect) WriteExprColBase(w core.Writer, col *expr.Col) {
-	if ref, ok := w.GetRef(col.Ref); ok {
-		w.Char(ref)
+	if ref := col.Ref(); ref.Enable {
+		w.Char(ref.Ref)
 		w.Char('.')
 	}
 	w.Write(col.Name)

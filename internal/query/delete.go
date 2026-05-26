@@ -1,6 +1,7 @@
 package query
 
 import (
+	"github.com/laacin/inyorm/internal/builder"
 	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/expr"
 	"github.com/laacin/inyorm/internal/query/dml"
@@ -12,14 +13,14 @@ type QueryDelete struct {
 	dml.ClauseWhere
 }
 
-func (q *QueryDelete) Build(b *core.Builder) error {
+func (q *QueryDelete) Build(b *builder.Builder) error {
 	if q.ClauseDelete.IsDeclared() {
 		q.ClauseDelete.Build(b)
 	}
 
 	if q.ClauseFrom.IsDeclared() {
 		if tbl, ok := q.ClauseFrom.Value.(*expr.Table); ok {
-			b.Attach.MainRef = tbl.Value
+			b.SetMainRef(tbl.Name)
 		}
 
 		q.ClauseFrom.Build(b)

@@ -16,14 +16,10 @@ type Writer interface {
 	Char(byte)
 	Wrap(func(curr string, w Writer))
 	Value(v any, mode WritingMode)
-
-	GetRef(ref string) (byte, bool)
 }
 
 type InternalWriter interface {
 	Writer
-	SetRef(string)
-
 	New() InternalWriter
 	ToString() string
 	Reset()

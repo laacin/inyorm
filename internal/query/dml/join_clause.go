@@ -2,7 +2,7 @@ package dml
 
 import (
 	"github.com/laacin/inyorm/internal/api"
-	"github.com/laacin/inyorm/internal/core"
+	"github.com/laacin/inyorm/internal/builder"
 	"github.com/laacin/inyorm/internal/expr"
 )
 
@@ -55,7 +55,7 @@ func (c *ClauseJoin) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *ClauseJoin) Build(b *core.Builder) error {
+func (c *ClauseJoin) Build(b *builder.Builder) error {
 	return nil
 }
 

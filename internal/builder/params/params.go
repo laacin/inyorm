@@ -16,6 +16,8 @@ type ParamStore struct {
 	errs  []error
 }
 
+func New() *ParamStore { return &ParamStore{} }
+
 func (p *ParamStore) Store(v any) {
 	p.initMap()
 

@@ -1,6 +1,6 @@
 package dml
 
-import "github.com/laacin/inyorm/internal/core"
+import "github.com/laacin/inyorm/internal/builder"
 
 // --- Entity
 
@@ -26,6 +26,6 @@ func (c *ClauseGroupBy) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *ClauseGroupBy) Build(b *core.Builder) error {
+func (c *ClauseGroupBy) Build(b *builder.Builder) error {
 	return nil
 }
