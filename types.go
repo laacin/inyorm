@@ -3,18 +3,23 @@ package inyorm
 import (
 	"github.com/laacin/inyorm/internal/api"
 	"github.com/laacin/inyorm/internal/core"
-	"github.com/laacin/inyorm/internal/query"
+	"github.com/laacin/inyorm/internal/expr"
+	"github.com/laacin/inyorm/internal/query/ddl"
+	"github.com/laacin/inyorm/internal/query/dml"
 )
 
 // --- Main types
-type (
-	Dialect = query.Dialect
-	Driver  = core.Driver
-)
+type Driver = core.Driver
 
 type Engine struct {
 	Dialect Dialect
 	Driver  Driver
+}
+
+type Dialect interface {
+	expr.Renderer
+	dml.Renderer
+	ddl.Renderer
 }
 
 // --- Expressions

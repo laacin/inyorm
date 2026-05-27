@@ -2,13 +2,12 @@ package std_dialect
 
 import (
 	"github.com/laacin/inyorm/internal/core"
-	"github.com/laacin/inyorm/internal/query"
 	"github.com/laacin/inyorm/internal/query/ddl"
 )
 
 // ---- CREATE TABLE ----
 
-func (s *Dialect) WriteQueryCreateTable(w core.Writer, t *query.QueryCreateTable) {
+func (s *Dialect) WriteQueryCreateTable(w core.Writer, t *ddl.QueryCreateTable) {
 	w.Write("CREATE TABLE IF NOT EXISTS")
 	w.Char(' ')
 	w.Write(t.Name)

@@ -145,11 +145,9 @@ func (c *Col) As(value string) api.Col {
 // --- Build
 func (c *Col) BaseName() string { return c.Name }
 
-func (*Col) Kind() ExprKind {
-	return ExprKindCol
-}
+func (*Col) Kind() Kind { return KindCol }
 
-func (c *Col) Render(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
+func (c *Col) Render(w core.InternalWriter, dial Renderer, mode core.WritingMode) {
 	if c != nil && (c.aggr != nil || c.exprs != nil || c.from != nil) {
 		nw := w.New()
 

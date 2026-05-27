@@ -35,11 +35,9 @@ func (p *Placeholder) IsLazy() bool {
 	return p.lazy
 }
 
-func (p *Placeholder) Kind() ExprKind {
-	return ExprKindPlaceholder
-}
+func (p *Placeholder) Kind() Kind { return KindPlaceholder }
 
-func (p *Placeholder) Render(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
+func (p *Placeholder) Render(w core.InternalWriter, dial Renderer, mode core.WritingMode) {
 	if p.paramIdx != nil {
 		idx := p.paramIdx()
 		p.ID = idx.ID

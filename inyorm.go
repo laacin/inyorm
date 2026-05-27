@@ -7,6 +7,8 @@ import (
 	"github.com/laacin/inyorm/internal"
 	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/query"
+	"github.com/laacin/inyorm/internal/query/ddl"
+	"github.com/laacin/inyorm/internal/query/dml"
 )
 
 type DB struct{ eng *Engine }
@@ -44,42 +46,52 @@ func (db *DB) RunTx(ctx context.Context, stmts ...Runner) error {
 // --- DML Statements
 
 func (db *DB) Select(fn func(q SelectQuery, e Expr)) Statement {
-	q := query.New(&query.QuerySelect{}, db.eng.Dialect)
-	fn(q.API, q.Expr)
+	q := dml.NewSelect(db.eng.Dialect)
+
+	qc := query.NewCompiler(q)
+	fn(q, qc.Expr())
 
 	stmt := &internal.Statement{}
-	return stmt.Start(db.eng.Driver, q)
+	return stmt.Start(db.eng.Driver, db.eng.Dialect, qc)
 }
 func (db *DB) Insert(fn func(q InsertQuery, e Expr)) Statement {
-	q := query.New(&query.QueryInsert{}, db.eng.Dialect)
-	fn(q.API, q.Expr)
+	q := dml.NewInsert(db.eng.Dialect)
+
+	qc := query.NewCompiler(q)
+	fn(q, qc.Expr())
 
 	stmt := &internal.Statement{}
-	return stmt.Start(db.eng.Driver, q)
+	return stmt.Start(db.eng.Driver, db.eng.Dialect, qc)
 }
 func (db *DB) Update(fn func(q UpdateQuery, e Expr)) Statement {
-	q := query.New(&query.QueryUpdate{}, db.eng.Dialect)
-	fn(q.API, q.Expr)
+	q := dml.NewUpdate(db.eng.Dialect)
+
+	qc := query.NewCompiler(q)
+	fn(q, qc.Expr())
 
 	stmt := &internal.Statement{}
-	return stmt.Start(db.eng.Driver, q)
+	return stmt.Start(db.eng.Driver, db.eng.Dialect, qc)
 }
 func (db *DB) Delete(fn func(q DeleteQuery, e Expr)) Statement {
-	q := query.New(&query.QueryDelete{}, db.eng.Dialect)
-	fn(q.API, q.Expr)
+	q := dml.NewDelete(db.eng.Dialect)
+
+	qc := query.NewCompiler(q)
+	fn(q, qc.Expr())
 
 	stmt := &internal.Statement{}
-	return stmt.Start(db.eng.Driver, q)
+	return stmt.Start(db.eng.Driver, db.eng.Dialect, qc)
 }
 
 // --- DDL Statements
 
 func (db *DB) CreateTable(fn func(q CreateTable, e Expr)) Statement {
-	q := query.New(&query.QueryCreateTable{}, db.eng.Dialect)
-	fn(q.API, q.Expr)
+	q := ddl.NewCreateTable(db.eng.Dialect)
+
+	qc := query.NewCompiler(q)
+	fn(q, qc.Expr())
 
 	stmt := &internal.Statement{}
-	return stmt.Start(db.eng.Driver, q)
+	return stmt.Start(db.eng.Driver, db.eng.Dialect, qc)
 }
 
 // --- Connection

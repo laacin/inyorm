@@ -3,8 +3,6 @@ package types
 import (
 	"strings"
 	"unicode"
-
-	"github.com/laacin/inyorm/internal/core"
 )
 
 type TagResult struct {
@@ -15,26 +13,26 @@ type TagResult struct {
 func ParseTag(fieldName, tag string) TagResult {
 	result := TagResult{}
 
-	for seq := range strings.SplitSeq(tag, core.TagKeySep) {
+	for seq := range strings.SplitSeq(tag, TagKeySep) {
 		seq = strings.TrimSpace(seq)
 
-		if strings.ToLower(seq) == core.TagKeySkip {
+		if strings.ToLower(seq) == TagKeySkip {
 			result.Skip = true
 			continue
 		}
 
-		if strings.ToLower(seq) == core.TagKeyCol {
+		if strings.ToLower(seq) == TagKeyCol {
 			result.Name = fieldName
 			continue
 		}
 
-		keyVal := strings.Split(seq, core.TagValSep)
+		keyVal := strings.Split(seq, TagValSep)
 		if len(keyVal) < 2 {
 			continue
 		}
 
 		key, val := keyVal[0], keyVal[1]
-		if strings.ToLower(key) == core.TagKeyCol {
+		if strings.ToLower(key) == TagKeyCol {
 			result.Name = val
 			continue
 		}

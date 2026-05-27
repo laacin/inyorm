@@ -4,12 +4,12 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/laacin/inyorm/internal/builder/mapper"
+	"github.com/laacin/inyorm/internal/core/mapper"
 	"github.com/laacin/inyorm/internal/expr"
 )
 
 func run(t *testing.T, v []any, exp []string) {
-	cols := (&mapper.Mapper{}).ReadCols(v...)
+	cols := mapper.New().ReadCols(v...)
 	if !reflect.DeepEqual(cols, exp) {
 		t.Errorf("columns doesn't match:\n - Expect: %v\n - Have: %v\n", exp, cols)
 	}

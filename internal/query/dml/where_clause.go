@@ -2,8 +2,8 @@ package dml
 
 import (
 	"github.com/laacin/inyorm/internal/api"
-	"github.com/laacin/inyorm/internal/builder"
 	"github.com/laacin/inyorm/internal/expr"
+	"github.com/laacin/inyorm/internal/query"
 )
 
 // --- Entity
@@ -32,6 +32,6 @@ func (c *ClauseWhere) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *ClauseWhere) Build(b *builder.Builder) error {
+func (c *ClauseWhere) Build(tools *query.Tools) error {
 	return nil
 }

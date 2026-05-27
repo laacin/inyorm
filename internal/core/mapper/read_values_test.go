@@ -4,11 +4,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/laacin/inyorm/internal/builder/mapper"
+	"github.com/laacin/inyorm/internal/core/mapper"
 )
 
 func newTest(t *testing.T, reference, v any) func(rows int, cols []string, vals []any) {
-	m := &mapper.Mapper{}
+	m := mapper.New()
 
 	cols := m.ReadCols([]any{reference})
 

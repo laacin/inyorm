@@ -2,7 +2,11 @@ package ddl
 
 import "github.com/laacin/inyorm/internal/core"
 
-type TableWriter interface {
+type Renderer interface {
+	// ---- Queries
+	WriteQueryCreateTable(core.Writer, *QueryCreateTable)
+
+	// ---- Dep
 	WriteColDecl(core.Writer, *ColDecl)
 
 	WriteColString(core.Writer)

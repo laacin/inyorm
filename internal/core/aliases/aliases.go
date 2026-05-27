@@ -53,8 +53,8 @@ func (a *AliasStore) getIfIsPossible(ref string) core.Reference {
 
 	if al, ok := a.list[ref]; ok {
 		return core.Reference{
-			Ref:    al,
-			Enable: a.enabled,
+			Ref:     al,
+			Enabled: a.enabled,
 		}
 	}
 

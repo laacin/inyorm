@@ -13,10 +13,8 @@ func (c *Concat) Start(values []any) *Concat {
 }
 
 // --- Build
-func (*Concat) Kind() ExprKind {
-	return ExprKindConcat
-}
+func (*Concat) Kind() Kind { return KindConcat }
 
-func (c *Concat) Render(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
+func (c *Concat) Render(w core.InternalWriter, dial Renderer, mode core.WritingMode) {
 	dial.WriteExprConcat(w, c, mode)
 }

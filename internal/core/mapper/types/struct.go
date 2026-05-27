@@ -1,10 +1,6 @@
 package types
 
-import (
-	"reflect"
-
-	"github.com/laacin/inyorm/internal/core"
-)
+import "reflect"
 
 func readStruct(t reflect.Type) StructInfo {
 	info := NewStructInfo()
@@ -18,7 +14,7 @@ func readStruct(t reflect.Type) StructInfo {
 			continue
 		}
 
-		info.Add(field.Name, field.Tag.Get(core.TAG), field.Index)
+		info.Add(field.Name, field.Tag.Get(TAG), field.Index)
 	}
 
 	return info

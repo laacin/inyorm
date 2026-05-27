@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"slices"
 
-	"github.com/laacin/inyorm/internal/builder/mapper/types"
+	"github.com/laacin/inyorm/internal/core/mapper/types"
 )
 
 // Errs

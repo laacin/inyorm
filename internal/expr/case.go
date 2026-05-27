@@ -11,19 +11,19 @@ type Case struct {
 	Cond    any
 	Whens   []CaseWhen
 	Els     any
-	kind    ExprKind
+	kind    Kind
 	current *CaseWhen
 }
 
 // start
 
 func (c *Case) StartSwitch(cond any) *Case {
-	c.kind = ExprKindCaseSwitch
+	c.kind = KindCaseSwitch
 	c.Cond = cond
 	return c
 }
 func (c *Case) StartSearch() *Case {
-	c.kind = ExprKindCaseSearch
+	c.kind = KindCaseSearch
 	return c
 }
 
@@ -46,15 +46,13 @@ func (c *Case) Else(els any) {
 
 // --- Build
 
-func (c *Case) Kind() ExprKind {
-	return c.kind
-}
+func (c *Case) Kind() Kind { return c.kind }
 
-func (c *Case) Render(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
+func (c *Case) Render(w core.InternalWriter, dial Renderer, mode core.WritingMode) {
 	switch c.kind {
-	case ExprKindCaseSwitch:
+	case KindCaseSwitch:
 		dial.WriteExprCaseSwitch(w, c, mode)
-	case ExprKindCaseSearch:
+	case KindCaseSearch:
 		dial.WriteExprCaseSearch(w, c, mode)
 	}
 }

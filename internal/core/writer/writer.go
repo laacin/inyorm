@@ -4,16 +4,15 @@ import (
 	"strings"
 
 	"github.com/laacin/inyorm/internal/core"
-	"github.com/laacin/inyorm/internal/expr"
 )
 
 type Writer struct {
-	sb   strings.Builder
-	dial expr.ExprWriter
+	sb     strings.Builder
+	parser core.ValueParser
 }
 
-func New(dial expr.ExprWriter) *Writer {
-	return &Writer{dial: dial}
+func New(parser core.ValueParser) *Writer {
+	return &Writer{parser: parser}
 }
 
 // --- Writer
@@ -33,13 +32,13 @@ func (w *Writer) Wrap(fn func(string, core.Writer)) {
 }
 
 func (w *Writer) Value(v any, mode core.WritingMode) {
-	expr.Parse(v).Render(w, w.dial, mode)
+	w.parser.Render(w, v, mode)
 }
 
 // --- Internal writer
 
 func (w *Writer) New() core.InternalWriter {
-	return &Writer{dial: w.dial}
+	return &Writer{parser: w.parser}
 }
 
 func (w *Writer) ToString() string {

@@ -2,7 +2,6 @@ package std_dialect
 
 import (
 	"github.com/laacin/inyorm/internal/core"
-	"github.com/laacin/inyorm/internal/query"
 	"github.com/laacin/inyorm/internal/query/dml"
 )
 
@@ -166,7 +165,7 @@ func (*Dialect) WriteClauseDelete(w core.Writer, cls *dml.ClauseDelete) {
 
 // ---- QUERY WRITER -----
 
-func (s *Dialect) WriteQuerySelect(w core.Writer, q *query.QuerySelect) {
+func (s *Dialect) WriteQuerySelect(w core.Writer, q *dml.QuerySelect) {
 	if q.ClauseSelect.IsDeclared() {
 		s.Self.WriteClauseSelect(w, &q.ClauseSelect)
 	}
@@ -212,13 +211,13 @@ func (s *Dialect) WriteQuerySelect(w core.Writer, q *query.QuerySelect) {
 	}
 }
 
-func (s *Dialect) WriteQueryInsert(w core.Writer, q *query.QueryInsert) {
+func (s *Dialect) WriteQueryInsert(w core.Writer, q *dml.QueryInsert) {
 	if q.ClauseInsertInto.IsDeclared() {
 		s.Self.WriteClauseInsertInto(w, &q.ClauseInsertInto)
 	}
 }
 
-func (s *Dialect) WriteQueryUpdate(w core.Writer, q *query.QueryUpdate) {
+func (s *Dialect) WriteQueryUpdate(w core.Writer, q *dml.QueryUpdate) {
 	if q.ClauseUpdate.IsDeclared() {
 		s.Self.WriteClauseUpdate(w, &q.ClauseUpdate)
 	}
@@ -229,7 +228,7 @@ func (s *Dialect) WriteQueryUpdate(w core.Writer, q *query.QueryUpdate) {
 	}
 }
 
-func (s *Dialect) WriteQueryDelete(w core.Writer, q *query.QueryDelete) {
+func (s *Dialect) WriteQueryDelete(w core.Writer, q *dml.QueryDelete) {
 	if q.ClauseDelete.IsDeclared() {
 		s.Self.WriteClauseDelete(w, &q.ClauseDelete)
 	}

@@ -1,6 +1,6 @@
 package dml
 
-import "github.com/laacin/inyorm/internal/builder"
+import "github.com/laacin/inyorm/internal/query"
 
 // --- Entity
 
@@ -28,6 +28,6 @@ func (c *ClauseLimit) IsDeclared() bool {
 	return c != nil && c.declared
 }
 
-func (c *ClauseLimit) Build(b *builder.Builder) error {
+func (c *ClauseLimit) Build(tools *query.Tools) error {
 	return nil
 }

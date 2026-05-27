@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/laacin/inyorm/internal/builder/mapper"
+	"github.com/laacin/inyorm/internal/core/mapper"
 )
 
 type MockRows struct {
@@ -39,7 +39,7 @@ func (m *MockRows) Scan(dest ...any) error {
 }
 
 func newScanner(t *testing.T, rows *MockRows, v any) func(expect any, expErr ...error) {
-	err := (&mapper.Mapper{}).Scan(rows, v)
+	err := mapper.New().Scan(rows, v)
 
 	return func(expect any, expErr ...error) {
 		if err != nil && len(expErr) > 0 && expErr[0] != nil {

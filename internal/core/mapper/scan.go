@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/laacin/inyorm/internal/builder/mapper/types"
 	"github.com/laacin/inyorm/internal/core"
+	"github.com/laacin/inyorm/internal/core/mapper/types"
 )
 
 func (m *Mapper) Scan(rows core.Rows, scanner any) error {
@@ -145,7 +145,7 @@ func scanByMap(rows core.Rows, value any) error {
 
 	mp, ok := value.(map[string]any)
 	if !ok {
-		return errors.New("map scanning must receive map[string]any or *[]map[string]any")
+		return errors.New("map scanning expects map[string]any or *[]map[string]any")
 	}
 
 	if !rows.Next() {
@@ -176,7 +176,7 @@ func scanByMapSlc(rows core.Rows, value any) error {
 
 	maps, ok := value.(*[]map[string]any)
 	if !ok {
-		return errors.New("map scanning must receive map[string]any or *[]map[string]any")
+		return errors.New("map scanning expects map[string]any or *[]map[string]any")
 	}
 
 	ln := len(*maps)

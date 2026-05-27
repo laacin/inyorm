@@ -2,29 +2,12 @@ package expr
 
 import "github.com/laacin/inyorm/internal/core"
 
-type ExprKind int
+type Expr interface {
+	Kind() Kind
+	Render(core.InternalWriter, Renderer, core.WritingMode)
+}
 
-const (
-	// Literals
-	ExprKindString ExprKind = iota
-	ExprKindNumber
-	ExprKindFloat
-	ExprKindBool
-	ExprKindNull
-
-	// Specials
-	ExprKindPlaceholder
-	ExprKindCond
-	ExprKindConcat
-	ExprKindCaseSwitch
-	ExprKindCaseSearch
-
-	// SQL Values
-	ExprKindTable
-	ExprKindCol
-)
-
-type ExprWriter interface {
+type Renderer interface {
 	// Literals
 	WriteLitString(core.Writer, string)
 	WriteLitInt(core.Writer, int)
@@ -54,7 +37,24 @@ type ExprWriter interface {
 	WriteExprColWrap(core.Writer)
 }
 
-type Expr interface {
-	Kind() ExprKind
-	Render(core.InternalWriter, ExprWriter, core.WritingMode)
-}
+type Kind int
+
+const (
+	// Literals
+	KindString Kind = iota
+	KindNumber
+	KindFloat
+	KindBool
+	KindNull
+
+	// Specials
+	KindPlaceholder
+	KindCond
+	KindConcat
+	KindCaseSwitch
+	KindCaseSearch
+
+	// SQL Values
+	KindTable
+	KindCol
+)

@@ -18,10 +18,8 @@ func (t *Table) Start(name string, ref core.LazyVal[core.Reference]) *Table {
 
 // --- Build
 
-func (t *Table) Kind() ExprKind {
-	return ExprKindTable
-}
+func (t *Table) Kind() Kind { return KindTable }
 
-func (t *Table) Render(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
+func (t *Table) Render(w core.InternalWriter, dial Renderer, mode core.WritingMode) {
 	dial.WriteExprTable(w, t)
 }

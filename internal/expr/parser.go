@@ -1,6 +1,22 @@
 package expr
 
-func Parse(value any) Expr {
+import "github.com/laacin/inyorm/internal/core"
+
+type Parser struct {
+	rend Renderer
+}
+
+func NewParser(rend Renderer) *Parser {
+	return &Parser{rend: rend}
+}
+
+func (e *Parser) Render(w core.InternalWriter, v any, mode core.WritingMode) {
+	parse(v).Render(w, e.rend, mode)
+}
+
+// helpers
+
+func parse(value any) Expr {
 	if value == nil {
 		return Null{}
 	}

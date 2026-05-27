@@ -11,25 +11,25 @@ type (
 )
 
 // Kinds
-func (String) Kind() ExprKind { return ExprKindString }
-func (Int) Kind() ExprKind    { return ExprKindNumber }
-func (Float) Kind() ExprKind  { return ExprKindFloat }
-func (Bool) Kind() ExprKind   { return ExprKindBool }
-func (Null) Kind() ExprKind   { return ExprKindNull }
+func (String) Kind() Kind { return KindString }
+func (Int) Kind() Kind    { return KindNumber }
+func (Float) Kind() Kind  { return KindFloat }
+func (Bool) Kind() Kind   { return KindBool }
+func (Null) Kind() Kind   { return KindNull }
 
 // Renders
-func (v String) Render(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
+func (v String) Render(w core.InternalWriter, dial Renderer, mode core.WritingMode) {
 	dial.WriteLitString(w, string(v))
 }
-func (v Int) Render(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
+func (v Int) Render(w core.InternalWriter, dial Renderer, mode core.WritingMode) {
 	dial.WriteLitInt(w, int(v))
 }
-func (v Float) Render(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
+func (v Float) Render(w core.InternalWriter, dial Renderer, mode core.WritingMode) {
 	dial.WriteLitFloat(w, float64(v))
 }
-func (v Bool) Render(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
+func (v Bool) Render(w core.InternalWriter, dial Renderer, mode core.WritingMode) {
 	dial.WriteLitBool(w, bool(v))
 }
-func (Null) Render(w core.InternalWriter, dial ExprWriter, mode core.WritingMode) {
+func (Null) Render(w core.InternalWriter, dial Renderer, mode core.WritingMode) {
 	dial.WriteLitNull(w)
 }

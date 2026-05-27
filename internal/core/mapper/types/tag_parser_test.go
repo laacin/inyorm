@@ -4,13 +4,12 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/laacin/inyorm/internal/builder/mapper/types"
-	"github.com/laacin/inyorm/internal/core"
+	"github.com/laacin/inyorm/internal/core/mapper/types"
 )
 
 func run(t *testing.T, v any, exp types.TagResult) {
 	field := reflect.TypeOf(v).FieldByIndex([]int{0})
-	result := types.ParseTag(field.Name, field.Tag.Get(core.TAG))
+	result := types.ParseTag(field.Name, field.Tag.Get(types.TAG))
 
 	if !reflect.DeepEqual(result, exp) {
 		t.Fatalf("\nmismatch.\nExpect:\n%v\nHave:\n%v\n", exp, result)

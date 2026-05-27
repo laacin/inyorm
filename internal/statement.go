@@ -4,25 +4,24 @@ import (
 	"context"
 
 	"github.com/laacin/inyorm/internal/api"
-	"github.com/laacin/inyorm/internal/builder"
-	"github.com/laacin/inyorm/internal/builder/mapper"
 	"github.com/laacin/inyorm/internal/core"
+	"github.com/laacin/inyorm/internal/core/mapper"
+	"github.com/laacin/inyorm/internal/expr"
+	"github.com/laacin/inyorm/internal/query"
 )
 
-type queryBuilder interface {
-	Build() (*builder.Builder, error)
-}
-
 type Statement struct {
-	query  queryBuilder
+	rend   expr.Renderer
+	query  *query.Compiler
 	driver core.Driver
 
 	bind any
 }
 
-func (s *Statement) Start(driver core.Driver, q queryBuilder) api.Statement {
+func (s *Statement) Start(driver core.Driver, rend expr.Renderer, qc *query.Compiler) api.Statement {
+	s.rend = rend
 	s.driver = driver
-	s.query = q
+	s.query = qc
 	return s
 }
 
@@ -42,17 +41,17 @@ func (s *Statement) BindPrep(binder ...any) api.PrepStatement {
 
 // --- Runner
 func (s *Statement) Raw() (string, []any, error) {
-	b, err := s.query.Build()
+	result, err := s.query.Compile(s.rend)
 	if err != nil {
 		return "", nil, err
 	}
 
-	vals, err := b.Params().Values()
+	vals, err := result.Params.Values()
 	if err != nil {
 		return "", nil, err
 	}
 
-	return b.Writer().ToString(), vals, nil
+	return result.QueryString, vals, nil
 }
 
 func (s *Statement) Run(context ...context.Context) error {
@@ -71,7 +70,7 @@ func (s *Statement) Run(context ...context.Context) error {
 		return err
 	}
 
-	return (&mapper.Mapper{}).Scan(rows, s.bind)
+	return mapper.New().Scan(rows, s.bind)
 }
 
 func (s *Statement) RunTx(ctx context.Context, tx core.Transaction) error {
@@ -89,7 +88,7 @@ func (s *Statement) RunTx(ctx context.Context, tx core.Transaction) error {
 		return err
 	}
 
-	return (&mapper.Mapper{}).Scan(rows, s.bind)
+	return mapper.New().Scan(rows, s.bind)
 }
 
 // --- Prepare
