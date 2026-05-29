@@ -8,7 +8,7 @@ import (
 
 type DB struct {
 	eng *Engine
-	Queries[Statement]
+	queries[Statement]
 }
 
 func New(eng *Engine, err error) (*DB, error) {
@@ -22,7 +22,7 @@ func New(eng *Engine, err error) (*DB, error) {
 
 	return &DB{
 		eng:     eng,
-		Queries: qb,
+		queries: qb,
 	}, nil
 }
 
@@ -36,7 +36,7 @@ func (db *DB) StartTx() Transaction {
 		return tx.Push(qc)
 	})
 
-	tx.Queries = qb
+	tx.queries = qb
 	return tx
 }
 
@@ -50,5 +50,5 @@ func (db *DB) Close() error {
 
 type txBuilder struct {
 	*statement.Transaction
-	Queries[api.SelfBinder]
+	queries[api.SelfBinder]
 }

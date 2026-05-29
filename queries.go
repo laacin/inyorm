@@ -12,7 +12,7 @@ type queryBuilder[T any] struct {
 	chain func(qc *query.Compiler) T
 }
 
-func newQueryBuilder[T any](dial Dialect, chain func(qc *query.Compiler) T) Queries[T] {
+func newQueryBuilder[T any](dial Dialect, chain func(qc *query.Compiler) T) queries[T] {
 	return &queryBuilder[T]{
 		dial:  dial,
 		chain: chain,
