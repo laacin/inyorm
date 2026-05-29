@@ -1,7 +1,6 @@
 package test
 
 import (
-	"context"
 	"fmt"
 	"strings"
 	"testing"
@@ -318,7 +317,9 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("run_tx", func(t *testing.T) {
-		stmt1 := db.Insert(func(q inyorm.InsertQuery, e inyorm.Expr) {
+		tx := db.StartTx()
+
+		tx.Insert(func(q inyorm.InsertQuery, e inyorm.Expr) {
 			q.Insert(User{})
 			q.Into(e.Table("users"))
 			q.Values(User{
@@ -329,7 +330,7 @@ func Test(t *testing.T) {
 			})
 		})
 
-		stmt2 := db.Insert(func(q inyorm.InsertQuery, e inyorm.Expr) {
+		tx.Insert(func(q inyorm.InsertQuery, e inyorm.Expr) {
 			q.Insert(Profile{})
 			q.Into(e.Table("profiles"))
 			q.Values(Profile{
@@ -340,7 +341,7 @@ func Test(t *testing.T) {
 			})
 		})
 
-		if err := db.RunTx(context.Background(), stmt1, stmt2); err != nil {
+		if err := tx.Run(); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -387,21 +388,23 @@ func Test(t *testing.T) {
 	t.Run("bind_between_tx", func(t *testing.T) {
 		var user1, user2 User
 
-		stmt1 := db.Select(func(q inyorm.SelectQuery, e inyorm.Expr) {
+		tx := db.StartTx()
+
+		tx.Select(func(q inyorm.SelectQuery, e inyorm.Expr) {
 			q.Select(e.All())
 			q.From(e.Table("users"))
 			q.Where(e.Col("id")).Equal(e.Param(1))
 			q.Limit(1)
 		}).Bind(&user1)
 
-		stmt2 := db.Select(func(q inyorm.SelectQuery, e inyorm.Expr) {
+		tx.Select(func(q inyorm.SelectQuery, e inyorm.Expr) {
 			q.Select(e.All())
 			q.From(e.Table("users"))
 			q.Where(e.Col("id")).Equal(e.Param(2))
 			q.Limit(1)
 		}).Bind(&user2)
 
-		if err := db.RunTx(context.Background(), stmt1, stmt2); err != nil {
+		if err := tx.Run(); err != nil {
 			t.Fatal(err)
 		}
 

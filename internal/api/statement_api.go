@@ -4,13 +4,17 @@ import "context"
 
 type Statement interface {
 	Runner
-	Prepare() PrepStatement
-	Bind(...any) Statement
+	Binder[Statement]
 }
 
-type PrepStatement interface {
-	BindPrep(...any) PrepStatement
-	Values(...any) Runner
+type Binder[T any] interface {
+	Bind(any) T
+	Values(any) T
+}
+
+type SelfBinder interface {
+	Bind(any) SelfBinder
+	Values(any) SelfBinder
 }
 
 type Runner interface {

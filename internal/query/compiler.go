@@ -11,13 +11,15 @@ import (
 )
 
 type Compiler struct {
-	tools *Tools
-	query Query
+	tools  *Tools
+	query  Query
+	parser *expr.Parser
 }
 
-func NewCompiler(q Query) *Compiler {
+func NewCompiler(q Query, parser *expr.Parser) *Compiler {
 	return &Compiler{
-		query: q,
+		query:  q,
+		parser: parser,
 		tools: &Tools{
 			Params:  params.New(),
 			Aliases: aliases.New(),
@@ -27,12 +29,12 @@ func NewCompiler(q Query) *Compiler {
 
 // --- Methods
 
-func (c *Compiler) Expr() *expr.Builder {
+func (c *Compiler) ExprBuilder() *expr.Builder {
 	return expr.NewBuilder(c.tools.Params, c.tools.Aliases)
 }
 
-func (c *Compiler) Compile(rend expr.Renderer) (*Result, error) {
-	w := writer.New(expr.NewParser(rend))
+func (c *Compiler) Compile() (*Result, error) {
+	w := writer.New(c.parser)
 
 	if err := c.query.Build(c.tools); err != nil {
 		return nil, fmt.Errorf("Building time error: %w", err)
