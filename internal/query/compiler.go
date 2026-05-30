@@ -29,6 +29,10 @@ func NewCompiler(q Query, parser *expr.Parser) *Compiler {
 
 // --- Methods
 
+func (c *Compiler) Params() core.ParamStore {
+	return c.tools.Params
+}
+
 func (c *Compiler) ExprBuilder() *expr.Builder {
 	return expr.NewBuilder(c.tools.Params, c.tools.Aliases)
 }
