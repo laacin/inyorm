@@ -94,6 +94,9 @@ func (p *ParamStore) FillObj(fn func(cols []string) []any) {
 	objInfo := p.obj[0]
 	p.obj = p.obj[1:]
 	vals := fn(objInfo.cols)
+	if len(vals) != len(objInfo.ids) {
+		return
+	}
 
 	for i, id := range objInfo.ids {
 		p.store[id] = vals[i]
@@ -135,6 +138,11 @@ func (p *ParamStore) Values() ([]any, error) {
 	}
 
 	return vals, nil
+}
+
+func (p *ParamStore) Clone() core.ParamStore {
+	clone := *p
+	return &clone
 }
 
 // --- helpers

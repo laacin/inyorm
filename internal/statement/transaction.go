@@ -38,10 +38,9 @@ func (tx *Transaction) Push(qc *query.Compiler) api.SelfBinder {
 		return &TxStatement{}
 	}
 
-	stmt := &TxStatement{
-		query:  result.QueryString,
-		params: result.Params,
-	}
+	stmt := &TxStatement{query: result.QueryString}
+	stmt.Binder = NewBinder[api.SelfBinder](result.Params, stmt)
+
 	tx.candidates = append(tx.candidates, stmt)
 	return stmt
 }
@@ -88,15 +87,6 @@ func (tx *Transaction) Run(context ...context.Context) error {
 // helpers
 
 type TxStatement struct {
-	query  string
-	params core.ParamStore
-	bind   any
-}
-
-func (s *TxStatement) Bind(v any) api.SelfBinder {
-	s.bind = v
-	return s
-}
-func (s *TxStatement) Values(vals any) api.SelfBinder {
-	return s
+	query string
+	Binder[api.SelfBinder]
 }

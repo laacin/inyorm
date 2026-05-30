@@ -15,3 +15,10 @@ func OptionalCtx(candidate []context.Context) context.Context {
 	}
 	return context.Background()
 }
+
+func GetLast[T any](prev T, candidate []T) T {
+	if len(candidate) > 0 {
+		return candidate[0]
+	}
+	return prev
+}

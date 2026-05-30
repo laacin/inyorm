@@ -43,6 +43,8 @@ type ParamStore interface {
 
 	LastIndex(idx int) ParamIndex
 	Values() ([]any, error)
+
+	Clone() ParamStore
 }
 
 type ParamIndex struct {

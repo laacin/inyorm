@@ -9,12 +9,12 @@ type Statement interface {
 
 type Binder[T any] interface {
 	Bind(any) T
-	Values(any) T
+	Values(any, ...string) T
 }
 
 type SelfBinder interface {
 	Bind(any) SelfBinder
-	Values(any) SelfBinder
+	Values(any, ...string) SelfBinder
 }
 
 type Runner interface {

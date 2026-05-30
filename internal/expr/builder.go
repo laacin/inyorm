@@ -47,7 +47,7 @@ func (e *Builder) Param(v any) any {
 
 func (e *Builder) Lazy(id ...string) any {
 	return (&Placeholder{}).StartLazy(func() core.ParamIndex {
-		e.param.Lazy(getLast("", id))
+		e.param.Lazy(core.GetLast("", id))
 		return e.param.LastIndex(0)
 	})
 }
@@ -80,13 +80,6 @@ func (e *Builder) Search(fn func(api.Case)) api.Col {
 }
 
 // --- Helpers
-func getLast[T any](prev T, candidate []T) T {
-	if len(candidate) > 0 {
-		return candidate[0]
-	}
-	return prev
-}
-
 func (e *Builder) getRef(candidate []string) core.Reference {
 	if len(candidate) > 0 {
 		return e.alias.Get(candidate[0])

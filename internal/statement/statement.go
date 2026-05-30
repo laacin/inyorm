@@ -12,25 +12,13 @@ type Statement struct {
 	driver core.Driver
 	qc     *query.Compiler
 
-	bind any
+	Binder[api.Statement]
 }
 
 func New(driver core.Driver, qc *query.Compiler) *Statement {
-	return &Statement{
-		driver: driver,
-		qc:     qc,
-	}
-}
-
-// --- Binder
-
-func (s *Statement) Bind(v any) api.Statement {
-	s.bind = v
-	return s
-}
-
-func (s *Statement) Values(v any) api.Statement {
-	return s
+	self := &Statement{driver: driver, qc: qc}
+	self.Binder = NewBinder[api.Statement](qc.Params(), self)
+	return self
 }
 
 // --- Runner
