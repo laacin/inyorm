@@ -75,7 +75,7 @@ func (tx *Transaction) Run(context ...context.Context) error {
 			return err
 		}
 
-		if err := mapper.New().Scan(rows, cand.bind); err != nil {
+		if err := mapper.New().Bind(rows, cand.bind); err != nil {
 			_ = t.Rollback()
 			return err
 		}

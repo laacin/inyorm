@@ -1,13 +1,24 @@
-package types
+package mapper
 
 import (
 	"strings"
 	"unicode"
 )
 
+// --- RULES
+const (
+	TAG = "inyorm"
+
+	TagKeySep = ","
+	TagValSep = ":"
+
+	TagKeyIgnore = "ignore"
+	TagKeyCol    = "col"
+)
+
 type TagResult struct {
-	Skip bool
-	Name string
+	Name   string
+	Ignore bool
 }
 
 func ParseTag(fieldName, tag string) TagResult {
@@ -16,8 +27,8 @@ func ParseTag(fieldName, tag string) TagResult {
 	for seq := range strings.SplitSeq(tag, TagKeySep) {
 		seq = strings.TrimSpace(seq)
 
-		if strings.ToLower(seq) == TagKeySkip {
-			result.Skip = true
+		if strings.ToLower(seq) == TagKeyIgnore {
+			result.Ignore = true
 			continue
 		}
 
@@ -75,3 +86,4 @@ func toSnake(v string) string {
 
 	return b.String()
 }
+

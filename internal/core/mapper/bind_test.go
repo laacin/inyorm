@@ -38,8 +38,8 @@ func (m *MockRows) Scan(dest ...any) error {
 	return nil
 }
 
-func newScanner(t *testing.T, rows *MockRows, v any) func(expect any, expErr ...error) {
-	err := mapper.New().Scan(rows, v)
+func newBinder(t *testing.T, rows *MockRows, v any) func(expect any, expErr ...error) {
+	err := mapper.New().Bind(rows, v)
 
 	return func(expect any, expErr ...error) {
 		if err != nil && len(expErr) > 0 && expErr[0] != nil {
@@ -58,7 +58,7 @@ func newScanner(t *testing.T, rows *MockRows, v any) func(expect any, expErr ...
 	}
 }
 
-func TestScanner(t *testing.T) {
+func TestBinder(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		type User struct {
 			ID   int
@@ -78,7 +78,7 @@ func TestScanner(t *testing.T) {
 		}
 
 		var u User
-		newScanner(t, rows, &u)(&exp)
+		newBinder(t, rows, &u)(&exp)
 	})
 
 	t.Run("pointer_element", func(t *testing.T) {
@@ -100,7 +100,7 @@ func TestScanner(t *testing.T) {
 		}
 
 		var u User
-		newScanner(t, rows, &u)(exp)
+		newBinder(t, rows, &u)(exp)
 	})
 
 	t.Run("missing_column", func(t *testing.T) {
@@ -124,7 +124,7 @@ func TestScanner(t *testing.T) {
 		}
 
 		var u User
-		newScanner(t, rows, &u)(&exp)
+		newBinder(t, rows, &u)(&exp)
 	})
 
 	t.Run("extra_column", func(t *testing.T) {
@@ -146,7 +146,7 @@ func TestScanner(t *testing.T) {
 		}
 
 		var u User
-		newScanner(t, rows, &u)(&exp)
+		newBinder(t, rows, &u)(&exp)
 	})
 
 	t.Run("slice_structs", func(t *testing.T) {
@@ -171,7 +171,7 @@ func TestScanner(t *testing.T) {
 		}
 
 		var u []User
-		newScanner(t, rows, &u)(&exp)
+		newBinder(t, rows, &u)(&exp)
 	})
 
 	t.Run("slice_ptr_structs", func(t *testing.T) {
@@ -194,7 +194,7 @@ func TestScanner(t *testing.T) {
 		}
 
 		var u []*User
-		newScanner(t, rows, &u)(&exp)
+		newBinder(t, rows, &u)(&exp)
 	})
 
 	t.Run("slice_preallocated", func(t *testing.T) {
@@ -219,7 +219,7 @@ func TestScanner(t *testing.T) {
 			{ID: 2, Name: "b"},
 		}
 
-		newScanner(t, rows, &u)(&exp)
+		newBinder(t, rows, &u)(&exp)
 	})
 
 	t.Run("struct_preallocated", func(t *testing.T) {
@@ -238,7 +238,7 @@ func TestScanner(t *testing.T) {
 		u := User{ID: 1, Name: "old"}
 		exp := User{ID: 100, Name: "zzz"}
 
-		newScanner(t, rows, &u)(&exp)
+		newBinder(t, rows, &u)(&exp)
 	})
 
 	t.Run("slice_less_capacity_than_rows", func(t *testing.T) {
@@ -264,7 +264,7 @@ func TestScanner(t *testing.T) {
 			{ID: 3, Name: "c"},
 		}
 
-		newScanner(t, rows, &u)(&exp)
+		newBinder(t, rows, &u)(&exp)
 	})
 
 	t.Run("slice_greater_capacity_than_rows", func(t *testing.T) {
@@ -289,7 +289,7 @@ func TestScanner(t *testing.T) {
 			{ID: 9, Name: "x"},
 		}
 
-		newScanner(t, rows, &u)(&exp)
+		newBinder(t, rows, &u)(&exp)
 	})
 
 	t.Run("single_map", func(t *testing.T) {
@@ -307,7 +307,7 @@ func TestScanner(t *testing.T) {
 			"name": "x",
 		}
 
-		newScanner(t, rows, m)(exp)
+		newBinder(t, rows, m)(exp)
 	})
 
 	t.Run("many_maps", func(t *testing.T) {
@@ -334,6 +334,6 @@ func TestScanner(t *testing.T) {
 			{"id": 6, "name": "mike", "age": 52},
 		}
 
-		newScanner(t, rows, &m)(&exp)
+		newBinder(t, rows, &m)(&exp)
 	})
 }

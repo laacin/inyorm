@@ -6,39 +6,39 @@ import (
 	"reflect"
 
 	"github.com/laacin/inyorm/internal/core"
-	"github.com/laacin/inyorm/internal/core/mapper/types"
 )
 
-func (m *Mapper) Scan(rows core.Rows, scanner any) error {
-	info := types.ReadInfo(reflect.TypeOf(scanner))
+func (m *Mapper) Bind(rows core.Rows, scanner any) error {
+	info := m.ReadKind(scanner)
 
-	if !info.IsPtr() && info.Kind != types.KindMap {
+	if !info.Ptr && info.Kind != core.KindMap {
 		return errors.New("scanner must be a pointer")
 	}
 
 	switch info.Kind {
-	case types.KindStruct:
-		if info.IsSlc() {
-			return scanByStructSlc(rows, scanner, info.Schema)
+	case core.KindStruct:
+		if info.Slice {
+			return bindFromStructSlc(rows, scanner, info.Schema)
 		}
-		return scanByStruct(rows, scanner, info.Schema)
+		return bindFromStruct(rows, scanner, info.Schema)
 
-	case types.KindMap:
-		if info.IsSlc() {
-			return scanByMapSlc(rows, scanner)
+	case core.KindMap:
+		if info.Slice {
+			return bindFromMapSlc(rows, scanner)
 		}
-		return scanByMap(rows, scanner)
+		return bindFromMap(rows, scanner)
 
 	default:
-		if info.IsSlc() {
-			return scanByPrimSlc(rows, scanner)
+		if info.Slice {
+			return bindFromPrimSlc(rows, scanner)
 		}
-		return scanByPrim(rows, scanner)
+		return bindFromPrim(rows, scanner)
 	}
 }
 
-// --- Scanners
-func scanByStruct(rows core.Rows, value any, schema types.StructInfo) error {
+// helpers
+
+func bindFromStruct(rows core.Rows, binder any, schema Schema) error {
 	defer rows.Close()
 
 	if !rows.Next() {
@@ -47,7 +47,7 @@ func scanByStruct(rows core.Rows, value any, schema types.StructInfo) error {
 
 	cols, _ := rows.Columns()
 	addrs := make([]any, len(cols))
-	val, _ := types.DerefPtrVal(reflect.ValueOf(value))
+	bind, _ := derefPtrVal(reflect.ValueOf(binder))
 
 	for i, col := range cols {
 		idx, ok := schema.GetIndex(col)
@@ -56,7 +56,7 @@ func scanByStruct(rows core.Rows, value any, schema types.StructInfo) error {
 			continue
 		}
 
-		field := val.FieldByIndex(idx)
+		field := bind.FieldByIndex(idx)
 		if !field.CanAddr() {
 			return fmt.Errorf("field %s is not addressable", col)
 		}
@@ -71,13 +71,13 @@ func scanByStruct(rows core.Rows, value any, schema types.StructInfo) error {
 	return rows.Err()
 }
 
-func scanByStructSlc(rows core.Rows, value any, schema types.StructInfo) error {
+func bindFromStructSlc(rows core.Rows, binder any, schema Schema) error {
 	defer rows.Close()
 
 	cols, _ := rows.Columns()
 	args := make([]any, len(cols))
 
-	slc, _ := types.DerefPtrVal(reflect.ValueOf(value))
+	slc, _ := derefPtrVal(reflect.ValueOf(binder))
 	ln := slc.Len()
 
 	i := 0
@@ -86,7 +86,7 @@ func scanByStructSlc(rows core.Rows, value any, schema types.StructInfo) error {
 			// update elem
 			for ci, col := range cols {
 				if idx, ok := schema.GetIndex(col); ok {
-					elem, _ := types.DerefPtrVal(slc.Index(i))
+					elem, _ := derefPtrVal(slc.Index(i))
 					field := elem.FieldByIndex(idx)
 					if !field.CanAddr() {
 						return fmt.Errorf("field %s is not addressable", col)
@@ -104,7 +104,7 @@ func scanByStructSlc(rows core.Rows, value any, schema types.StructInfo) error {
 
 		} else {
 			// create elem
-			typ, ptrs := types.DerefPtrTyp(slc.Type().Elem())
+			typ, ptrs := derefPtrTyp(slc.Type().Elem())
 			dummy := reflect.New(typ).Elem()
 
 			for ci, col := range cols {
@@ -140,20 +140,14 @@ func scanByStructSlc(rows core.Rows, value any, schema types.StructInfo) error {
 	return rows.Err()
 }
 
-func scanByMap(rows core.Rows, value any) error {
+func bindFromMap(rows core.Rows, binder any) error {
 	defer rows.Close()
 
-	mp, ok := value.(map[string]any)
-	if !ok {
-		return errors.New("map scanning expects map[string]any or *[]map[string]any")
-	}
-
 	if !rows.Next() {
-		return rows.Err()
+		return nil
 	}
 
 	cols, _ := rows.Columns()
-
 	args := make([]any, len(cols))
 	tmp := make([]any, len(cols))
 	for i := range args {
@@ -164,61 +158,63 @@ func scanByMap(rows core.Rows, value any) error {
 		return err
 	}
 
+	bind, _ := derefPtrVal(reflect.ValueOf(binder))
 	for i, col := range cols {
-		mp[col] = tmp[i]
+		bind.SetMapIndex(reflect.ValueOf(col), reflect.ValueOf(tmp[i]))
 	}
 
 	return rows.Err()
 }
 
-func scanByMapSlc(rows core.Rows, value any) error {
+func bindFromMapSlc(rows core.Rows, binder any) error {
 	defer rows.Close()
 
-	maps, ok := value.(*[]map[string]any)
-	if !ok {
-		return errors.New("map scanning expects map[string]any or *[]map[string]any")
-	}
-
-	ln := len(*maps)
 	cols, _ := rows.Columns()
+	slc, _ := derefPtrVal(reflect.ValueOf(binder))
 	args := make([]any, len(cols))
-	tmp := make([]any, len(cols))
-	for i := range args {
-		args[i] = &tmp[i]
-	}
+	typ, _ := derefPtrTyp(slc.Type().Elem())
+	ln := slc.Len()
 
 	i := 0
 	for rows.Next() {
-		if i < ln {
-			if err := rows.Scan(args...); err != nil {
-				return err
-			}
+		tmp := make([]any, len(cols))
+		for i := range args {
+			args[i] = &tmp[i]
+		}
 
-			for i, col := range cols {
-				(*maps)[i][col] = tmp[i]
+		if err := rows.Scan(args...); err != nil {
+			return err
+		}
+
+		if i < ln {
+			elem, _ := derefPtrVal(slc.Index(i))
+			for ci, col := range cols {
+				elem.SetMapIndex(reflect.ValueOf(col), reflect.ValueOf(tmp[ci]))
 			}
 		} else {
-			if err := rows.Scan(args...); err != nil {
-				return err
+			dummy := reflect.MakeMap(typ)
+			for ci, col := range cols {
+				dummy.SetMapIndex(reflect.ValueOf(col), reflect.ValueOf(tmp[ci]))
 			}
 
-			mp := make(map[string]any, len(cols))
-			for i, col := range cols {
-				mp[col] = tmp[i]
-			}
-			*maps = append(*maps, mp)
+			slc.Set(reflect.Append(slc, dummy))
 		}
+
+		if err := rows.Scan(args...); err != nil {
+			return err
+		}
+
 		i++
 	}
 
 	if i < ln {
-		*maps = (*maps)[:i]
+		slc.Set(slc.Slice(0, i))
 	}
 
 	return rows.Err()
 }
 
-func scanByPrim(rows core.Rows, value any) error {
+func bindFromPrim(rows core.Rows, value any) error {
 	defer rows.Close()
 
 	if !rows.Next() {
@@ -251,7 +247,7 @@ func scanByPrim(rows core.Rows, value any) error {
 	return rows.Err()
 }
 
-func scanByPrimSlc(rows core.Rows, value any) error {
+func bindFromPrimSlc(rows core.Rows, value any) error {
 	defer rows.Close()
 
 	vals, err := normalizePrimSlc(value)
@@ -283,11 +279,11 @@ func scanByPrimSlc(rows core.Rows, value any) error {
 
 // helpers
 func normalizePrimSlc(value any) ([]any, error) {
-	slc, _ := types.DerefPtrVal(reflect.ValueOf(value))
+	slc, _ := derefPtrVal(reflect.ValueOf(value))
 
 	vals := make([]any, slc.Len())
 	for i := range slc.Len() {
-		elem, _ := types.DerefPtrVal(slc.Index(i))
+		elem, _ := derefPtrVal(slc.Index(i))
 
 		if !elem.CanAddr() {
 			return nil, errors.New("passed no adressable value")
@@ -299,7 +295,7 @@ func normalizePrimSlc(value any) ([]any, error) {
 }
 
 func normalizePrim(value any) (any, error) {
-	val, _ := types.DerefPtrVal(reflect.ValueOf(value))
+	val, _ := derefPtrVal(reflect.ValueOf(value))
 	if !val.CanAddr() {
 		return nil, errors.New("passed no adressable value")
 	}

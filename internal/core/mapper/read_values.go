@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"slices"
 
-	"github.com/laacin/inyorm/internal/core/mapper/types"
+	"github.com/laacin/inyorm/internal/core"
 )
 
 // Errs
@@ -16,42 +16,43 @@ var (
 	ErrColNotFound = func(col string) error { return fmt.Errorf("column %s not found", col) }
 )
 
-func (m *Mapper) ReadValues(cols []string, values any) ([]any, error) {
-	val := reflect.ValueOf(values)
-	info := types.ReadInfo(val.Type())
-	val, _ = types.DerefPtrVal(val)
+func (m *Mapper) ReadValues(cols []string, v any) ([]any, error) {
+	info := m.ReadKind(v)
+	val, _ := derefPtrVal(reflect.ValueOf(v))
 
 	switch info.Kind {
-	case types.KindStruct:
-		if info.IsSlc() {
-			return valsByStructSlc(cols, val, info.Schema)
+	case core.KindStruct:
+		if info.Slice {
+			return valsFromStructSlc(cols, val, info.Schema)
 		}
-		return valsByStruct(cols, val, info.Schema)
+		return valsFromStruct(cols, val, info.Schema)
 
-	case types.KindMap:
-		if info.IsSlc() {
-			return valsByMapSlc(cols, val)
+	case core.KindMap:
+		if info.Slice {
+			return valsFromMapSlc(cols, val)
 		}
-		return valsByMap(cols, val)
+		return valsFromMap(cols, val)
 
-	case types.KindString, types.KindInt, types.KindUint, types.KindBool, types.KindFloat:
-		if info.IsSlc() {
-			return valsByPrimSlc(cols, val)
+	case core.KindString, core.KindInt, core.KindUint, core.KindBool, core.KindFloat:
+		if info.Slice {
+			return valsFromPrimSlc(val)
 		}
-		return valsByPrim(cols, val)
+		return valsFromPrim(val)
 
-	case types.KindAny:
-		if info.IsSlc() {
-			return valsByPrimSlc(cols, val)
+	case core.KindAny:
+		if info.Slice {
+			return valsFromPrimSlc(val)
 		}
 	}
 
 	return nil, errors.New("something went wrong")
 }
 
-// Readers
-func valsByStruct(cols []string, val reflect.Value, schema types.StructInfo) ([]any, error) {
+// helpers
+
+func valsFromStruct(cols []string, val reflect.Value, schema Schema) ([]any, error) {
 	args := make([]any, len(cols))
+
 	for i, col := range cols {
 		if idx, ok := schema.GetIndex(col); ok {
 			args[i] = val.FieldByIndex(idx).Interface()
@@ -63,11 +64,11 @@ func valsByStruct(cols []string, val reflect.Value, schema types.StructInfo) ([]
 	return args, nil
 }
 
-func valsByStructSlc(cols []string, val reflect.Value, schema types.StructInfo) ([]any, error) {
+func valsFromStructSlc(cols []string, val reflect.Value, schema Schema) ([]any, error) {
 	args := make([]any, len(cols)*val.Len())
 
 	for i := range val.Len() {
-		elem, _ := types.DerefPtrVal(val.Index(i))
+		elem, _ := derefPtrVal(val.Index(i))
 
 		for ci, col := range cols {
 			if findex, ok := schema.GetIndex(col); ok {
@@ -81,49 +82,52 @@ func valsByStructSlc(cols []string, val reflect.Value, schema types.StructInfo) 
 	return args, nil
 }
 
-func valsByMap(cols []string, val reflect.Value) ([]any, error) {
-	m, _ := reflect.TypeAssert[map[string]any](val)
+func valsFromMap(cols []string, val reflect.Value) ([]any, error) {
 	args := make([]any, len(cols))
 
 	for i, col := range cols {
-		if v, ok := m[col]; ok {
-			args[i] = v
-			continue
+		v, _ := derefPtrVal(val.MapIndex(reflect.ValueOf(col)))
+
+		if !v.IsValid() {
+			return nil, ErrColNotFound(col)
 		}
-		return nil, ErrColNotFound(col)
+
+		args[i] = v.Interface()
 	}
 
 	return args, nil
 }
 
-func valsByMapSlc(cols []string, val reflect.Value) ([]any, error) {
+func valsFromMapSlc(cols []string, val reflect.Value) ([]any, error) {
 	args := make([]any, len(cols)*val.Len())
 
 	for i := range val.Len() {
-		elem, _ := types.DerefPtrVal(val.Index(i))
-		m, _ := reflect.TypeAssert[map[string]any](elem)
+		elem, _ := derefPtrVal(val.Index(i))
 
 		for ci, col := range cols {
-			if rslt, ok := m[col]; ok {
-				args[i*len(cols)+ci] = rslt
-				continue
+			v, _ := derefPtrVal(elem.MapIndex(reflect.ValueOf(col)))
+
+			if !v.IsValid() {
+				return nil, ErrColNotFound(col)
 			}
-			return nil, ErrColNotFound(col)
+
+			args[i*len(cols)+ci] = v.Interface()
 		}
 	}
 
 	return args, nil
 }
 
-func valsByPrim(cols []string, val reflect.Value) ([]any, error) {
+func valsFromPrim(val reflect.Value) ([]any, error) {
 	return []any{val.Interface()}, nil
 }
 
-func valsByPrimSlc(cols []string, val reflect.Value) ([]any, error) {
+func valsFromPrimSlc(val reflect.Value) ([]any, error) {
 	args := make([]any, val.Len())
 
 	for i := range val.Len() {
-		elem, _ := types.DerefPtrVal(val.Index(i))
+		elem, _ := derefPtrVal(val.Index(i))
+
 		if !slices.Contains(primitives, elem.Kind()) {
 			return nil, errors.New("[]any must contains only primitive types")
 		}
@@ -134,7 +138,6 @@ func valsByPrimSlc(cols []string, val reflect.Value) ([]any, error) {
 	return args, nil
 }
 
-// Helpers
 var primitives = []reflect.Kind{
 	reflect.Bool,
 

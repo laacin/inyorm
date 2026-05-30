@@ -40,5 +40,5 @@ func Run(stmt *Statement, ctx context.Context) error {
 		return err
 	}
 
-	return mapper.New().Scan(rows, stmt.bind)
+	return mapper.New().Bind(rows, stmt.bind)
 }

@@ -10,7 +10,7 @@ import (
 func newTest(t *testing.T, reference, v any) func(rows int, cols []string, vals []any) {
 	m := mapper.New()
 
-	cols := m.ReadCols([]any{reference})
+	cols := m.ReadCols(reference)
 
 	args, err := m.ReadValues(cols, v)
 	if err != nil {
@@ -18,12 +18,6 @@ func newTest(t *testing.T, reference, v any) func(rows int, cols []string, vals 
 	}
 
 	return func(rows int, cols []string, vals []any) {
-		// if result.Rows != rows {
-		// 	t.Fatalf("\nmismatch rows:\nExpect:\n%d\nHave:\n%d\n", rows, result.Rows)
-		// }
-		// if !reflect.DeepEqual(result.Columns, cols) {
-		// 	t.Fatalf("\nmismatch columns:\nExpect:\n%#v\nHave:\n%#v\n", cols, result.Columns)
-		// }
 		if !reflect.DeepEqual(args, vals) {
 			t.Fatalf("\nmismatch result:\nExpect:\n%#v\nHave:\n%#v\n", vals, args)
 		}

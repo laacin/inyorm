@@ -70,6 +70,40 @@ type Reference struct {
 // ---- MAPPER -----
 
 type Mapper interface {
+	ReadInfo(v any) KindInfo
 	ReadCols(...any) []string
 	ReadValues(cols []string, v any) ([]any, error)
+}
+
+type Kind int
+
+const (
+	// Single val kinds
+	KindString Kind = iota
+	KindInt
+	KindUint
+	KindFloat
+	KindBool
+
+	// multiple vals kinds
+	KindStruct
+	KindMap
+
+	KindCustom
+	KindAny
+	KindUnknown
+)
+
+type CustomKind interface{ BaseName() string }
+
+type KindInfo struct {
+	Kind   Kind
+	Slice  bool
+	Ptr    bool
+	Schema map[string]FieldInfo // is nil if Kind != KindStruct
+}
+
+type FieldInfo struct {
+	Ignore bool
+	Index  []int
 }

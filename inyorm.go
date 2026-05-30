@@ -32,11 +32,9 @@ func (db *DB) StartTx() Transaction {
 		Transaction: statement.NewTransaction(db.eng.Driver),
 	}
 
-	qb := newQueryBuilder(db.eng.Dialect, func(qc *query.Compiler) api.SelfBinder {
-		return tx.Push(qc)
-	})
-
+	qb := newQueryBuilder(db.eng.Dialect, tx.Push)
 	tx.queries = qb
+
 	return tx
 }
 
