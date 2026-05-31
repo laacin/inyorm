@@ -101,7 +101,7 @@ func (p *ParamStore) FillObj(fn func(cols []string) []any) {
 // idx = 0 is the last inserted, idx = 1 is the previous one
 func (p *ParamStore) LastIndex(idx int) core.ParamIndex {
 	num := len(p.ids)
-	if idx > len(p.ids) {
+	if idx >= len(p.ids) {
 		return core.ParamIndex{}
 	}
 
