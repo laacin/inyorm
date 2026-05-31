@@ -15,7 +15,6 @@ var errExecNoDriver = errors.New("missing driver")
 type Statement struct {
 	driver core.Driver
 	query  string
-	params core.ParamStore
 
 	Binder[api.Statement]
 	err error
@@ -27,8 +26,8 @@ func New(driver core.Driver, qc *query.Compiler) *Statement {
 		return &Statement{err: err}
 	}
 
-	self := &Statement{driver: driver, query: result.QueryString, params: result.Params}
-	self.Binder = NewBinder[api.Statement](qc.Params(), self)
+	self := &Statement{driver: driver, query: result.QueryString}
+	self.Binder = NewBinder[api.Statement](result.Params, self)
 	return self
 }
 
