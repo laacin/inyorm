@@ -2,6 +2,7 @@ package params
 
 import (
 	"fmt"
+	"maps"
 	"strconv"
 
 	"github.com/laacin/inyorm/internal/core"
@@ -16,11 +17,9 @@ type ParamStore struct {
 	errs  []error
 }
 
-func New() *ParamStore { return &ParamStore{} }
+func New() *ParamStore { return &ParamStore{store: map[string]any{}} }
 
 func (p *ParamStore) Store(v any) {
-	p.initMap()
-
 	id := p.rand()
 	p.ids = append(p.ids, id)
 	p.store[id] = v
@@ -60,8 +59,6 @@ func (p *ParamStore) LazyObj(cols []string) {
 }
 
 func (p *ParamStore) Fill(id string, v any) {
-	p.initMap()
-
 	if id != "" {
 		if _, exists := p.store[id]; exists {
 			p.pushErr("param duplicate: %s is already assigned", id)
@@ -84,8 +81,6 @@ func (p *ParamStore) Fill(id string, v any) {
 }
 
 func (p *ParamStore) FillObj(fn func(cols []string) []any) {
-	p.initMap()
-
 	if len(p.obj) < 1 {
 		p.pushErr("param overflow: unexpected lazy object")
 		return
@@ -117,10 +112,6 @@ func (p *ParamStore) LastIndex(idx int) core.ParamIndex {
 }
 
 func (p *ParamStore) Values() ([]any, error) {
-	if p.store == nil {
-		return []any{}, nil
-	}
-
 	for _, err := range p.errs {
 		if err != nil {
 			return nil, err
@@ -141,17 +132,27 @@ func (p *ParamStore) Values() ([]any, error) {
 }
 
 func (p *ParamStore) Clone() core.ParamStore {
-	clone := *p
-	return &clone
+	clone := &ParamStore{}
+
+	clone.ids = append([]string(nil), p.ids...)
+	clone.lazy = append([]string(nil), p.lazy...)
+	clone.errs = append([]error(nil), p.errs...)
+
+	clone.obj = make([]objInfo, len(p.obj))
+	for i, obj := range p.obj {
+		clone.obj[i] = objInfo{
+			ids:  append([]string(nil), obj.ids...),
+			cols: append([]string(nil), obj.cols...),
+		}
+	}
+
+	clone.store = make(map[string]any, len(p.store))
+	maps.Copy(clone.store, p.store)
+
+	return clone
 }
 
 // --- helpers
-func (p *ParamStore) initMap() {
-	if p.store == nil {
-		p.store = make(map[string]any)
-	}
-}
-
 func (p *ParamStore) rand() string {
 	id := "_" + strconv.FormatUint(uint64(len(p.ids)+1), 36)
 	return id

@@ -28,14 +28,11 @@ func (p *Binder[T]) Values(v any, id ...string) T {
 	}
 
 	m := mapper.New()
-	if m.ReadKind(v).Kind == core.KindStruct {
+	kind := m.ReadKind(v).Kind
+	if kind == core.KindStruct || kind == core.KindMap {
 		p.params.FillObj(func(cols []string) []any {
 			vals, err := m.ReadValues(cols, v)
-			if err != nil {
-				p.err = err
-				return nil
-			}
-
+			p.err = err
 			return vals
 		})
 		return p.chain

@@ -31,6 +31,7 @@ type Expr interface {
 	Col(name string, table ...string) Col
 	All(table ...string) Col
 	Param(value any) Param
+	Lazy(id ...string) Param
 	Cond(ident any) Cond
 	Concat(v ...any) Col
 	Switch(cond any, fn func(cs Case)) Col

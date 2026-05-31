@@ -271,6 +271,42 @@ func Test(t *testing.T) {
 		}
 	})
 
+	t.Run("prepare_statement", func(t *testing.T) {
+		stmt, err := db.Select(func(q inyorm.SelectQuery, e inyorm.Expr) {
+			q.Select(e.All())
+			q.From(e.Table("posts"))
+			q.Where(e.Col("id")).Equal(e.Lazy())
+			q.Limit(1)
+		}).Prepare()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		expect := make([]Post, 13)
+		for i := range expect {
+			expect[i].ID = i + 1
+			expect[i].AuthorID = 1
+
+			if i == 0 {
+				expect[i].Title = "untitled"
+				expect[i].Description = "My first post!"
+				continue
+			}
+
+			expect[i].Title = fmt.Sprintf("Title %d", i-1)
+			expect[i].Description = fmt.Sprintf("Desc %d", i-1)
+		}
+
+		for i := range len(expect) {
+			var post Post
+			if err := stmt.Values(i + 1).Bind(&post).Run(); err != nil {
+				t.Fatal(err)
+			}
+
+			AssertEqual(t, post, expect[i])
+		}
+	})
+
 	t.Run("delete_all_posts", func(t *testing.T) {
 		stmt := db.Delete(func(q inyorm.DeleteQuery, e inyorm.Expr) {
 			q.Delete()

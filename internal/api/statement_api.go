@@ -5,6 +5,13 @@ import "context"
 type Statement interface {
 	Runner
 	Binder[Statement]
+	Prepare(...context.Context) (Prepared, error)
+}
+
+type Prepared interface {
+	Run(...context.Context) error
+	Bind(any) Prepared
+	Values(any, ...string) Prepared
 }
 
 type Binder[T any] interface {

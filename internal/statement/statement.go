@@ -21,6 +21,10 @@ func New(driver core.Driver, qc *query.Compiler) *Statement {
 	return self
 }
 
+func (s *Statement) Prepare(context ...context.Context) (api.Prepared, error) {
+	return NewPrepared(core.OptionalCtx(context), s.driver, s.qc)
+}
+
 // --- Runner
 
 func (s *Statement) Raw() (string, []any, error) {
