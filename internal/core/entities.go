@@ -36,10 +36,10 @@ type ParamStore interface {
 	Store(v any)
 
 	Lazy(id string)
-	LazyObj(cols []string)
+	LazyObject(cols []string)
 
 	Fill(id string, v any)
-	FillObj(func(cols []string) []any) // Objs loads must be in orders
+	FillObject(func(cols []string) []any) // Objs loads must be in orders
 
 	LastIndex(idx int) ParamIndex
 	Values() ([]any, error)

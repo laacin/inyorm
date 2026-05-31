@@ -30,7 +30,7 @@ func (p *Binder[T]) Values(v any, id ...string) T {
 	m := mapper.New()
 	kind := m.ReadKind(v).Kind
 	if kind == core.KindStruct || kind == core.KindMap {
-		p.params.FillObj(func(cols []string) []any {
+		p.params.FillObject(func(cols []string) []any {
 			vals, err := m.ReadValues(cols, v)
 			p.err = err
 			return vals

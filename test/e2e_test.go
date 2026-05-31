@@ -457,4 +457,89 @@ func Test(t *testing.T) {
 			Age:      32,
 		})
 	})
+
+	t.Run("prepared_inserts", func(t *testing.T) {
+		stmt, err := db.Insert(func(q inyorm.InsertQuery, e inyorm.Expr) {
+			q.Insert(User{})
+			q.Into(e.Table("users"))
+			q.Values(e.Lazy())
+		}).Prepare()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		stmt.Values(User{
+			ID:       3,
+			Account:  "acc3",
+			Password: "pw3",
+			Age:      33,
+		})
+		if err := stmt.Run(); err != nil {
+			t.Fatal(err)
+		}
+
+		stmt.Values(User{
+			ID:       4,
+			Account:  "acc4",
+			Password: "pw4",
+			Age:      44,
+		})
+		if err := stmt.Run(); err != nil {
+			t.Fatal(err)
+		}
+
+		stmt.Values(User{
+			ID:       5,
+			Account:  "acc5",
+			Password: "pw5",
+			Age:      55,
+		})
+		if err := stmt.Run(); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	t.Run("check_previous_prepared_stmt", func(t *testing.T) {
+		stmt, err := db.Select(func(q inyorm.SelectQuery, e inyorm.Expr) {
+			q.Select(e.All())
+			q.From(e.Table("users"))
+			q.Where(e.Col("id")).In(e.Lazy(), e.Lazy(), e.Lazy())
+		}).Prepare()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var users []User
+		stmt.Values(3) // FIX
+		stmt.Values(4)
+		stmt.Values(5)
+		if err := stmt.Bind(&users).Run(); err != nil {
+			t.Fatal(err)
+		}
+
+		if len(users) != 3 {
+			t.Fatalf("unexpected result, got: %#v", users)
+		}
+
+		AssertEqual(t, users[0], User{
+			ID:       3,
+			Account:  "acc3",
+			Password: "pw3",
+			Age:      33,
+		})
+
+		AssertEqual(t, users[1], User{
+			ID:       4,
+			Account:  "acc4",
+			Password: "pw4",
+			Age:      44,
+		})
+
+		AssertEqual(t, users[2], User{
+			ID:       5,
+			Account:  "acc5",
+			Password: "pw5",
+			Age:      55,
+		})
+	})
 }

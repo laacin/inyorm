@@ -79,7 +79,7 @@ func (c *ClauseInsertInto) Build(tools *query.Tools) error {
 
 			if i == 0 {
 				params[i] = ph.Start(func() core.ParamIndex {
-					tools.Params.LazyObj(cols)
+					tools.Params.LazyObject(cols)
 					return tools.Params.LastIndex(len(cols) - 1)
 				})
 				continue
