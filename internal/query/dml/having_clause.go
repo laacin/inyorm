@@ -17,9 +17,9 @@ type ClauseHaving struct {
 
 func (c *ClauseHaving) Having(ident any) api.Cond {
 	c.declared = true
-	cond := &expr.Cond{}
+	cond := expr.NewCond(ident)
 	c.Cond = cond
-	return cond.Start(ident)
+	return cond
 }
 
 // --- Build

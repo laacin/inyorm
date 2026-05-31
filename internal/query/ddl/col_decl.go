@@ -8,15 +8,13 @@ type ColDecl struct {
 	Meta ColMeta
 }
 
-// start
-
-func (b *ColDecl) Start(name string, kind ColKind) *ColDecl {
-	b.Name = name
-	b.Kind = kind
-	b.Meta.NotNull = true
-	return b
+func NewColDecl(name string, kind ColKind) *ColDecl {
+	return &ColDecl{
+		Name: name,
+		Kind: kind,
+		Meta: ColMeta{NotNull: true},
+	}
 }
-
 func (b *ColDecl) PrimaryKey() api.ColDeclNext {
 	b.Meta.PrimaryKey = true
 	return b

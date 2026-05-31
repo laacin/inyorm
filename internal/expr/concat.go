@@ -6,10 +6,8 @@ import "github.com/laacin/inyorm/internal/core"
 
 type Concat struct{ Values []any }
 
-// start
-func (c *Concat) Start(values []any) *Concat {
-	c.Values = values
-	return c
+func NewConcat(values []any) *Concat {
+	return &Concat{Values: values}
 }
 
 // --- Build

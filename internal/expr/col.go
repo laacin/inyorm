@@ -17,16 +17,11 @@ type Col struct {
 	exprs []ColExpr
 }
 
-// start
-
-func (c *Col) StartFrom(from Expr) *Col {
-	c.from = from
-	return c
+func NewCol(name string, ref core.LazyVal[core.Reference]) *Col {
+	return &Col{Name: name, Ref: ref}
 }
-func (c *Col) Start(name string, ref core.LazyVal[core.Reference]) *Col {
-	c.Name = name
-	c.Ref = ref
-	return c
+func NewColFrom(from Expr) *Col {
+	return &Col{from: from}
 }
 
 // --- PUB API

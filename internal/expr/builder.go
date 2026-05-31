@@ -17,65 +17,58 @@ func NewBuilder(param core.ParamStore, alias core.AliasStore) *Builder {
 // --- PUB API
 
 func (e *Builder) Table(name string) any {
-	tbl := &Table{}
 	e.alias.Set(name)
-	return tbl.Start(name, func() core.Reference {
+	return NewTable(name, func() core.Reference {
 		return e.alias.Get(name)
 	})
 }
 
 func (e *Builder) Col(name string, ref ...string) api.Col {
-	col := &Col{}
-	return col.Start(name, func() core.Reference {
+	return NewCol(name, func() core.Reference {
 		return e.getRef(ref)
 	})
 }
 
 func (e *Builder) All(ref ...string) api.Col {
-	col := &Col{}
-	return col.Start("*", func() core.Reference {
+	return NewCol("*", func() core.Reference {
 		return e.getRef(ref)
 	})
 }
 
 func (e *Builder) Param(v any) any {
-	return (&Placeholder{}).Start(func() core.ParamIndex {
+	return NewPlaceholder(func() core.ParamIndex {
 		e.param.Store(v)
 		return e.param.LastIndex(0)
 	})
 }
 
 func (e *Builder) Lazy(id ...string) any {
-	return (&Placeholder{}).StartLazy(func() core.ParamIndex {
+	return NewPlaceholder(func() core.ParamIndex {
 		e.param.Lazy(core.GetLast("", id))
 		return e.param.LastIndex(0)
-	})
+	}, true)
 }
 
 func (e *Builder) Cond(ident any) api.Cond {
-	cond := &Cond{}
-	return cond.Start(ident)
+	return NewCond(ident)
 }
 
 func (e *Builder) Concat(values ...any) api.Col {
-	col := &Col{}
-	return col.StartFrom((&Concat{}).Start(values))
+	return NewColFrom(NewConcat(values))
 }
 
 func (e *Builder) Switch(cond any, fn func(api.Case)) api.Col {
-	cs := &Case{}
-	fn(cs.StartSwitch(cond))
+	cs := NewCaseSwitch(cond)
+	fn(cs)
 
-	col := &Col{}
-	return col.StartFrom(cs)
+	return NewColFrom(cs)
 }
 
 func (e *Builder) Search(fn func(api.Case)) api.Col {
-	cs := &Case{}
-	fn(cs.StartSearch())
+	cs := NewCaseSearch()
+	fn(cs)
 
-	col := &Col{}
-	return col.StartFrom(cs)
+	return NewColFrom(cs)
 
 }
 

@@ -39,10 +39,10 @@ func (c *ClauseJoin) Cross() {
 }
 
 func (c *ClauseJoin) On(ident any) api.Cond {
-	cond := &expr.Cond{}
+	cond := expr.NewCond(ident)
 	c.current.Cond = cond
 	c.Segments = append(c.Segments, *c.current)
-	return cond.Start(ident)
+	return cond
 }
 
 // --- Build

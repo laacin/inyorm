@@ -75,17 +75,15 @@ func (c *ClauseInsertInto) Build(tools *query.Tools) error {
 		params := make([]any, len(cols))
 
 		for i := range cols {
-			ph := &expr.Placeholder{}
-
 			if i == 0 {
-				params[i] = ph.Start(func() core.ParamIndex {
+				params[i] = expr.NewPlaceholder(func() core.ParamIndex {
 					tools.Params.LazyObject(cols)
 					return tools.Params.LastIndex(len(cols) - 1)
 				})
 				continue
 			}
 
-			params[i] = ph.Start(func() core.ParamIndex {
+			params[i] = expr.NewPlaceholder(func() core.ParamIndex {
 				return tools.Params.LastIndex(len(cols) - i - 1)
 			})
 		}
@@ -100,7 +98,7 @@ func (c *ClauseInsertInto) Build(tools *query.Tools) error {
 
 	params := make([]any, len(args))
 	for i, arg := range args {
-		params[i] = (&expr.Placeholder{}).Start(func() core.ParamIndex {
+		params[i] = expr.NewPlaceholder(func() core.ParamIndex {
 			tools.Params.Store(arg)
 			return tools.Params.LastIndex(0)
 		})

@@ -10,11 +10,8 @@ type ForeignKey struct {
 	OnUpdate OnAction
 }
 
-// start
-
-func (b *ForeignKey) Start(col string) *ForeignKey {
-	b.Col = col
-	return b
+func NewForeignKey(col string) *ForeignKey {
+	return &ForeignKey{Col: col}
 }
 
 // --- PUB API

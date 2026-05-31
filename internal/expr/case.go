@@ -15,16 +15,11 @@ type Case struct {
 	current *CaseWhen
 }
 
-// start
-
-func (c *Case) StartSwitch(cond any) *Case {
-	c.kind = KindCaseSwitch
-	c.Cond = cond
-	return c
+func NewCaseSwitch(cond any) *Case {
+	return &Case{kind: KindCaseSwitch, Cond: cond}
 }
-func (c *Case) StartSearch() *Case {
-	c.kind = KindCaseSearch
-	return c
+func NewCaseSearch() *Case {
+	return &Case{kind: KindCaseSearch}
 }
 
 // --- PUB API

@@ -1,18 +1,11 @@
 package ddl
 
-import (
-	"github.com/laacin/inyorm/internal/api"
-	"github.com/laacin/inyorm/internal/expr"
-)
+import "github.com/laacin/inyorm/internal/expr"
 
 type Check struct{ Cond expr.Expr }
 
-// start
-
-func (b *Check) Start(ident any) api.Cond {
-	cond := &expr.Cond{}
-	b.Cond = cond
-	return cond.Start(ident)
+func NewCheck(cond *expr.Cond) *Check {
+	return &Check{Cond: cond}
 }
 
 // --- Build

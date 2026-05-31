@@ -8,12 +8,8 @@ type Table struct {
 	Ref  core.LazyVal[core.Reference]
 }
 
-// start
-
-func (t *Table) Start(name string, ref core.LazyVal[core.Reference]) *Table {
-	t.Name = name
-	t.Ref = ref
-	return t
+func NewTable(name string, ref core.LazyVal[core.Reference]) *Table {
+	return &Table{Name: name, Ref: ref}
 }
 
 // --- Build

@@ -13,10 +13,8 @@ type Cond struct {
 	current    Predicate
 }
 
-// start
-func (c *Cond) Start(ident any) *Cond {
-	c.current = Predicate{Identifier: ident}
-	return c
+func NewCond(ident any) *Cond {
+	return &Cond{current: Predicate{Identifier: ident}}
 }
 
 // --- PUB API
@@ -63,12 +61,12 @@ func (c *Cond) IsNull() api.CondNext {
 
 func (c *Cond) And(ident any) api.Cond {
 	c.Connectors = append(c.Connectors, PredAnd)
-	return c.Start(ident)
+	return c.start(ident)
 }
 
 func (c *Cond) Or(ident any) api.Cond {
 	c.Connectors = append(c.Connectors, PredOr)
-	return c.Start(ident)
+	return c.start(ident)
 }
 
 // --- Build
@@ -84,4 +82,9 @@ func (c *Cond) push(op PredOperator, values []any) {
 	c.current.Operator = op
 	c.current.Closed = true
 	c.Predicates = append(c.Predicates, c.current)
+}
+
+func (c *Cond) start(ident any) api.Cond {
+	c.current = Predicate{Identifier: ident}
+	return c
 }

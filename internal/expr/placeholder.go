@@ -11,23 +11,11 @@ type Placeholder struct {
 	paramIdx core.LazyVal[core.ParamIndex]
 }
 
-// start
-
-func (p *Placeholder) Start(fn func() core.ParamIndex) *Placeholder {
-	p.paramIdx = fn
-	return p
+func NewPlaceholder(fn core.LazyVal[core.ParamIndex], lazy ...bool) *Placeholder {
+	return &Placeholder{paramIdx: fn, lazy: core.GetLast(false, lazy)}
 }
-
-func (p *Placeholder) StartEmpty(idx core.ParamIndex) *Placeholder {
-	p.ID = idx.ID
-	p.Num = idx.Num
-	return p
-}
-
-func (p *Placeholder) StartLazy(fn func() core.ParamIndex) *Placeholder {
-	p.lazy = true
-	p.paramIdx = fn
-	return p
+func NewPlaceholderEmpty(idx core.ParamIndex) *Placeholder {
+	return &Placeholder{ID: idx.ID, Num: idx.Num}
 }
 
 // --- Build

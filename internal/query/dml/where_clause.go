@@ -17,9 +17,9 @@ type ClauseWhere struct {
 
 func (c *ClauseWhere) Where(ident any) api.Cond {
 	c.declared = true
-	cond := &expr.Cond{}
+	cond := expr.NewCond(ident)
 	c.Conds = append(c.Conds, cond)
-	return cond.Start(ident)
+	return cond
 }
 
 // --- Build

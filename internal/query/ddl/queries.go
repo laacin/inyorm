@@ -3,6 +3,7 @@ package ddl
 import (
 	"github.com/laacin/inyorm/internal/api"
 	"github.com/laacin/inyorm/internal/core"
+	"github.com/laacin/inyorm/internal/expr"
 	"github.com/laacin/inyorm/internal/query"
 )
 
@@ -25,35 +26,35 @@ func (q *QueryCreateTable) TableName(name string) {
 }
 
 func (q *QueryCreateTable) String(name string) api.ColDeclNext {
-	col := &ColDecl{}
+	col := NewColDecl(name, ColKindString)
 	q.Cols = append(q.Cols, col)
-	return col.Start(name, ColKindString)
+	return col
 }
 func (q *QueryCreateTable) Int(name string) api.ColDeclNext {
-	col := &ColDecl{}
+	col := NewColDecl(name, ColKindInt)
 	q.Cols = append(q.Cols, col)
-	return col.Start(name, ColKindInt)
+	return col
 }
 func (q *QueryCreateTable) Float(name string) api.ColDeclNext {
-	col := &ColDecl{}
+	col := NewColDecl(name, ColKindFloat)
 	q.Cols = append(q.Cols, col)
-	return col.Start(name, ColKindFloat)
+	return col
 }
 func (q *QueryCreateTable) Bool(name string) api.ColDeclNext {
-	col := &ColDecl{}
+	col := NewColDecl(name, ColKindBool)
 	q.Cols = append(q.Cols, col)
-	return col.Start(name, ColKindBool)
+	return col
 }
 
 func (q *QueryCreateTable) ForeignKey(on string) api.ForeignKey {
-	fk := &ForeignKey{}
+	fk := NewForeignKey(on)
 	q.Fks = append(q.Fks, fk)
-	return fk.Start(on)
+	return fk
 }
 func (q *QueryCreateTable) Check(ident any) api.Cond {
-	check := &Check{}
-	q.Checks = append(q.Checks, check)
-	return check.Start(ident)
+	cond := expr.NewCond(ident)
+	q.Checks = append(q.Checks, NewCheck(cond))
+	return cond
 }
 
 // --- Render
