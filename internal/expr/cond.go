@@ -36,7 +36,7 @@ func (c *Cond) Like(value any) api.CondNext {
 	return c
 }
 
-func (c *Cond) In(values []any) api.CondNext {
+func (c *Cond) In(values ...any) api.CondNext {
 	c.push(PredIn, values)
 	return c
 }

@@ -32,7 +32,7 @@ type Cond interface {
 
 	Equal(v any) CondNext
 	Like(v any) CondNext
-	In(vals []any) CondNext
+	In(vals ...any) CondNext
 	Between(v1, v2 any) CondNext
 	Greater(v any) CondNext
 	Less(v any) CondNext
