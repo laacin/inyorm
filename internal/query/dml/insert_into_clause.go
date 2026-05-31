@@ -73,14 +73,18 @@ func (c *ClauseInsertInto) Build(tools *query.Tools) error {
 
 	if ph, ok := c.rawVal.(*expr.Placeholder); ok && ph.IsLazy() {
 		params := make([]any, len(cols))
+
 		for i := range cols {
 			ph := &expr.Placeholder{}
+
 			if i == 0 {
-				ph.Start(func() core.ParamIndex {
+				params[i] = ph.Start(func() core.ParamIndex {
 					tools.Params.LazyObj(cols)
 					return tools.Params.LastIndex(len(cols) - 1)
 				})
+				continue
 			}
+
 			params[i] = ph.Start(func() core.ParamIndex {
 				return tools.Params.LastIndex(len(cols) - i - 1)
 			})

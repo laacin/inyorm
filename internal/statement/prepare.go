@@ -25,6 +25,7 @@ func NewPrepared(ctx context.Context, driver core.Driver, qc *query.Compiler) (*
 	if err != nil {
 		return nil, err
 	}
+
 	self := &Prepared{stmt: stmt, snapshot: result.Params}
 	self.Binder = NewBinder[api.Prepared](self.snapshot.Clone(), self)
 	return self, nil

@@ -14,15 +14,23 @@ type ParamStore struct {
 	obj  []objInfo
 
 	store map[string]any
-	errs  []error
+	seens map[string]struct{}
+
+	errs []error
 }
 
-func New() *ParamStore { return &ParamStore{store: map[string]any{}} }
+func New() *ParamStore {
+	return &ParamStore{
+		store: map[string]any{},
+		seens: map[string]struct{}{},
+	}
+}
 
 func (p *ParamStore) Store(v any) {
 	id := p.rand()
 	p.ids = append(p.ids, id)
 	p.store[id] = v
+	p.seens[id] = struct{}{}
 }
 
 func (p *ParamStore) Lazy(id string) {
@@ -31,14 +39,16 @@ func (p *ParamStore) Lazy(id string) {
 
 		p.ids = append(p.ids, id)
 		p.lazy = append(p.lazy, id)
+		p.seens[id] = struct{}{}
 		return
 	}
 
-	if _, exists := p.store[id]; exists {
+	if _, exists := p.seens[id]; exists {
 		p.pushErr("param conflict: %s already exists", id)
 		return
 	}
 
+	p.seens[id] = struct{}{}
 	p.ids = append(p.ids, id)
 }
 
@@ -48,8 +58,15 @@ func (p *ParamStore) LazyObj(cols []string) {
 	objIds := make([]string, len(cols))
 	for i, col := range cols {
 		id := baseId + col
+
+		if _, exists := p.seens[id]; exists {
+			p.pushErr("param conflict: %s already exists", id)
+			return
+		}
+
 		objIds[i] = id
 		p.ids = append(p.ids, id)
+		p.seens[id] = struct{}{}
 	}
 
 	p.obj = append(p.obj, objInfo{
@@ -90,6 +107,11 @@ func (p *ParamStore) FillObj(fn func(cols []string) []any) {
 	p.obj = p.obj[1:]
 	vals := fn(objInfo.cols)
 	if len(vals) != len(objInfo.ids) {
+		p.pushErr(
+			"param object mismatch: expected %d values, got %d",
+			len(objInfo.ids),
+			len(vals),
+		)
 		return
 	}
 
@@ -147,7 +169,9 @@ func (p *ParamStore) Clone() core.ParamStore {
 	}
 
 	clone.store = make(map[string]any, len(p.store))
+	clone.seens = make(map[string]struct{}, len(p.seens))
 	maps.Copy(clone.store, p.store)
+	maps.Copy(clone.seens, p.seens)
 
 	return clone
 }
