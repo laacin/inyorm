@@ -48,5 +48,5 @@ func (db *DB) Close() error {
 
 type txBuilder struct {
 	*statement.Transaction
-	queries[api.SelfBinder]
+	queries[api.OnlyBinder]
 }

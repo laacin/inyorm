@@ -27,7 +27,7 @@ func NewTransaction(driver core.Driver) *Transaction {
 	}
 }
 
-func (tx *Transaction) Push(qc *query.Compiler) api.SelfBinder {
+func (tx *Transaction) Push(qc *query.Compiler) api.OnlyBinder {
 	if tx.err != nil {
 		return &TxStatement{}
 	}
@@ -39,7 +39,7 @@ func (tx *Transaction) Push(qc *query.Compiler) api.SelfBinder {
 	}
 
 	stmt := &TxStatement{query: result.QueryString}
-	stmt.Binder = NewBinder[api.SelfBinder](result.Params, stmt)
+	stmt.Binder = NewBinder[api.OnlyBinder](result.Params, stmt)
 
 	tx.candidates = append(tx.candidates, stmt)
 	return stmt
@@ -88,5 +88,5 @@ func (tx *Transaction) Run(context ...context.Context) error {
 
 type TxStatement struct {
 	query string
-	Binder[api.SelfBinder]
+	Binder[api.OnlyBinder]
 }

@@ -14,38 +14,56 @@ var errExecNoDriver = errors.New("missing driver")
 
 type Statement struct {
 	driver core.Driver
-	qc     *query.Compiler
+	query  string
+	params core.ParamStore
 
 	Binder[api.Statement]
+	err error
 }
 
 func New(driver core.Driver, qc *query.Compiler) *Statement {
-	self := &Statement{driver: driver, qc: qc}
+	result, err := qc.Compile()
+	if err != nil {
+		return &Statement{err: err}
+	}
+
+	self := &Statement{driver: driver, query: result.QueryString, params: result.Params}
 	self.Binder = NewBinder[api.Statement](qc.Params(), self)
 	return self
 }
 
 func (s *Statement) Prepare(context ...context.Context) (api.Prepared, error) {
-	return NewPrepared(core.OptionalCtx(context), s.driver, s.qc)
+	if s.err != nil {
+		return nil, s.err
+	}
+
+	if s.driver == nil {
+		return nil, errExecNoDriver
+	}
+
+	return NewPrepared(core.OptionalCtx(context), s)
 }
 
 // --- Runner
 
 func (s *Statement) Raw() (string, []any, error) {
-	result, err := s.qc.Compile()
+	if s.err != nil {
+		return "", nil, s.err
+	}
+
+	vals, err := s.params.Values()
 	if err != nil {
 		return "", nil, err
 	}
 
-	vals, err := result.Params.Values()
-	if err != nil {
-		return "", nil, err
-	}
-
-	return result.QueryString, vals, nil
+	return s.query, vals, nil
 }
 
 func (s *Statement) Run(context ...context.Context) error {
+	if s.err != nil {
+		return s.err
+	}
+
 	if s.driver == nil {
 		return errExecNoDriver
 	}

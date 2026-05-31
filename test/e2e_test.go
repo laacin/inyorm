@@ -499,20 +499,15 @@ func Test(t *testing.T) {
 		}
 	})
 
-	t.Run("check_previous_prepared_stmt", func(t *testing.T) {
-		stmt, err := db.Select(func(q inyorm.SelectQuery, e inyorm.Expr) {
+	t.Run("lazy_values_on_non_prepared_statement", func(t *testing.T) {
+		stmt := db.Select(func(q inyorm.SelectQuery, e inyorm.Expr) {
 			q.Select(e.All())
 			q.From(e.Table("users"))
 			q.Where(e.Col("id")).In(e.Lazy(), e.Lazy(), e.Lazy())
-		}).Prepare()
-		if err != nil {
-			t.Fatal(err)
-		}
+		})
 
 		var users []User
-		stmt.Values(3) // FIX
-		stmt.Values(4)
-		stmt.Values(5)
+		stmt.Values(3, 4, 5)
 		if err := stmt.Bind(&users).Run(); err != nil {
 			t.Fatal(err)
 		}

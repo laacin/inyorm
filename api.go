@@ -39,7 +39,7 @@ type Expr interface {
 }
 
 type Transaction interface {
-	queries[api.SelfBinder]
+	queries[api.OnlyBinder]
 	Run(...context.Context) error
 }
 
@@ -59,7 +59,7 @@ type (
 // Statement
 type (
 	Statement = api.Statement
-	Runner    = api.Runner
+	Prepared  = api.Prepared
 )
 
 // DML

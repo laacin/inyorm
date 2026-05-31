@@ -6,7 +6,6 @@ import (
 	"github.com/laacin/inyorm/internal/api"
 	"github.com/laacin/inyorm/internal/core"
 	"github.com/laacin/inyorm/internal/core/mapper"
-	"github.com/laacin/inyorm/internal/query"
 )
 
 type Prepared struct {
@@ -15,18 +14,13 @@ type Prepared struct {
 	snapshot core.ParamStore
 }
 
-func NewPrepared(ctx context.Context, driver core.Driver, qc *query.Compiler) (*Prepared, error) {
-	result, err := qc.Compile()
+func NewPrepared(ctx context.Context, stmt *Statement) (*Prepared, error) {
+	prep, err := stmt.driver.Prepare(ctx, stmt.query)
 	if err != nil {
 		return nil, err
 	}
 
-	stmt, err := driver.Prepare(ctx, result.QueryString)
-	if err != nil {
-		return nil, err
-	}
-
-	self := &Prepared{stmt: stmt, snapshot: result.Params}
+	self := &Prepared{stmt: prep, snapshot: stmt.params}
 	self.Binder = NewBinder[api.Prepared](self.snapshot.Clone(), self)
 	return self, nil
 }

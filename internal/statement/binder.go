@@ -22,7 +22,7 @@ func (p *Binder[T]) Bind(v any) T {
 	return p.chain
 }
 
-func (p *Binder[T]) Values(v any, id ...string) T {
+func (p *Binder[T]) Value(id string, v any) T {
 	if p.err != nil {
 		return p.chain
 	}
@@ -30,7 +30,7 @@ func (p *Binder[T]) Values(v any, id ...string) T {
 	m := mapper.New()
 	kind := m.ReadKind(v).Kind
 	if kind == core.KindStruct || kind == core.KindMap {
-		p.params.FillObject(func(cols []string) []any {
+		p.params.FillObject(func(cols []string) []any { // TODO: allow lazy objects to be referenced by ID
 			vals, err := m.ReadValues(cols, v)
 			p.err = err
 			return vals
@@ -38,6 +38,28 @@ func (p *Binder[T]) Values(v any, id ...string) T {
 		return p.chain
 	}
 
-	p.params.Fill(core.GetLast("", id), v)
+	p.params.Fill(id, v)
+	return p.chain
+}
+
+func (p *Binder[T]) Values(v ...any) T {
+	if p.err != nil {
+		return p.chain
+	}
+
+	for _, val := range v {
+		m := mapper.New()
+		kind := m.ReadKind(val).Kind
+		if kind == core.KindStruct || kind == core.KindMap {
+			p.params.FillObject(func(cols []string) []any {
+				vals, err := m.ReadValues(cols, val)
+				p.err = err
+				return vals
+			})
+			return p.chain
+		}
+
+		p.params.Fill("", val)
+	}
 	return p.chain
 }
