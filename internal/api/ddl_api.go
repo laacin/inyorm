@@ -20,7 +20,9 @@ type ColDeclNext interface {
 // --- ConsDecl
 
 type ConsDecl interface {
+	PrimaryKey(on ...string)
 	ForeignKey(on string) ForeignKey
+	Check(ident any) Cond
 }
 
 type ForeignKey interface {

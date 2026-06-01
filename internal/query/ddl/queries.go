@@ -11,6 +11,7 @@ type QueryCreateTable struct {
 	rend Renderer
 
 	Name   string
+	ConsPk *PrimaryKey
 	Cols   []*ColDecl
 	Fks    []*ForeignKey
 	Checks []*Check
@@ -44,6 +45,10 @@ func (q *QueryCreateTable) Bool(name string) api.ColDeclNext {
 	col := NewColDecl(name, ColKindBool)
 	q.Cols = append(q.Cols, col)
 	return col
+}
+
+func (q *QueryCreateTable) PrimaryKey(on ...string) {
+	q.ConsPk = NewPrimaryKey(on)
 }
 
 func (q *QueryCreateTable) ForeignKey(on string) api.ForeignKey {

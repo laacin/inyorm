@@ -20,6 +20,7 @@ type Renderer interface {
 	WriteMetaNotNull(core.Writer)
 	WriteMetaDefault(core.Writer, any)
 
+	WriteConsPrimaryKey(core.Writer, *PrimaryKey)
 	WriteConsForeignKey(core.Writer, *ForeignKey)
 	WriteConsCheck(core.Writer, *Check)
 }

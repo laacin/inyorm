@@ -462,4 +462,27 @@ func TestCreateTable(t *testing.T) {
 
 		run(t, stmt, exp, []any{})
 	})
+
+	t.Run("relational_table", func(t *testing.T) {
+		stmt := db.CreateTable(func(q inyorm.CreateTable) {
+			q.TableName("user_roles")
+
+			q.String("user_id")
+			q.String("role_id")
+
+			q.PrimaryKey("user_id", "role_id")
+			q.ForeignKey("user_id").To("id", "users").OnDel("cascade")
+			q.ForeignKey("role_id").To("id", "roles").OnDel("cascade")
+		})
+
+		exp := "CREATE TABLE IF NOT EXISTS user_roles ("
+		exp += "user_id TEXT NOT NULL, "
+		exp += "role_id TEXT NOT NULL, "
+		exp += "PRIMARY KEY (user_id, role_id), "
+		exp += "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, "
+		exp += "FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE"
+		exp += ")"
+
+		run(t, stmt, exp, []any{})
+	})
 }

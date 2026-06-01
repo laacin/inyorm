@@ -651,6 +651,7 @@ func Test(t *testing.T) {
 			q.Int("user_id")
 			q.Int("role_id")
 
+			q.PrimaryKey("user_id", "role_id")
 			q.ForeignKey("user_id").To("id", "users").OnDel("cascade")
 			q.ForeignKey("role_id").To("id", "roles").OnDel("cascade")
 		})

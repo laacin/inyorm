@@ -36,7 +36,5 @@ type CreateTableQuery interface {
 	TableName(name string)
 
 	ColDecl
-
-	ForeignKey(on string) ForeignKey
-	Check(ident any) Cond
+	ConsDecl
 }

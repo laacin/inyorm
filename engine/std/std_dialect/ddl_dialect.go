@@ -21,6 +21,11 @@ func (s *Dialect) WriteQueryCreateTable(w core.Writer, t *ddl.QueryCreateTable) 
 		s.Self.WriteColDecl(w, c)
 	}
 
+	if t.ConsPk != nil {
+		w.Write(", ")
+		s.Self.WriteConsPrimaryKey(w, t.ConsPk)
+	}
+
 	for _, fk := range t.Fks {
 		w.Write(", ")
 		s.Self.WriteConsForeignKey(w, fk)
@@ -118,6 +123,19 @@ func (*Dialect) WriteMetaDefault(w core.Writer, value any) {
 }
 
 // ---- TABLE CONSTRAINTS ----
+
+func (*Dialect) WriteConsPrimaryKey(w core.Writer, cons *ddl.PrimaryKey) {
+	w.Write("PRIMARY KEY")
+	w.Char(' ')
+	w.Char('(')
+	for i, col := range cons.Cols {
+		if i > 0 {
+			w.Write(", ")
+		}
+		w.Write(col)
+	}
+	w.Char(')')
+}
 
 func (*Dialect) WriteConsForeignKey(w core.Writer, cons *ddl.ForeignKey) {
 	w.Write("FOREIGN KEY")
