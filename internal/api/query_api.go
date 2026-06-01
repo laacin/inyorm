@@ -16,6 +16,7 @@ type InsertQuery interface {
 	Insert
 	Into
 	Values
+	OnConflict
 }
 
 type UpdateQuery interface {

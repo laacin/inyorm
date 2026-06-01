@@ -26,6 +26,7 @@ type Renderer interface {
 	WriteClauseOffset(core.Writer, *ClauseOffset)
 
 	WriteClauseInsertInto(core.Writer, *ClauseInsertInto)
+	WriteClauseOnConflict(core.Writer, *ClauseOnConflict)
 	WriteClauseUpdate(core.Writer, *ClauseUpdate)
 	WriteClauseDelete(core.Writer, *ClauseDelete)
 }
@@ -46,6 +47,7 @@ const (
 
 	// Insert statement
 	ClauseKindInsertInto
+	ClauseKindOnConflict
 
 	// Update statement
 	ClauseKindUpdate
@@ -76,6 +78,8 @@ func (k ClauseKind) String() string {
 		return "OFFSET"
 	case ClauseKindInsertInto:
 		return "INSERT INTO"
+	case ClauseKindOnConflict:
+		return "ON CONFLICT"
 	case ClauseKindUpdate:
 		return "UPDATE"
 	case ClauseKindDelete:

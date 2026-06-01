@@ -26,6 +26,10 @@ func New(eng *Engine, err error) (*DB, error) {
 	}, nil
 }
 
+func (db *DB) CreateTable(fn func(q CreateTable)) Runner {
+	return db.queries.CreateTable(fn)
+}
+
 // --- Transaction
 func (db *DB) StartTx() Transaction {
 	tx := &txBuilder{

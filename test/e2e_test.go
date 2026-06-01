@@ -30,6 +30,11 @@ type Profile struct {
 	Bio       string
 }
 
+type Role struct {
+	ID   int
+	Name string
+}
+
 func Test(t *testing.T) {
 	db, err := inyorm.New(sqlite.Open(tmpSqliteFilePath))
 	if err != nil {
@@ -605,5 +610,53 @@ func Test(t *testing.T) {
 			t.Fatal(err)
 		}
 		AssertEqual(t, users[2], User{Password: "pw5"})
+	})
+
+	t.Run("roles_table", func(t *testing.T) {
+		tx := db.StartTx()
+
+		tx.CreateTable(func(q inyorm.CreateTable) {
+			q.TableName("roles")
+
+			q.Int("id").PrimaryKey().AutoIncrement()
+			q.String("name").Unique()
+		})
+
+		tx.Insert(func(q inyorm.InsertQuery, e inyorm.Expr) {
+			q.Insert(Role{})
+			q.OnConflict().DoNothing()
+			q.Into(e.Table("roles"))
+			q.Values([]Role{
+				{Name: "Client"},
+				{Name: "Employee"},
+				{Name: "Admin"},
+			})
+		})
+
+		// check if 'OnConflict' works
+		tx.Insert(func(q inyorm.InsertQuery, e inyorm.Expr) {
+			q.Insert(Role{})
+			q.OnConflict().DoNothing()
+			q.Into(e.Table("roles"))
+			q.Values([]Role{
+				{Name: "Client"},
+				{Name: "Employee"},
+				{Name: "Admin"},
+			})
+		})
+
+		tx.CreateTable(func(q inyorm.CreateTable) {
+			q.TableName("user_roles")
+
+			q.Int("user_id")
+			q.Int("role_id")
+
+			q.ForeignKey("user_id").To("id", "users").OnDel("cascade")
+			q.ForeignKey("role_id").To("id", "roles").OnDel("cascade")
+		})
+
+		if err := tx.Run(); err != nil {
+			t.Fatal(err)
+		}
 	})
 }

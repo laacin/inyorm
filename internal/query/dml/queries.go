@@ -65,6 +65,7 @@ type QueryInsert struct {
 	helper
 
 	ClauseInsertInto
+	ClauseOnConflict
 }
 
 func (q *QueryInsert) Api() api.InsertQuery {
@@ -77,6 +78,8 @@ func (q *QueryInsert) Build(tools *query.Tools) error {
 			tools.Aliases.SetMain(tbl.Name)
 		}
 	})
+
+	q.build(tools, &q.ClauseOnConflict)
 
 	return q.end()
 }

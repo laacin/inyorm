@@ -60,6 +60,7 @@ type (
 type (
 	Statement = api.Statement
 	Prepared  = api.Prepared
+	Runner    = api.Runner
 )
 
 // DML

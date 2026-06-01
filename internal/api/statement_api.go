@@ -3,10 +3,9 @@ package api
 import "context"
 
 type Statement interface {
+	Runner
 	Binder[Statement]
 	Prepare(...context.Context) (Prepared, error)
-	Raw() (string, []any, error)
-	Run(...context.Context) error
 }
 
 type Prepared interface {
@@ -15,6 +14,11 @@ type Prepared interface {
 }
 
 // ---
+
+type Runner interface {
+	Run(...context.Context) error
+	Raw() (string, []any, error)
+}
 
 type Binder[T any] interface {
 	Bind(any) T

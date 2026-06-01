@@ -42,6 +42,43 @@ func (*Dialect) WriteClauseInsertInto(w core.Writer, cls *dml.ClauseInsertInto) 
 	}
 }
 
+func (*Dialect) WriteClauseOnConflict(w core.Writer, cls *dml.ClauseOnConflict) {
+	w.Write("ON CONFLICT")
+	w.Char(' ')
+
+	if len(cls.On) > 0 {
+
+		w.Char('(')
+		for i, target := range cls.On {
+			if i > 0 {
+				w.Write(", ")
+			}
+			w.Value(target, core.WriteBase)
+		}
+		w.Char(')')
+		w.Char(' ')
+	}
+
+	switch cls.Action {
+	case dml.OnConflictDoNothing:
+		w.Write("DO NOTHING")
+
+	case dml.OnConflictDoUpdate:
+		w.Write("DO UPDATE")
+		w.Write(" SET ")
+
+		for i, upd := range cls.Update {
+			if i > 0 {
+				w.Write(", ")
+			}
+			w.Value(upd, core.WriteBase)
+			w.Write(" = ")
+			w.Write("excluded.")
+			w.Value(upd, core.WriteBase)
+		}
+	}
+}
+
 func (*Dialect) WriteClauseSelect(w core.Writer, cls *dml.ClauseSelect) {
 	w.Write("SELECT")
 	w.Char(' ')
@@ -214,6 +251,11 @@ func (s *Dialect) WriteQuerySelect(w core.Writer, q *dml.QuerySelect) {
 func (s *Dialect) WriteQueryInsert(w core.Writer, q *dml.QueryInsert) {
 	if q.ClauseInsertInto.IsDeclared() {
 		s.Self.WriteClauseInsertInto(w, &q.ClauseInsertInto)
+	}
+
+	if q.ClauseOnConflict.IsDeclared() {
+		w.Char(' ')
+		s.Self.WriteClauseOnConflict(w, &q.ClauseOnConflict)
 	}
 }
 

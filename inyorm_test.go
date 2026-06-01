@@ -8,7 +8,7 @@ import (
 	"github.com/laacin/inyorm/engine/std"
 )
 
-func run(t *testing.T, stmt inyorm.Statement, exp string, vals []any) {
+func run(t *testing.T, stmt inyorm.Runner, exp string, vals []any) {
 	query, values, err := stmt.Raw()
 	if err != nil {
 		t.Fatal(err)

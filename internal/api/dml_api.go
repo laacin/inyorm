@@ -83,6 +83,15 @@ type Insert interface {
 	Insert(ref ...any) Ignore
 }
 
+type OnConflict interface {
+	OnConflict(ident ...any) OnConflictNext
+}
+
+type OnConflictNext interface {
+	DoNothing()
+	DoUpdate(ident ...any)
+}
+
 // --- Update
 
 type Update interface {
