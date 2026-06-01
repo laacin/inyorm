@@ -21,11 +21,11 @@ func newQueryBuilder[T any](dial Dialect, chain func(qc *query.Compiler) T) quer
 
 // --- DDL
 
-func (qb *queryBuilder[T]) CreateTable(fn func(q CreateTable, e Expr)) T {
+func (qb *queryBuilder[T]) CreateTable(fn func(q CreateTable)) T {
 	q := ddl.NewCreateTable(qb.dial)
 
 	qc := query.NewCompiler(q, expr.NewParser(qb.dial))
-	fn(q, qc.ExprBuilder())
+	fn(q)
 
 	return qb.chain(qc)
 }

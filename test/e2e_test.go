@@ -38,7 +38,7 @@ func Test(t *testing.T) {
 	defer End(db, deleteSqliteFile)
 
 	t.Run("create_table", func(t *testing.T) {
-		stmt := db.CreateTable(func(q inyorm.CreateTable, e inyorm.Expr) {
+		stmt := db.CreateTable(func(q inyorm.CreateTable) {
 			q.TableName("users")
 
 			q.Int("id").PrimaryKey().AutoIncrement()
@@ -91,7 +91,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("create_table_with_constraints", func(t *testing.T) {
-		stmt := db.CreateTable(func(q inyorm.CreateTable, e inyorm.Expr) {
+		stmt := db.CreateTable(func(q inyorm.CreateTable) {
 			q.TableName("posts")
 
 			q.Int("id").PrimaryKey().AutoIncrement()
@@ -100,7 +100,7 @@ func Test(t *testing.T) {
 			q.String("description").Nullable()
 
 			q.ForeignKey("author_id").To("id", "users").OnDel("cascade")
-			q.Check(e.Col("description")).Not().Like("%someword%")
+			q.Check("description").Not().Like("%someword%")
 		})
 
 		if err := stmt.Run(); err != nil {
@@ -336,7 +336,7 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("create_table_profile", func(t *testing.T) {
-		stmt := db.CreateTable(func(q inyorm.CreateTable, e inyorm.Expr) {
+		stmt := db.CreateTable(func(q inyorm.CreateTable) {
 			q.TableName("profiles")
 
 			q.Int("id").PrimaryKey()

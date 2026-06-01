@@ -52,7 +52,12 @@ func (q *QueryCreateTable) ForeignKey(on string) api.ForeignKey {
 	return fk
 }
 func (q *QueryCreateTable) Check(ident any) api.Cond {
-	cond := expr.NewCond(ident)
+	cond := expr.NewCond(ident, func(a any) any {
+		if str, ok := a.(string); ok {
+			return expr.NewCol(str, nil)
+		}
+		return a
+	})
 	q.Checks = append(q.Checks, NewCheck(cond))
 	return cond
 }

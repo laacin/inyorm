@@ -18,6 +18,9 @@ type Col struct {
 }
 
 func NewCol(name string, ref core.LazyVal[core.Reference]) *Col {
+	if ref == nil {
+		return &Col{Name: name, Ref: func() core.Reference { return core.Reference{Enabled: false} }}
+	}
 	return &Col{Name: name, Ref: ref}
 }
 func NewColFrom(from Expr) *Col {

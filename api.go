@@ -102,5 +102,5 @@ type queries[T any] interface {
 	Update(func(q UpdateQuery, e Expr)) T
 	Delete(func(q DeleteQuery, e Expr)) T
 
-	CreateTable(func(q CreateTable, e Expr)) T
+	CreateTable(func(q CreateTable)) T
 }

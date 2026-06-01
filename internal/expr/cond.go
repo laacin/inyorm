@@ -8,12 +8,19 @@ import (
 // --- Entity
 
 type Cond struct {
-	Predicates []Predicate
-	Connectors []PredConnector
-	current    Predicate
+	Predicates   []Predicate
+	Connectors   []PredConnector
+	current      Predicate
+	identWrapper func(any) any
 }
 
-func NewCond(ident any) *Cond {
+func NewCond(ident any, identWrapper ...func(any) any) *Cond {
+	if len(identWrapper) > 0 {
+		return &Cond{
+			current:      Predicate{Identifier: identWrapper[0](ident)},
+			identWrapper: identWrapper[0],
+		}
+	}
 	return &Cond{current: Predicate{Identifier: ident}}
 }
 
@@ -85,6 +92,11 @@ func (c *Cond) push(op PredOperator, values []any) {
 }
 
 func (c *Cond) start(ident any) api.Cond {
+	if c.identWrapper != nil {
+		c.current = Predicate{Identifier: c.identWrapper(ident)}
+		return c
+	}
+
 	c.current = Predicate{Identifier: ident}
 	return c
 }

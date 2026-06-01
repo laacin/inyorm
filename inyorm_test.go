@@ -423,7 +423,7 @@ func TestCreateTable(t *testing.T) {
 	db, _ := inyorm.New(std.JustDialect())
 
 	t.Run("basic_table", func(t *testing.T) {
-		stmt := db.CreateTable(func(q inyorm.CreateTable, e inyorm.Expr) {
+		stmt := db.CreateTable(func(q inyorm.CreateTable) {
 			q.TableName("users")
 
 			q.Int("id").PrimaryKey().AutoIncrement()
@@ -439,7 +439,7 @@ func TestCreateTable(t *testing.T) {
 	})
 
 	t.Run("with_constraints", func(t *testing.T) {
-		stmt := db.CreateTable(func(q inyorm.CreateTable, e inyorm.Expr) {
+		stmt := db.CreateTable(func(q inyorm.CreateTable) {
 			q.TableName("posts")
 
 			q.String("id").PrimaryKey()
@@ -448,7 +448,7 @@ func TestCreateTable(t *testing.T) {
 			q.String("description").Nullable()
 
 			q.ForeignKey("author_id").To("id", "users").OnDel("cascade")
-			q.Check(e.Col("description")).Not().Like("%word%")
+			q.Check("description").Not().Like("%word%")
 		})
 
 		exp := "CREATE TABLE IF NOT EXISTS posts ("
